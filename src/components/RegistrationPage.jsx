@@ -3,6 +3,7 @@ import React, { Component } from "react";
 // import ReactTooltip from 'react-tooltip';
 import RegistrationForm from "./RegistrationForm";
 // import "./formsStyle.scss";
+import axios from "axios";
 
 export default class RegistrationPage extends Component {
   constructor(props) {
@@ -15,42 +16,71 @@ export default class RegistrationPage extends Component {
 
   static propTypes = {};
 
-  SignUpReq = event => {
+  signUpReq = event => {
+    console.log("in signupreq");
     event.preventDefault();
     const firstName = event.target.elements.firstName.value;
     const lastName = event.target.elements.lastName.value;
-    const university = event.target.elements.university.value;
+    //const university = event.target.elements.university.value;//bug here
+    const university = "MTA";
     const email = event.target.elements.email.value;
     const password = event.target.elements.password.value;
     const confirmPassword = event.target.elements.confirmPassword.value;
 
-    return fetch("signUp", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        firstname: firstName,
-        lastname: lastName,
-        email: email,
-        university: university,
-        password: password,
-        confirmpassword: confirmPassword
-      })
+    const userData = {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      universityName: university,
+      password: password,
+      //confirmpassword: confirmPassword
+      password2: confirmPassword
+    };
+
+    return axios
+    .post("/api/users/register", userData)
+    .then(res => {
+      if (!res.status === 200) {
+        // throw response;
+        //signUp fail
+        this.setState({ isRegSucceed: false });
+      } else {
+        this.setState({ isRegSucceed: true });
+        //signUp success- move to the main page
+      }
     })
-      .then(response => {
-        if (!response.ok) {
-          // throw response;
-          //signUp fail
-          this.setState({ isRegSucceed: false });
-        } else {
-          this.setState({ isRegSucceed: true });
-          //signUp success- move to the main page
-        }
-      })
-      .catch(err => {});
-  };
+    .catch(err => {}
+    );
+};
+ 
+  //   fetch("api/users/register", {
+  //     method: "POST",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json"
+  //     },
+  //     body: JSON.stringify({
+  //       firstName: firstName,
+  //       lastName: lastName,
+  //       email: email,
+  //       universityName: university,
+  //       password: password,
+  //       //confirmpassword: confirmPassword
+  //       password2: confirmPassword
+  //     })
+  //   })
+  //     .then(response => {
+  //       if (!response.ok) {
+  //         // throw response;
+  //         //signUp fail
+  //         this.setState({ isRegSucceed: false });
+  //       } else {
+  //         this.setState({ isRegSucceed: true });
+  //         //signUp success- move to the main page
+  //       }
+  //     })
+  //     .catch(err => {});
+  // };
 
   onClickLogin = () => {};
 
