@@ -23,9 +23,6 @@ export default class LoginPage extends Component {
     const password = event.target.elements.password.value;
     const userData = { email: email, password: password };
     const { history } = this.props;
-    // debugger;
-    // console.log("history: " + history);
-    // history.push("/");
 
     return axios
       .post("/api/users/login", userData)
