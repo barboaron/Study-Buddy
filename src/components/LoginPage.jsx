@@ -7,45 +7,48 @@ import axios from "axios";
 import setAuthToken from "../utils/setAuthToken";
 import jwt_decode from "jwt-decode";
 
-
 export default class LoginPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showLoginFailErr: false
+      showLoginFailErr: false,
     };
   }
 
   static propTypes = {};
 
-  loginReq = event => {
+  loginReq = (event) => {
     event.preventDefault();
     const email = event.target.elements.email.value;
     const password = event.target.elements.password.value;
     const userData = { email: email, password: password };
+    const { history } = this.props;
+    // debugger;
+    // console.log("history: " + history);
+    // history.push("/");
 
     return axios
-    .post("/api/users/login", userData)
-    .then(res => {
-      if (!res.status === 200) {
-        // throw response;
-        //login fail
-        this.setState({ showLoginFailErr: true });
-      } else {
-        this.setState({ showLoginFailErr: false });
-        const { token } = res.data;
-        localStorage.setItem("jwtToken", token);
-        //Set token to Auth header
-        setAuthToken(token);
-        //Decode token to get user data
-        const decoded = jwt_decode(token);
-        console.log(decoded);
-      }
-    })
-    .catch(err => {}
-    );
-};
-    
+      .post("/api/users/login", userData)
+      .then((res) => {
+        if (!res.status === 200) {
+          // throw response;
+          //login fail
+          this.setState({ showLoginFailErr: true });
+        } else {
+          this.setState({ showLoginFailErr: false });
+          const { token } = res.data;
+          localStorage.setItem("jwtToken", token);
+          //Set token to Auth header
+          setAuthToken(token);
+          //Decode token to get user data
+          const decoded = jwt_decode(token);
+          console.log(decoded);
+          history.push("/");
+        }
+      })
+      .catch((err) => {});
+  };
+
   //   fetch("api/users/login", {
   //     method: "POST",
   //     headers: {
@@ -61,7 +64,7 @@ export default class LoginPage extends Component {
   //         this.setState({ showLoginFailErr: true });
   //       } else {
   //         this.setState({ showLoginFailErr: false });
-          
+
   //         response.json().then(data => {
   //           localStorage.setItem("jwtToken", data.token);
   //         }) //need catch?
@@ -83,7 +86,6 @@ export default class LoginPage extends Component {
           <LoginForm
             loginReq={this.loginReq}
             showLoginFailErr={showLoginFailErr}
-            onClickSignUp={this.onClickSignUp}
           ></LoginForm>
           {/* <img src="LogoStudyBuddy.png" alt="Study-Buddy" /> */}
         </div>

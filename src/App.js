@@ -1,14 +1,29 @@
 import React from "react";
 import LoginPage from "./components/LoginPage";
-import "./App.css";
+import MainPage from "./components/MainPage";
 import RegistrationPage from "./components/RegistrationPage";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
+import "./App.css";
 
 function App() {
   return (
-    <div className="App">
-      {/* <LoginPage></LoginPage> */}
-      <RegistrationPage></RegistrationPage>
-    </div>
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/login" component={LoginPage}></Route>
+          <Route exact path="/" component={MainPage}></Route>
+          <Route path="/registration" component={RegistrationPage}></Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
 
