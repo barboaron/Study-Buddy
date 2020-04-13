@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const nodemailer = require('nodemailer');
 const bcrypt = require("bcryptjs");
+const jwt_decode = require("jwt-decode");
 const jwt = require("jsonwebtoken");
 const keys = require("../../../config/keys");
 // Load input validation
@@ -29,12 +31,14 @@ router.post("/register", (req, res) => {
           lastName: req.body.lastName,
           universityName: req.body.universityName,
           email: req.body.email,
-          password: req.body.password
+          password: req.body.password,
+          confirmed: false
         });
   // Hash password before saving in database
         bcrypt.genSalt(10, (err, salt) => {
           bcrypt.hash(newUser.password, salt, (err, hash) => {
             if (err) throw err;
+            sendMail(newUser)
             newUser.password = hash;
             newUser
               .save()
@@ -62,7 +66,7 @@ router.post("/login", (req, res) => {
     User.findOne({ email }).then(user => {
       // Check if user exists
       if (!user) {
-        return res.status(404).json({ emailnotfound: "Email not found" });
+        return res.status(400).json({ emailnotfound: "Email or password are incorrect." });
       }
   // Check password
       bcrypt.compare(password, user.password).then(isMatch => {
@@ -71,7 +75,7 @@ router.post("/login", (req, res) => {
           // Create JWT Payload
           const payload = {
             id: user.id,
-            name: user.name
+            name: user.firstName
           };
   // Sign token
           jwt.sign(
@@ -90,10 +94,52 @@ router.post("/login", (req, res) => {
         } else {
           return res
             .status(400)
-            .json({ passwordincorrect: "Password incorrect" });
+            .json({ passwordincorrect: "Email or password are incorrect." });
         }
       });
     });
   });
+
+  function sendMail(user) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'studybuddynoreply@gmail.com',
+        pass: 'studyBuddy2020'
+      }
+    });
+    const payload = {
+      id: user.id,
+      name: user.firstName
+    };
+// Sign token
+    jwt.sign(
+      payload,
+      keys.secretOrKey,
+      {
+        expiresIn: 31556926 // 1 year in seconds
+      },
+      (err, token) => {
+        var decoded = jwt_decode(token);
+        console.log(decoded);
+        const mailOptions = {
+          from: 'studybuddynoreply@gmail.com',
+          to: user.email,
+          subject: 'Confirm your email - StudyBuddy',
+          html: `Click the link to confirm your registration: http://localhost:5000/confirmation/${token}`
+        };
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+          }
+        });
+      }
+    );
+    
+  }
+
+  
 
   module.exports = router;

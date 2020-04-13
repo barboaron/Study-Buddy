@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const users = require("./src/routes/api/users");
+const profiles = require("./src/routes/api/profiles");
+const jwt = require("jsonwebtoken");
+const jwt_decode = require("jwt-decode");
+const User = require("./src/models/User");
+const keys = require("./config/keys");
 
 const app = express();
 // Bodyparser middleware
@@ -18,7 +23,7 @@ const db = require("./config/keys").mongoURI;
 mongoose
   .connect(
     db,
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useUnifiedTopology: false }
   )
   .then(() => console.log("MongoDB successfully connected"))
   .catch(err => console.log(err));
@@ -29,6 +34,21 @@ app.use(passport.initialize());
 require("./config/passport")(passport);
 // Routes
 app.use("/api/users", users);
+app.use("/api/profiles", profiles);
+
+
+app.get("/confirmation/:token", async (req, res) => { 
+  try {
+    const user = jwt_decode(req.params.token);
+    const id = user.id;
+    await User.update({_id: id}, {confirmed:true});
+  }
+  catch(err){
+    console.log(err);
+  }
+  return res.redirect("http://localhost:3000");
+}
+);
 
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
