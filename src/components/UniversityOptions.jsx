@@ -1,6 +1,4 @@
 import React from "react";
-// import ReactTooltip from 'react-tooltip';
-// import styles from "./styles/universityOptions.scss";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
@@ -10,7 +8,7 @@ export default function UniversitySelect() {
   const [university, setSelection] = React.useState("");
 
   // export default class UniversityOptions extends Component {
-  const handleChange = event => {
+  const handleChange = (event) => {
     setSelection(event.target.value);
   };
 

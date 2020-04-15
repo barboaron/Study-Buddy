@@ -1,14 +1,25 @@
 import React from "react";
 import LoginPage from "./components/LoginPage";
-import "./App.css";
+import MainPage from "./components/MainPage";
 import RegistrationPage from "./components/RegistrationPage";
+import UserProfile from "./components/UserProfile";
+import EditProfile from "./components/EditProfile";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import "./App.css";
 
 function App() {
   return (
-    <div className="App">
-      {/* <LoginPage></LoginPage> */}
-      <RegistrationPage></RegistrationPage>
-    </div>
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/login" component={LoginPage}></Route>
+          <Route exact path="/" component={MainPage}></Route>
+          <Route path="/registration" component={RegistrationPage}></Route>
+          <Route path="/UserProfile" component={UserProfile}></Route>
+          <Route path="/EditProfile" component={EditProfile}></Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
 
