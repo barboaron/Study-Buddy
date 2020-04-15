@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt_decode = require("jwt-decode");
 const jwt = require("jsonwebtoken");
 const keys = require("../../../config/keys");
+const Validator = require("validator");
+const isEmpty = require("is-empty");
 // Load input validation
 const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
@@ -39,6 +41,16 @@ router.post("/register", (req, res) => {
           bcrypt.hash(newUser.password, salt, (err, hash) => {
             if (err) throw err;
             sendMail(newUser)
+            setTimeout( () => { 
+              User.findOne({ email: newUser.email }).then(user => {
+                if(!user.confirmed) {
+                  User.deleteOne({ email: user.email }).then(res => {})
+                  .catch(err => {
+                    console.log(err);
+                  })
+                }
+              })
+            }, 86400000);
             newUser.password = hash;
             newUser
               .save()
@@ -61,12 +73,14 @@ router.post("/login", (req, res) => {
       return res.status(400).json(errors);
     }
   const email = req.body.email;
-    const password = req.body.password;
+  const password = req.body.password;
   // Find user by email
     User.findOne({ email }).then(user => {
       // Check if user exists
       if (!user) {
-        return res.status(400).json({ emailnotfound: "Email or password are incorrect." });
+        return res.status(401).json({ emailnotfound: "Email or password are incorrect." });
+      } else if(!user.confirmed) {
+        return res.status(401).json({ emailnotfound: "Email not confirmed" });
       }
   // Check password
       bcrypt.compare(password, user.password).then(isMatch => {
@@ -117,7 +131,7 @@ router.post("/login", (req, res) => {
       payload,
       keys.secretOrKey,
       {
-        expiresIn: 31556926 // 1 year in seconds
+        expiresIn: 86400 // 1 day in seconds
       },
       (err, token) => {
         var decoded = jwt_decode(token);
@@ -137,9 +151,63 @@ router.post("/login", (req, res) => {
         });
       }
     );
-    
   }
 
+router.post("/changePassword", (req, res) => {
   
+  const _id = req.body._id;
+  const currentPassword = req.body.currentPassword;
+  const newPassword = req.body.newPassword;
+  const confirmPassword = req.body.confirmPassword;
 
-  module.exports = router;
+  User.findOne({ _id }).then( user => {
+    bcrypt.compare(currentPassword, user.password).then(isMatch => {
+      if (isMatch) {
+        const validatePasswordString = validateNewPassword(currentPassword, newPassword, confirmPassword);
+  
+        if(validatePasswordString === 'success') {
+        // Hash password before saving in database
+        bcrypt.genSalt(10, (err, salt) => {
+          bcrypt.hash(newPassword, salt, async (err, hash) => {
+            if (err) throw err;
+            await User.update({ _id }, { password:hash });
+            return res
+            .status(200)
+            .json({ success: 'password successfully changed'})
+          });
+        });
+        } else {
+          return res
+          .status(401)
+          .json({ newPasswordinvalid: validatePasswordString });
+        }
+      } else {
+        return res
+          .status(401)
+          .json({ currentPasswordIncorrect: 'current password incorrect' });
+      }
+  })
+})})
+
+function validateNewPassword(currentPassword, newPassword, confirmPassword) {
+
+  if (Validator.isEmpty(newPassword)) {
+    return "New Password field is required";
+  }
+  if (Validator.isEmpty(confirmPassword)) {
+    return "Confirm Password field is required";
+  }
+  if (!Validator.isLength(newPassword, { min: 8, max: 30 })) {
+      return "New password must be at least 8 characters";
+  }
+  if (!Validator.equals(newPassword, confirmPassword)) {
+      return "Confirm password must match to new password";
+  }
+  if (Validator.equals(currentPassword, newPassword)) {
+    return "New password can't be the same as old password";
+  }
+
+  return 'success';
+}
+
+module.exports = router;

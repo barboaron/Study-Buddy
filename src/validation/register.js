@@ -1,7 +1,16 @@
 const Validator = require("validator");
 const isEmpty = require("is-empty");
+
+let universityEmailDomains =  {
+  'Ben Gurion University' :'bgu.ac.il',
+  'MTA':'mta.ac.il',
+  'Tel Aviv University': 'tau.ac.il',
+  'HIT': 'hit.ac.il',
+};
+
 module.exports = function validateRegisterInput(data) {
   let errors = {};
+
 // Convert empty fields to an empty string so we can use validator functions
   data.firstName = !isEmpty(data.firstName) ? data.firstName : "";
   data.lastName = !isEmpty(data.lastName) ? data.lastName : "";
@@ -25,6 +34,8 @@ module.exports = function validateRegisterInput(data) {
     errors.email = "Email field is required";
   } else if (!Validator.isEmail(data.email)) {
     errors.email = "Email is invalid";
+  } else if (!isValidEmailDomain(data.email, data.universityName)) {
+    errors.email = "Please register with your university email";
   }
 // Password checks
   if (Validator.isEmpty(data.password)) {
@@ -33,8 +44,8 @@ module.exports = function validateRegisterInput(data) {
 if (Validator.isEmpty(data.password2)) {
     errors.password2 = "Confirm password field is required";
   }
-if (!Validator.isLength(data.password, { min: 6, max: 30 })) {
-    errors.password = "Password must be at least 6 characters";
+if (!Validator.isLength(data.password, { min: 8, max: 30 })) {
+    errors.password = "Password must be at least 8 characters";
   }
 if (!Validator.equals(data.password, data.password2)) {
     errors.password2 = "Passwords must match";
@@ -44,3 +55,7 @@ return {
     isValid: isEmpty(errors)
   };
 };
+
+function isValidEmailDomain(email, universityName) {
+  return email.toLowerCase().includes(universityEmailDomains[universityName])
+}

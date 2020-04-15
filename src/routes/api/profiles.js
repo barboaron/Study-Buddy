@@ -46,5 +46,4 @@ router.post("/updateProfile",  (req, res) => {
         .catch(err => res.status(400));
 });
 
-
-        module.exports = router;
+module.exports = router;
