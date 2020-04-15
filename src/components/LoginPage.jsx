@@ -19,15 +19,15 @@ export default class LoginPage extends Component {
 
   loginReq = (event) => {
     event.preventDefault();
-    const email = event.target.elements.email.value;
-    const password = event.target.elements.password.value;
+    const email = event?.target?.elements?.email?.value;
+    const password = event?.target?.elements?.password?.value;
     const userData = { email: email, password: password };
     const { history } = this.props;
 
     return axios
       .post("/api/users/login", userData)
       .then((res) => {
-        if (!res.status === 200) {
+        if (res.status !== 200) {
           // throw response;
           //login fail
           this.setState({ showLoginFailErr: true });
@@ -43,35 +43,10 @@ export default class LoginPage extends Component {
           history.push("/");
         }
       })
-      .catch((err) => {});
+      .catch((err) => {
+        this.setState({ showLoginFailErr: true });
+      });
   };
-
-  //   fetch("api/users/login", {
-  //     method: "POST",
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify({ email: email, password: password })
-  //   })
-  //     .then(response => {
-  //       if (!response.ok) {
-  //         // throw response;
-  //         //login fail
-  //         this.setState({ showLoginFailErr: true });
-  //       } else {
-  //         this.setState({ showLoginFailErr: false });
-
-  //         response.json().then(data => {
-  //           localStorage.setItem("jwtToken", data.token);
-  //         }) //need catch?
-  //         //login success- move to the main page
-  //       }
-  //     })
-  //     .catch(err => {});
-  // };
-
-  onClickSignUp = () => {};
 
   render() {
     const { showLoginFailErr } = this.state;

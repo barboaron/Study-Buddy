@@ -18,7 +18,7 @@ export default class RegistrationForm extends Component {
   render() {
     const { signUpReq, isRegSucceed } = this.props;
     return (
-      <form onSubmit={signUpReq}>
+      <form className="form" onSubmit={signUpReq}>
         <h4>Sign Up</h4>
         <p>
           Welcome! Nice to meet you, Sign up to <span>Study-Buddy</span>

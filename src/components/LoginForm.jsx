@@ -10,9 +10,10 @@ export default class LoginForm extends Component {
     showLoginFailErr: PropTypes.bool,
   };
   render() {
+    debugger;
     const { loginReq, showLoginFailErr } = this.props;
     return (
-      <form onSubmit={loginReq}>
+      <form className="form" onSubmit={loginReq}>
         <h4>Sign In</h4>
         <p>
           Welcome back! Log in to your account to <span>Study-Buddy</span>
@@ -33,7 +34,7 @@ export default class LoginForm extends Component {
         </div>
         <button type="submit">Log in</button>
         {showLoginFailErr ? (
-          <span>Login attempt fail. Please try again</span>
+          <span className="errMsg">Login attempt fail. Please try again</span>
         ) : null}
         <Link to="/registration">
           <span className="signupLabel">Not a user? Sign up</span>
