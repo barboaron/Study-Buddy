@@ -1,15 +1,16 @@
 const express = require("express");
 const router = express.Router();
-// Load input validation
-const validateRegisterInput = require("../../validation/register");
-const validateLoginInput = require("../../validation/login");
 // Load User model
 const User = require("../../models/User");
 const Profile = require("../../models/Profile");
+const jwt_decode = require("jwt-decode");
 
 // CREATE PROFILE (in the body, must send all fields required)
 router.post("/createProfile", (req, res) => {
-    User.findOne({ _id: req.body.user_id }).then(user => {
+    const jwt = req.body.jwt;
+    const { id } = jwt_decode(jwt);
+
+    User.findOne({ _id: id }).then(user => {
           if (!user) {
             return res.status(400).json("User does not exist.");
         } else {
@@ -17,7 +18,8 @@ router.post("/createProfile", (req, res) => {
                 user_id: user.id,
                 courses: req.body.courses,
                 degree_name: req.body.degree_name,
-                year_of_study: req.body.year_of_study
+                year_of_study: req.body.year_of_study,
+                university_name: user.universityName,
           });
 
             newProfile
@@ -31,19 +33,52 @@ router.post("/createProfile", (req, res) => {
 //UPDATE PROFILE (in the body, must send user_id, and all fields to be updated)
 router.post("/updateProfile",  (req, res) => {
     
-    const user_id = req.body.user_id;
+    const jwt = req.body.jwt;
+    const { id:loggedInUserId } = jwt_decode(jwt);
+    const profileUserId = req.body.id;
 
-    Profile.findOne({ user_id }).then(async (profile) => {
+    Profile.findOne({ _id: profileUserId }).then(async (profile) => {
         
         if (!profile) {
             return res.status(400).json("Profile does not exist.");
-    }   else {
-            await Profile.update({_id: profile.id}, req.body);
-            return res.status(200).json("Profile updated");
+        }  else {
+            if(loggedInUserId === profile.user_id) {
+                await Profile.update({_id: profile.id}, req.body);
+                return res.status(200).json("Profile updated");
+            } else {
+                return res.status(401).json("cannot edit user profile");
+            }
         };
     
-        })
-        .catch(err => res.status(400));
+    })
+    .catch(err => res.status(400));
+});
+
+router.get("/profile",  (req, res) => {
+    
+    const jwt = req.body.jwt;
+    const { id:loggedInUserId } = jwt_decode(jwt);
+    const profileUserId = req.body.id;
+
+    Profile.findOne({ _id: profileUserId }).then( (profile) => {
+        
+        if (!profile) {
+            return res.status(400).json("Profile does not exist.");
+        }  else {
+            var convertedProfile = JSON.parse(JSON.stringify(profile));
+
+            if(loggedInUserId === profile.user_id) {
+                convertedProfile.canEdit = true;
+            } else {
+                convertedProfile.canEdit = false;
+                delete convertedProfile.study_groups;
+            }
+
+            return res.status(200).json(convertedProfile);
+        };
+    
+    })
+    .catch(err => res.status(400));
 });
 
 module.exports = router;

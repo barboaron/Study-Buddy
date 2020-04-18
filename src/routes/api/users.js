@@ -96,7 +96,7 @@ router.post("/login", (req, res) => {
             payload,
             keys.secretOrKey,
             {
-              expiresIn: 31556926 // 1 year in seconds
+              expiresIn: 21600 //6 hours in seconds
             },
             (err, token) => {
               res.json({
@@ -155,12 +155,13 @@ router.post("/login", (req, res) => {
 
 router.post("/changePassword", (req, res) => {
   
-  const _id = req.body._id;
+  const jwt = req.body.jwt;
+  const { id } = jwt_decode(jwt);
   const currentPassword = req.body.currentPassword;
   const newPassword = req.body.newPassword;
   const confirmPassword = req.body.confirmPassword;
 
-  User.findOne({ _id }).then( user => {
+  User.findOne({ _id:id }).then( user => {
     bcrypt.compare(currentPassword, user.password).then(isMatch => {
       if (isMatch) {
         const validatePasswordString = validateNewPassword(currentPassword, newPassword, confirmPassword);
@@ -170,7 +171,7 @@ router.post("/changePassword", (req, res) => {
         bcrypt.genSalt(10, (err, salt) => {
           bcrypt.hash(newPassword, salt, async (err, hash) => {
             if (err) throw err;
-            await User.update({ _id }, { password:hash });
+            await User.update({ _id:id }, { password:hash });
             return res
             .status(200)
             .json({ success: 'password successfully changed'})
@@ -209,5 +210,19 @@ function validateNewPassword(currentPassword, newPassword, confirmPassword) {
 
   return 'success';
 }
+
+router.get("/isLoggedIn", (req, res) => {
+  
+  const token = (req.body.jwt).substring(7);
+
+  jwt.verify(token, keys.secretOrKey, function(err, decoded) {
+    if (err) {
+      res.status(401).json(err.message);
+    } else {
+      res.status(200).json("token not expired");
+    }
+  });
+})
+
 
 module.exports = router;
