@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
-// import ReactTooltip from 'react-tooltip';
 import LoginForm from "./LoginForm";
-import "./styles/formsStyle.scss";
+import "../styles/formsStyle.scss";
 import axios from "axios";
-import setAuthToken from "../utils/setAuthToken";
+import setAuthToken from "../../utils/setAuthToken";
 import jwt_decode from "jwt-decode";
 
 export default class LoginPage extends Component {
@@ -14,8 +12,6 @@ export default class LoginPage extends Component {
       showLoginFailErr: false,
     };
   }
-
-  static propTypes = {};
 
   loginReq = (event) => {
     event.preventDefault();
@@ -59,7 +55,6 @@ export default class LoginPage extends Component {
             loginReq={this.loginReq}
             showLoginFailErr={showLoginFailErr}
           ></LoginForm>
-          {/* <img src="LogoStudyBuddy.png" alt="Study-Buddy" /> */}
         </div>
       </div>
     );

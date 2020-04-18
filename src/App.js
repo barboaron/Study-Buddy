@@ -1,9 +1,9 @@
 import React from "react";
-import LoginPage from "./components/LoginPage";
+import LoginPage from "./components/Login/LoginPage";
 import MainPage from "./components/MainPage";
-import RegistrationPage from "./components/RegistrationPage";
-import UserProfile from "./components/UserProfile";
-import EditProfile from "./components/EditProfile";
+import RegistrationPage from "./components/Registration/RegistrationPage";
+import UserProfile from "./components/UserProfile/UserProfile";
+import EditProfile from "./components/UserProfile/EditProfile";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 
