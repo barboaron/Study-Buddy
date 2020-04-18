@@ -1,8 +1,5 @@
 import React, { Component } from "react";
-// import PropTypes from "prop-types";
-// import ReactTooltip from 'react-tooltip';
 import RegistrationForm from "./RegistrationForm";
-// import "./formsStyle.scss";
 import axios from "axios";
 
 export default class RegistrationPage extends Component {
@@ -14,15 +11,14 @@ export default class RegistrationPage extends Component {
     };
   }
 
-  static propTypes = {};
-
   signUpReq = (event) => {
     console.log("in signupreq");
     event.preventDefault();
     const firstName = event?.target?.elements?.firstName?.value;
     const lastName = event?.target?.elements?.lastName?.value;
-    //const university = event.target.elements.university.value;//bug here
-    const university = "MTA";
+    debugger;
+    const university = event.target.elements.university.value; //bug here
+    // const university = "MTA";
     const email = event?.target?.elements?.email?.value;
     const password = event?.target?.elements?.password?.value;
     const confirmPassword = event?.target?.elements?.confirmPassword?.value;
@@ -33,7 +29,6 @@ export default class RegistrationPage extends Component {
       email: email,
       universityName: university,
       password: password,
-      //confirmpassword: confirmPassword
       password2: confirmPassword,
     };
 
@@ -46,11 +41,16 @@ export default class RegistrationPage extends Component {
           this.setState({ isRegSucceed: true });
         }
       })
-      .catch((err) => {});
+      .catch((err) => {
+        this.setState({
+          isRegSucceed: false,
+          errMsg: Object.values(err.response.data),
+        });
+      });
   };
 
   render() {
-    const { isRegSucceed } = this.state;
+    const { isRegSucceed, errMsg } = this.state;
     return (
       <div className="session">
         <div className="leftPicture"></div>
@@ -58,9 +58,10 @@ export default class RegistrationPage extends Component {
           <RegistrationForm
             signUpReq={this.signUpReq}
             isRegSucceed={isRegSucceed}
+            errMsg={errMsg}
           ></RegistrationForm>
         ) : (
-          <span className="loginLabel" onclick={this.onClickLogin}>
+          <span className="loginLabel" onClick={this.onClickLogin}>
             A verification link has been sent to your email account Please click
             <br />
             on the verification link to confirm your account

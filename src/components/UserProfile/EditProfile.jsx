@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import "./styles/userProfileStyle.css";
+import "../styles/userProfileStyle.css";
 import axios from "axios";
-// import setAuthToken from "../utils/setAuthToken";
-// import jwt_decode from "jwt-decode";
-import ChangePassword from "./ChangePassword";
+import ChangePassword from "../Utils/ChangePassword";
+import ChangeUserDetails from "../Utils/ChangeUserDetails";
+import ProfileImg from "../Utils/profileImg";
 
 export default class EditProfile extends Component {
   constructor(props) {
@@ -61,18 +61,10 @@ export default class EditProfile extends Component {
           <form method="post">
             <div class="row">
               <div class="col-md-4">
-                <div class="profile-img">
-                  <img
-                    src={userDetails.profilePic || "defaultPicUser.png"}
-                    alt=""
-                  />
-                  {!showChangePassword && (
-                    <div class="file btn btn-lg btn-primary">
-                      Change Photo
-                      <input type="file" name="file" />
-                    </div>
-                  )}
-                </div>
+                <ProfileImg
+                  userDetails={userDetails}
+                  showChangePassword={showChangePassword}
+                />
               </div>
               <div class="col-md-6">
                 <div class="profile-head">
@@ -81,36 +73,12 @@ export default class EditProfile extends Component {
                 {showChangePassword ? (
                   <ChangePassword />
                 ) : (
-                  <form className="form" onSubmit={this.editProfile}>
-                    <div className="floating-label">
-                      <input
-                        placeholder={
-                          userDetails.degreeName || "Computer Science"
-                        }
-                        type="text"
-                        name="degree"
-                      />
-                      <label for="degree">Degree name:</label>
-                    </div>
-                    <div className="floating-label">
-                      <input
-                        placeholder={userDetails.year || "2"}
-                        type="text"
-                        name="year"
-                      />
-                      <label for="year">Year of study:</label>
-                    </div>
-                    {showErrMsg ? (
-                      <span className="errMsg">Error. Please try again</span>
-                    ) : null}
-                    <button
-                      className="changePassword"
-                      onClick={this.showChangePass}
-                    >
-                      Change Password
-                    </button>
-                    <button type="submit">Send</button>
-                  </form>
+                  <ChangeUserDetails
+                    userDetails={userDetails}
+                    showErrMsg={showErrMsg}
+                    editProfile={this.editProfile}
+                    showChangePass={this.showChangePass}
+                  />
                 )}
               </div>
             </div>

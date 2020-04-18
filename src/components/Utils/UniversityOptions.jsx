@@ -7,7 +7,6 @@ import Select from "@material-ui/core/Select";
 export default function UniversitySelect() {
   const [university, setSelection] = React.useState("");
 
-  // export default class UniversityOptions extends Component {
   const handleChange = (event) => {
     setSelection(event.target.value);
   };
@@ -19,6 +18,7 @@ export default function UniversitySelect() {
         labelId="demo-simple-select-label"
         id="demo-simple-select"
         value={university}
+        name="university"
         onChange={handleChange}
       >
         <MenuItem value="MTA">MTA</MenuItem>

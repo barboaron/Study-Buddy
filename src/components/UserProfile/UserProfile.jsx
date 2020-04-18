@@ -1,12 +1,9 @@
 import React, { Component } from "react";
-import "./styles/userProfileStyle.css";
+import "../styles/userProfileStyle.css";
 import Paper from "@material-ui/core/Paper";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import { Link } from "react-router-dom";
-// import axios from "axios";
-// import setAuthToken from "../utils/setAuthToken";
-// import jwt_decode from "jwt-decode";
 
 export default class UserProfile extends Component {
   constructor(props) {
