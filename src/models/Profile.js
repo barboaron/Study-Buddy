@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const User = require("./User");
 // Create Schema
 const ProfileSchema = new Schema({
     user_id: {
@@ -16,12 +15,20 @@ const ProfileSchema = new Schema({
         type: String,
         required:true
     },
+    university_name: {
+        type: String,
+        required: true
+    },
     year_of_study: {
         type: Number,
         required: true
     },
     pic_url: {
         type: String,
+        required:false
+    },
+    study_groups: {
+        type: [],
         required:false
     }
 });
