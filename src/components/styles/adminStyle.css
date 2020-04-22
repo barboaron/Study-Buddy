@@ -1,0 +1,55 @@
+#addCourseManually {
+  padding: 20px 30px;
+  display: flex;
+}
+.addCourseButton {
+  margin-top: 28px;
+  height: 53px;
+  margin-left: 50px;
+  text-align: center;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 4px;
+}
+.addCourseLabels {
+  top: 25px;
+}
+.addCourses {
+  display: flex;
+  padding: 0px 30px;
+  align-items: center;
+}
+.uploadFileBtn {
+  background-color: transparent;
+  box-shadow: none;
+  padding: 18px;
+  height: 60px;
+  width: 60px;
+  min-width: 10px;
+  margin-left: -50px;
+  margin-top: -18px;
+}
+
+#chooseFile {
+  border-bottom: 0;
+  padding: 0px;
+  margin-left: 30px;
+}
+
+.listOfCourses {
+  overflow: scroll;
+  height: 340px;
+  border-style: solid;
+}
+
+.tableOfCourses {
+  width: 100%;
+  position: relative;
+}
+.headerColumn {
+  font-weight: 700;
+  font-size: 20px;
+  position: sticky;
+  top: 0;
+  background-color: rgb(217, 217, 217);
+}
