@@ -4,6 +4,7 @@ import MainPage from "./components/MainPage";
 import RegistrationPage from "./components/Registration/RegistrationPage";
 import UserProfile from "./components/UserProfile/UserProfile";
 import EditProfile from "./components/UserProfile/EditProfile";
+import Admin from "./components/AdminPanel/Admin";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 
@@ -17,6 +18,7 @@ function App() {
           <Route path="/registration" component={RegistrationPage}></Route>
           <Route path="/UserProfile" component={UserProfile}></Route>
           <Route path="/EditProfile" component={EditProfile}></Route>
+          <Route path="/Admin" component={Admin}></Route>
         </Switch>
       </div>
     </Router>
