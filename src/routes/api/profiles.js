@@ -4,9 +4,12 @@ const router = express.Router();
 const User = require("../../models/User");
 const Profile = require("../../models/Profile");
 const jwt_decode = require("jwt-decode");
+const { isLoggedIn } = require("../../authentication/auth");
+var fs = require("fs");
+var multer = require("multer");
 
 // CREATE PROFILE (in the body, must send all fields required)
-router.post("/createProfile", (req, res) => {
+router.post("/createProfile", isLoggedIn, (req, res) => {
     const jwt = req.body.jwt;
     const { id } = jwt_decode(jwt);
 
@@ -14,6 +17,7 @@ router.post("/createProfile", (req, res) => {
           if (!user) {
             return res.status(400).json("User does not exist.");
         } else {
+            
             const newProfile = new Profile({
                 user_id: user.id,
                 courses: req.body.courses,
@@ -21,6 +25,9 @@ router.post("/createProfile", (req, res) => {
                 year_of_study: req.body.year_of_study,
                 university_name: user.universityName,
           });
+
+          newProfile.img.data = fs.readFileSync(req.files.userPhoto.path)
+          newProfile.img.contentType = "image/png";
 
             newProfile
                 .save()
@@ -31,7 +38,7 @@ router.post("/createProfile", (req, res) => {
 })
 
 //UPDATE PROFILE (in the body, must send user_id, and all fields to be updated)
-router.post("/updateProfile",  (req, res) => {
+router.post("/updateProfile", isLoggedIn,  (req, res) => {
     
     const jwt = req.body.jwt;
     const { id:loggedInUserId } = jwt_decode(jwt);
@@ -43,18 +50,17 @@ router.post("/updateProfile",  (req, res) => {
             return res.status(400).json("Profile does not exist.");
         }  else {
             if(loggedInUserId === profile.user_id) {
-                await Profile.update({_id: profile.id}, req.body);
+                await Profile.update({_id: profile.id}, req.body.dataToUpdate);
                 return res.status(200).json("Profile updated");
             } else {
                 return res.status(401).json("cannot edit user profile");
             }
         };
-    
     })
     .catch(err => res.status(400));
 });
 
-router.get("/profile",  (req, res) => {
+router.get("/profile", isLoggedIn, (req, res) => {
     
     const jwt = req.body.jwt;
     const { id:loggedInUserId } = jwt_decode(jwt);

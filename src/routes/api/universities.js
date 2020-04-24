@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const University = require("../../models/University");
+const { isLoggedIn, isAdminUser } = require("../../authentication/auth");
+const jwt_decode = require("jwt-decode");
 
-router.get("/",  (req, res) => {
+
+router.get("/", isLoggedIn,  (req, res) => {
     
     University.find({}).then( (universitiesArray) => {
         const universitiesNames = universitiesArray.map((universityObj) => {
@@ -13,7 +16,7 @@ router.get("/",  (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-router.get("/degrees",  (req, res) => {
+router.get("/degrees", isLoggedIn, (req, res) => {
     const universityName = req.body.universityName;
 
     University.findOne({ universityName }).then( (university) => {
@@ -25,7 +28,7 @@ router.get("/degrees",  (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-router.get("/courses",  (req, res) => {
+router.get("/courses", isLoggedIn, (req, res) => {
     const universityName = req.body.universityName;
     const degreeName = req.body.degreeName;
 
@@ -39,7 +42,7 @@ router.get("/courses",  (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-router.post("/addUniversity",  (req, res) => {
+router.post("/addUniversity", isLoggedIn, isAdminUser, (req, res) => {
     const universityName = req.body.universityName;
     University.findOne({ universityName }).then(university => {
         if (university) {
@@ -59,9 +62,15 @@ router.post("/addUniversity",  (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-router.post("/addDegrees",  (req, res) => {
+router.post("/addDegrees", isLoggedIn, isAdminUser, (req, res) => {
+    const jwt = req.body.jwt;
     const universityName = req.body.universityName;
     const degrees = req.body.degrees;
+    const userUniversity = getUniversityOfUser(jwt);
+
+    if(userUniversity !== universityName) {
+        res.status(401).json(`you can only add data to ${userUniversity}`);
+    } 
 
     University.findOne({ universityName }).then(async (university) => {
         if (!university) {
@@ -91,9 +100,16 @@ router.post("/addDegrees",  (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-router.post("/addCourses",  (req, res) => {
+router.post("/addCourses", isLoggedIn, isAdminUser, (req, res) => {
+    const jwt = req.body.jwt;
+    const userUniversity = getUniversityOfUser(jwt);
     const universityName = req.body.universityName;
     const degreeName = req.body.degreeName;
+    
+    if(userUniversity !== universityName) {
+        res.status(401).json(`you can only add data to ${userUniversity}`);
+    } 
+
     let courses = new Set(req.body.courses);
     courses = Array.from(courses);
 
@@ -125,6 +141,52 @@ router.post("/addCourses",  (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
+router.post("/deleteCourse", isLoggedIn, isAdminUser, (req, res) => {
+    const jwt = req.body.jwt;
+    const universityName = req.body.universityName;
+    const degreeName = req.body.degreeName;
+    const courseName = req.body.course;
 
+    getUniversityOfUser(jwt).then( userUniversity => {
+        if(userUniversity !== universityName) {
+            res.status(401).json(`you can only change data to ${userUniversity}`);
+        } 
+    })
+    
+    University.findOne({ universityName }).then(async (university) => {
+        if (!university) {
+          return res.status(400).json("University not exist.");
+        } else {
+            const degree = university.universityDegrees.find( (degree) => {
+                return degree.degreeName === degreeName;
+            });
+
+            var index = university.universityDegrees.indexOf(degree);
+            
+            degree.courses = degree.courses.filter( course => {
+                return course !== courseName;
+            })
+
+            if (index !== -1) {
+                university.universityDegrees[index] = degree;
+            }
+
+            await University.update({ universityName }, {
+                universityDegrees: university.universityDegrees
+            });
+            return res.status(200).json(courseName);
+        }
+    })
+    .catch(err => res.status(400).json(err));
+});
+
+function getUniversityOfUser(jwt) {
+    const { id } = jwt_decode(jwt);
+
+    let res = User.findOne({ _id:id }).then( user => {
+        return user.universityName;
+    })
+    return res;
+}
 
 module.exports = router;
