@@ -23,8 +23,9 @@ const ProfileSchema = new Schema({
         type: Number,
         required: true
     },
-    pic_url: {
-        type: String,
+    img: {
+        data: Buffer,
+        contentType: String,
         required:false
     },
     study_groups: {

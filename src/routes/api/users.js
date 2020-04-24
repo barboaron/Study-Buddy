@@ -12,7 +12,7 @@ const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
 // Load User model
 const User = require("../../models/User");
-
+const { isLoggedIn } = require("../../authentication/auth");
 
 // @route POST api/users/register
 // @desc Register user
@@ -34,7 +34,8 @@ router.post("/register", (req, res) => {
           universityName: req.body.universityName,
           email: req.body.email,
           password: req.body.password,
-          confirmed: false
+          confirmed: false,
+          isAdmin: false,
         });
   // Hash password before saving in database
         bcrypt.genSalt(10, (err, salt) => {
@@ -153,7 +154,7 @@ router.post("/login", (req, res) => {
     );
   }
 
-router.post("/changePassword", (req, res) => {
+router.post("/changePassword", isLoggedIn, (req, res) => {
   
   const jwt = req.body.jwt;
   const { id } = jwt_decode(jwt);
@@ -211,18 +212,23 @@ function validateNewPassword(currentPassword, newPassword, confirmPassword) {
   return 'success';
 }
 
-router.get("/isLoggedIn", (req, res) => {
+router.get("/getUserId", isLoggedIn, (req, res) => {
   
-  const token = (req.body.jwt).substring(7);
-
-  jwt.verify(token, keys.secretOrKey, function(err, decoded) {
-    if (err) {
-      res.status(401).json(err.message);
-    } else {
-      res.status(200).json("token not expired");
-    }
-  });
+  const jwt = req.body.jwt;
+  const { id } = jwt_decode(jwt);
+  
+  return res.status(200).json({ id });
 })
 
+// router.get("/usersAndIds", isLoggedIn,  (req, res) => {
+    
+//   User.find({}).then( (usersArray) => {
+//       const universitiesNames = usersArray.map((userObj) => {
+//           return userObj.;
+//       })
+//       return res.status(200).json(universitiesNames);
+//   })
+//   .catch(err => res.status(400).json(err));
+// });
 
 module.exports = router;
