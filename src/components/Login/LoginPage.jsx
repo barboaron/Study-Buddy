@@ -33,9 +33,10 @@ export default class LoginPage extends Component {
           localStorage.setItem("jwtToken", token);
           //Set token to Auth header
           setAuthToken(token);
-          //Decode token to get user data
-          const decoded = jwt_decode(token);
-          console.log(decoded);
+          //Decode token to get user id
+          const { id } = jwt_decode(token);
+          console.log(id);
+          localStorage.setItem("loggedInUserID", id);
           history.push("/");
         }
       })

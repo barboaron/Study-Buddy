@@ -1,13 +1,7 @@
 import React from "react";
 
 const PasswordIcon = (props) => (
-  <svg
-    enable-background="new 0 0 24 24"
-    version="1.1"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+  <svg enableBackground="new 0 0 24 24" version="1.1" {...props}>
     <rect className="st0" width="24" height="24" fill="#fff" />
     <path className="st1" d="M19,21H5V9h14V21z M6,20h12V10H6V20z" />
     <path

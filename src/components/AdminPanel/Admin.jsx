@@ -23,8 +23,8 @@ export default class Admin extends Component {
           id="bootstrap-css"
         />
 
-        <div class="container emp-profile">
-          <div class="profile-head">
+        <div className="container emp-profile">
+          <div className="profile-head">
             <h2> Admin Panel - {userDetails.university || "MTA"}</h2>
             <form id="addCourseManually" onSubmit={this.addNewCourseManually}>
               <h4> Add Course Manually: </h4>
