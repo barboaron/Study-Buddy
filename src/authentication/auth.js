@@ -5,6 +5,10 @@ const keys = require("../../config/keys");
 
 function isLoggedIn(req, res, next) {
   
+    if(!req.body.jwt) {
+        res.status(401).json("please sign in");
+    }
+    
     const token = (req.body.jwt).substring(7);
   
     jwt.verify(token, keys.secretOrKey, function(err, decoded) {

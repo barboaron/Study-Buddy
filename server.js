@@ -4,12 +4,12 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const users = require("./src/routes/api/users");
 const profiles = require("./src/routes/api/profiles");
-const universities = require("./src/routes/api/universities");
+const courses = require("./src/routes/api/courses");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
 const keys = require("./config/keys");
-const multer = require('multer');
+//const multer = require('multer');
 
 const app = express();
 // Bodyparser middleware
@@ -37,7 +37,7 @@ require("./config/passport")(passport);
 // Routes
 app.use("/api/users", users);
 app.use("/api/profiles", profiles);
-app.use("/api/universities", universities);
+app.use("/api/courses", courses);
 
 
 app.get("/confirmation/:token", async (req, res) => { 
