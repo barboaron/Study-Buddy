@@ -4,7 +4,8 @@ import Paper from "@material-ui/core/Paper";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import { Link } from "react-router-dom";
-// import axios from "axios";
+import axios from "axios";
+import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 
 export default class UserProfile extends Component {
   constructor(props) {
@@ -13,10 +14,15 @@ export default class UserProfile extends Component {
       currTab: 0,
       list: this.getMyGroup(),
     };
-    // this.getUserID = this.getUserID.bind(this);
+    this.getUserID = this.getUserID.bind(this);
+    this.getUserDetails = this.getUserDetails.bind(this);
   }
 
-  componentDidMount() {}
+  async componentDidMount() {
+    const user_id = await this.getUserID();
+    const user_details = await this.getUserDetails(user_id);
+    this.setState({ user_id, user_details });
+  }
 
   handleChange = (_, newValue) => {
     let list = [];
@@ -34,20 +40,66 @@ export default class UserProfile extends Component {
   };
 
   getMyGroup = () => {
-    debugger;
     return ["groups", "bla"];
   };
 
   getMyCourses = () => {
-    debugger;
     return ["courses", "bla"];
   };
 
-  getUserDetails = () => {};
+  async getUserID() {
+    // will move to parent
+    let token = await localStorage.getItem("jwtToken");
+    const reqData = {
+      jwt: token,
+    };
+
+    return axios
+      .post("/api/users/getUserId", reqData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          // this.setState({ user_id: res.data.id });
+          return res.data.id;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  async getUserDetails(user_id) {
+    const token = await localStorage.getItem("jwtToken");
+    // const { user_id } = this.state;
+
+    const reqData = {
+      jwt: token,
+      userId: user_id,
+    };
+    debugger;
+
+    return axios
+      .post("/api/profiles/profile", reqData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          debugger;
+          return res;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
 
   render() {
-    const userDetails = this.getUserDetails() || {};
+    const userDetails = {};
     const { list } = this.state;
+    const { history } = this.props;
+    isUserLoggedIn(history, "/UserProfile", "/login");
+
     return (
       <div className="profile_user">
         <link
@@ -55,7 +107,6 @@ export default class UserProfile extends Component {
           rel="stylesheet"
           id="bootstrap-css"
         />
-
         <div className="container emp-profile">
           <div className="row">
             <div className="col-md-4">

@@ -53,7 +53,10 @@ export default class ChangePassword extends Component {
     return (
       <div className="floating-label">
         {showSucceedMsg ? (
-          <span>Password changed successfully!</span>
+          <span className="msgPasswodSuccess">
+            Password changed successfully!
+            <br />
+          </span>
         ) : (
           <form className="form" onSubmit={this.changePassword}>
             {errMsg ? (

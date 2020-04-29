@@ -30,6 +30,8 @@ class SearchCourses extends Component {
         data.course.toLowerCase().includes(this.state.search.toLowerCase())
       ) {
         return data;
+      } else {
+        return;
       }
     }).map((data) => {
       return (

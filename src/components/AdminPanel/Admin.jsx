@@ -3,6 +3,7 @@ import "../styles/adminStyle.css";
 import FloatingLabel from "../Utils/floatingLabel";
 import uploadFileIcon from "../Icons/uploadFileIcon";
 import SearchCourses from "./SearchCourses";
+// import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 
 export default class Admin extends Component {
   constructor(props) {
@@ -10,11 +11,15 @@ export default class Admin extends Component {
     this.state = {};
   }
 
+  componentDidMount() {}
+
   addNewCourses = () => {};
   addNewCourseManually = () => {};
 
   render() {
     const userDetails = {};
+    // const { history } = this.props;
+    // isUserLoggedIn(history, "/");
     return (
       <div className="profile_user">
         <link

@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import LoginForm from "./LoginForm";
-import "../styles/formsStyle.scss";
 import axios from "axios";
 import setAuthToken from "../../utils/setAuthToken";
+import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 import jwt_decode from "jwt-decode";
+import "../styles/formsStyle.scss";
 
 export default class LoginPage extends Component {
   constructor(props) {
@@ -24,7 +25,6 @@ export default class LoginPage extends Component {
       .post("/api/users/login", userData)
       .then((res) => {
         if (res.status !== 200) {
-          // throw response;
           //login fail
           this.setState({ showLoginFailErr: true });
         } else {
@@ -35,7 +35,6 @@ export default class LoginPage extends Component {
           setAuthToken(token);
           //Decode token to get user id
           const { id } = jwt_decode(token);
-          console.log(id);
           localStorage.setItem("loggedInUserID", id);
           history.push("/");
         }
@@ -47,6 +46,8 @@ export default class LoginPage extends Component {
 
   render() {
     const { showLoginFailErr } = this.state;
+    const { history } = this.props;
+    isUserLoggedIn(history, "/");
     return (
       <div>
         <img className="loginLogo" src="LogoStudyBuddy.png" alt="Study-Buddy" />
