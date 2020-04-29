@@ -3,17 +3,25 @@ const Schema = mongoose.Schema;
 
 // Create Schema
 const ProfileSchema = new Schema({
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
     user_id: {
         type: String,
         required: true
     },
     courses: {
         type: [],
-        required:true
+        required:false
     },
     degree_name: {
         type: String,
-        required:true
+        required:false
     },
     university_name: {
         type: String,
@@ -21,7 +29,7 @@ const ProfileSchema = new Schema({
     },
     year_of_study: {
         type: Number,
-        required: true
+        required: false
     },
     img: {
         data: Buffer,
@@ -31,6 +39,10 @@ const ProfileSchema = new Schema({
     study_groups: {
         type: [],
         required:false
+    },
+    isFullDetails: {
+        type: Boolean,
+        required:true
     }
 });
 module.exports = Profile = mongoose.model("profiles", ProfileSchema);

@@ -30,7 +30,7 @@ router.post("/editCourses", isLoggedIn, (req, res) => {
                     }
                 });
             }
-            await Profile.update({_id: profile.id}, { courses: coursesArray});
+            await Profile.update({_id: profile.id}, { courses: coursesArray, isFullDetails: true});
             return res.json(coursesArray);
         })
     })
@@ -46,23 +46,11 @@ router.post("/updateProfile", isLoggedIn,  (req, res) => {
         Profile.findOne({ user_id: id }).then(async (profile) => {
             
             if (!profile) {
-                const newProfile = new Profile({
-                    user_id: id,
-                    courses: [],
-                    degree_name: req.body.degree_name,
-                    year_of_study: req.body.year_of_study,
-                    university_name: user.universityName,
-                });
-                newProfile
-                    .save()
-                    .then(profile => res.json(profile))
-                    .catch(err => console.log(err));
+                return res.status(400).json("Profile does not exist.");
             }  else {
                 const updatedProfile = {
-                    user_id: id,
                     degree_name: req.body.degree_name,
                     year_of_study: req.body.year_of_study,
-                    university_name: user.universityName,
                 };
                 await Profile.update({_id: profile.id}, updatedProfile);
                 return res.status(200).json(updatedProfile);

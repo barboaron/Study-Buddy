@@ -12,6 +12,7 @@ const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
 // Load User model
 const User = require("../../models/User");
+const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");
 
 // @route POST api/users/register
@@ -37,6 +38,18 @@ router.post("/register", (req, res) => {
           confirmed: false,
           isAdmin: false,
         });
+        const newProfile = new Profile({
+          firstName:req.body.firstName,
+          lastName: req.body.lastName,
+          isFullDetails: false,
+          university_name: req.body.universityName,
+          user_id:newUser._id,
+          courses: []
+        });
+        newProfile
+          .save()
+          .then(profile => {})
+          .catch(err => console.log(err));
   // Hash password before saving in database
         bcrypt.genSalt(10, (err, salt) => {
           bcrypt.hash(newUser.password, salt, (err, hash) => {
