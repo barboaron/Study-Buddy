@@ -212,12 +212,29 @@ function validateNewPassword(currentPassword, newPassword, confirmPassword) {
   return 'success';
 }
 
-router.get("/getUserId", isLoggedIn, (req, res) => {
+router.post("/getUserId", isLoggedIn, (req, res) => {
   
   const jwt = req.body.jwt;
   const { id } = jwt_decode(jwt);
   
   return res.status(200).json({ id });
+})
+
+router.post("/isLoggedIn", (req, res) => {
+  
+  if(!req.body.jwt) {
+    res.status(401).json({ isLoggedIn: false});
+  }
+
+  const token = (req.body.jwt).substring(7);
+  
+    jwt.verify(token, keys.secretOrKey, function(err, decoded) {
+        if (err) {
+          res.status(200).json({ isLoggedIn: false});
+        } else {
+          res.status(200).json({ isLoggedIn: true});
+        }
+    });
 })
 
 // router.get("/usersAndIds", isLoggedIn,  (req, res) => {
