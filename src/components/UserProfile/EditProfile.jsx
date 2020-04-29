@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import "../styles/userProfileStyle.css";
 import axios from "axios";
 import ChangePassword from "../Utils/ChangePassword";
 import ChangeUserDetails from "../Utils/ChangeUserDetails";
 import ProfileImg from "../Utils/profileImg";
+import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
+import "../styles/userProfileStyle.css";
 
 export default class EditProfile extends Component {
   constructor(props) {
@@ -50,6 +51,8 @@ export default class EditProfile extends Component {
   render() {
     const { showChangePassword, showErrMsg } = this.state;
     const userDetails = this.getUserDetails() || {};
+    const { history } = this.props;
+    isUserLoggedIn(history, "/EditProfile", "/login");
     return (
       <div className="profile_user">
         <link
@@ -57,32 +60,30 @@ export default class EditProfile extends Component {
           rel="stylesheet"
           id="bootstrap-css"
         />
-        <div class="container emp-profile">
-          <form method="post">
-            <div class="row">
-              <div class="col-md-4">
-                <ProfileImg
-                  userDetails={userDetails}
-                  showChangePassword={showChangePassword}
-                />
-              </div>
-              <div class="col-md-6">
-                <div class="profile-head">
-                  <h2>{userDetails.name || "Bar Boaron"}</h2>
-                </div>
-                {showChangePassword ? (
-                  <ChangePassword />
-                ) : (
-                  <ChangeUserDetails
-                    userDetails={userDetails}
-                    showErrMsg={showErrMsg}
-                    editProfile={this.editProfile}
-                    showChangePass={this.showChangePass}
-                  />
-                )}
-              </div>
+        <div className="container emp-profile">
+          <div className="row">
+            <div className="col-md-4">
+              <ProfileImg
+                userDetails={userDetails}
+                showChangePassword={showChangePassword}
+              />
             </div>
-          </form>
+            <div className="col-md-6">
+              <div className="profile-head">
+                <h2>{userDetails.name || "Bar Boaron"}</h2>
+              </div>
+              {showChangePassword ? (
+                <ChangePassword />
+              ) : (
+                <ChangeUserDetails
+                  userDetails={userDetails}
+                  showErrMsg={showErrMsg}
+                  editProfile={this.editProfile}
+                  showChangePass={this.showChangePass}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );

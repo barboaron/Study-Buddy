@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import RegistrationForm from "./RegistrationForm";
 import axios from "axios";
+import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 
 export default class RegistrationPage extends Component {
   constructor(props) {
@@ -51,6 +52,8 @@ export default class RegistrationPage extends Component {
 
   render() {
     const { isRegSucceed, errMsg } = this.state;
+    const { history } = this.props;
+    isUserLoggedIn(history, "/");
     return (
       <div className="session">
         <div className="leftPicture"></div>

@@ -16,9 +16,6 @@ class SearchCourses extends Component {
   };
 
   render() {
-    const styleInfo = {
-      paddingRight: "10px",
-    };
     const elementStyle = {
       border: "solid",
       borderRadius: "10px",
@@ -33,6 +30,8 @@ class SearchCourses extends Component {
         data.course.toLowerCase().includes(this.state.search.toLowerCase())
       ) {
         return data;
+      } else {
+        return;
       }
     }).map((data) => {
       return (

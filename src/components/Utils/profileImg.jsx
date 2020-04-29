@@ -5,10 +5,10 @@ export default class ProfileImg extends Component {
   render() {
     const { userDetails, showChangePassword } = this.props;
     return (
-      <div class="profile-img">
+      <div className="profile-img">
         <img src={userDetails.profilePic || "defaultPicUser.png"} alt="" />
         {!showChangePassword && (
-          <div class="file btn btn-lg btn-primary">
+          <div className="file btn btn-lg btn-primary">
             Change Photo
             <input type="file" name="file" />
           </div>

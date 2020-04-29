@@ -11,18 +11,27 @@ export default class ChangePassword extends Component {
     this.state = {
       showSucceedMsg: false,
     };
+    this.changePassword = this.changePassword.bind(this);
   }
 
   getUserDetails = () => {};
 
-  changePassword = (event) => {
+  async changePassword(event) {
     event.preventDefault();
+
+    const currentPassword = event?.target?.elements?.oldPassword?.value;
+    const newPassword = event?.target?.elements?.newPassword?.value;
+    const confirmPassword = event?.target?.elements?.confirmPassword?.value;
+
+    let token = await localStorage.getItem("jwtToken");
+
     const passwordData = {
-      currentPassword: event?.target?.elements?.oldPassword?.value,
-      newPassword: event?.target?.elements?.newPassword?.value,
-      confirmPassword: event?.target?.elements?.confirmPassword?.value,
+      currentPassword,
+      newPassword,
+      confirmPassword,
+      jwt: token,
     };
-    debugger;
+
     return axios
       .post("/api/users/changePassword", passwordData)
       .then((res) => {
@@ -34,19 +43,31 @@ export default class ChangePassword extends Component {
         }
       })
       .catch((err) => {
-        console.log("error");
+        this.setState({ errMsg: Object.values(err.response.data) });
       });
-  };
+  }
 
   render() {
-    const { showSucceedMsg } = this.state;
+    const { showSucceedMsg, errMsg } = this.state;
 
     return (
       <div className="floating-label">
         {showSucceedMsg ? (
-          <span>Password changed successfully!</span>
+          <span className="msgPasswodSuccess">
+            Password changed successfully!
+            <br />
+          </span>
         ) : (
           <form className="form" onSubmit={this.changePassword}>
+            {errMsg ? (
+              <span className="errMsg">
+                {errMsg.map((elem) => (
+                  <span className="errMsg">
+                    {elem} <br />
+                  </span>
+                ))}
+              </span>
+            ) : null}
             <FloatingLabel
               placeholder="Old Password"
               type="password"

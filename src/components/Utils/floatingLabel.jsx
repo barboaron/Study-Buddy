@@ -7,7 +7,7 @@ export default class FloatingLabel extends Component {
     return (
       <div className={classNames("floating-label", className)}>
         <input placeholder={placeholder} type={type} name={name} />
-        <label for={name}>{content}</label>
+        <label htmlFor={name}>{content}</label>
         {Icon && (
           <div className="icon">
             <Icon />
