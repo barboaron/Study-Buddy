@@ -1,79 +1,90 @@
 const express = require("express");
 const router = express.Router();
-// Load User model
 const User = require("../../models/User");
 const Profile = require("../../models/Profile");
+const Course = require("../../models/Course");
 const jwt_decode = require("jwt-decode");
 const { isLoggedIn } = require("../../authentication/auth");
-var fs = require("fs");
-var multer = require("multer");
+// var fs = require("fs");
+// var multer = require("multer");
 
-// CREATE PROFILE (in the body, must send all fields required)
-router.post("/createProfile", isLoggedIn, (req, res) => {
+router.post("/editCourses", isLoggedIn, (req, res) => {
     const jwt = req.body.jwt;
     const { id } = jwt_decode(jwt);
 
-    User.findOne({ _id: id }).then(user => {
-          if (!user) {
-            return res.status(400).json("User does not exist.");
-        } else {
-            
-            const newProfile = new Profile({
-                user_id: user.id,
-                courses: req.body.courses,
-                degree_name: req.body.degree_name,
-                year_of_study: req.body.year_of_study,
-                university_name: user.universityName,
-          });
-
-          newProfile.img.data = fs.readFileSync(req.files.userPhoto.path)
-          newProfile.img.contentType = "image/png";
-
-            newProfile
-                .save()
-                .then(profile => res.json(profile))
-                .catch(err => console.log(err));
-            };
-          });
-})
+    Profile.findOne({ user_id: id }).then( (profile) => {
+        Course.find( {
+            universityName: profile.university_name, 
+            degreeName: profile.degree_name.toLowerCase(),
+        } ).then(async (courses) => {
+            let coursesArray = [];
+            if (!(req.body.coursesIds === undefined || req.body.coursesIds.length === 0)) {
+                const filteredCourses = courses.filter( course => {
+                    console.log(course._id);
+                    return req.body.coursesIds.includes(course._id.toString());
+                });
+                coursesArray = filteredCourses.map( course => {
+                    return {
+                        id: course._id,
+                        name: course.courseName,
+                    }
+                });
+            }
+            await Profile.update({_id: profile.id}, { courses: coursesArray});
+            return res.json(coursesArray);
+        })
+    })
+});
 
 //UPDATE PROFILE (in the body, must send user_id, and all fields to be updated)
 router.post("/updateProfile", isLoggedIn,  (req, res) => {
     
     const jwt = req.body.jwt;
-    const { id:loggedInUserId } = jwt_decode(jwt);
-    const profileUserId = req.body.id;
+    const { id } = jwt_decode(jwt);
 
-    Profile.findOne({ _id: profileUserId }).then(async (profile) => {
-        
-        if (!profile) {
-            return res.status(400).json("Profile does not exist.");
-        }  else {
-            if(loggedInUserId === profile.user_id) {
-                await Profile.update({_id: profile.id}, req.body.dataToUpdate);
-                return res.status(200).json("Profile updated");
-            } else {
-                return res.status(401).json("cannot edit user profile");
-            }
-        };
+    User.findOne({ _id: id }).then(user => {
+        Profile.findOne({ user_id: id }).then(async (profile) => {
+            
+            if (!profile) {
+                const newProfile = new Profile({
+                    user_id: id,
+                    courses: [],
+                    degree_name: req.body.degree_name,
+                    year_of_study: req.body.year_of_study,
+                    university_name: user.universityName,
+                });
+                newProfile
+                    .save()
+                    .then(profile => res.json(profile))
+                    .catch(err => console.log(err));
+            }  else {
+                const updatedProfile = {
+                    user_id: id,
+                    degree_name: req.body.degree_name,
+                    year_of_study: req.body.year_of_study,
+                    university_name: user.universityName,
+                };
+                await Profile.update({_id: profile.id}, updatedProfile);
+                return res.status(200).json(updatedProfile);
+            };
+        })
     })
-    .catch(err => res.status(400));
+    .catch(err => res.status(400).json("user doesn't exist"));
 });
 
-router.get("/profile", isLoggedIn, (req, res) => {
+router.post("/profile", isLoggedIn, (req, res) => {
     
     const jwt = req.body.jwt;
-    const { id:loggedInUserId } = jwt_decode(jwt);
-    const profileUserId = req.body.id;
+    const { id } = jwt_decode(jwt);
+    const profileUserId = req.body.userId;
 
-    Profile.findOne({ _id: profileUserId }).then( (profile) => {
-        
+    Profile.findOne({ user_id: profileUserId }).then( (profile) => {
         if (!profile) {
             return res.status(400).json("Profile does not exist.");
         }  else {
-            var convertedProfile = JSON.parse(JSON.stringify(profile));
+            let convertedProfile = JSON.parse(JSON.stringify(profile));
 
-            if(loggedInUserId === profile.user_id) {
+            if(id === profile.user_id) {
                 convertedProfile.canEdit = true;
             } else {
                 convertedProfile.canEdit = false;
@@ -82,9 +93,23 @@ router.get("/profile", isLoggedIn, (req, res) => {
 
             return res.status(200).json(convertedProfile);
         };
-    
     })
-    .catch(err => res.status(400));
+    .catch(err => res.status(400).json(err));
+});
+
+router.post("/courses", isLoggedIn, (req, res) => {
+    
+    const jwt = req.body.jwt;
+    const { id } = jwt_decode(jwt);
+    
+    Profile.findOne({ user_id: id }).then( (profile) => {
+        if (!profile) {
+            return res.status(400).json("Profile does not exist.");
+        }  else {
+            return res.status(200).json(profile.courses);
+        };
+    })
+    .catch(err => res.status(400).json(err));
 });
 
 module.exports = router;
