@@ -9,50 +9,71 @@ import "../styles/userProfileStyle.css";
 export default class EditProfile extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      isLoading: false,
+    };
   }
 
-  getUserDetails = () => {};
-  showChangePass = () => {
-    this.setState({ showChangePassword: true });
-  };
-  editProfile = (event) => {
-    event.preventDefault();
-    const firstName = event?.target?.elements?.firstName?.value;
-    const lastName = event?.target?.elements?.lastName?.value;
-    const degreeName = event?.target?.elements?.degreeName?.value;
-    const year = event?.target?.elements?.year?.value;
-    //const courses = event.target.elements.courses.value;
-    const profileData = {
-      firatName: firstName,
-      lastName: lastName,
-      degreeName: degreeName,
-      year: year,
-    };
+  componentDidMount() {
     const { history } = this.props;
+    isUserLoggedIn(history, "/EditProfile", "/login");
+    // debugger;
+    const { userDetails, fullName } = this.props.location.state;
+    this.setState({ userDetails, fullName, isLoading: true });
+  }
+
+  async getUserDetails(user_id) {
+    const token = await localStorage.getItem("jwtToken");
+
+    const reqData = {
+      jwt: token,
+      userId: user_id,
+    };
+    debugger;
 
     return axios
-      .post("/api/changeProfile", profileData)
+      .post("/api/profiles/profile", reqData)
       .then((res) => {
         if (res.status !== 200) {
-          this.setState({ showErrMsg: true });
-
           console.log("error");
         } else {
-          history.push("/userProfile");
+          debugger;
+          return res;
         }
       })
       .catch((err) => {
         console.log("error");
-        this.setState({ showErrMsg: true });
       });
+  }
+  createFullName = (userDetails) => {
+    const { firstName, lastName } = userDetails;
+    return (
+      firstName[0].toUpperCase() +
+      firstName.substring(1) +
+      " " +
+      lastName[0].toUpperCase() +
+      lastName.substring(1)
+    );
+  };
+
+  showChangePass = () => {
+    this.setState({ showChangePassword: true });
   };
 
   render() {
-    const { showChangePassword, showErrMsg } = this.state;
-    const userDetails = this.getUserDetails() || {};
-    const { history } = this.props;
-    isUserLoggedIn(history, "/EditProfile", "/login");
+    const {
+      showChangePassword,
+      showErrMsg,
+      userDetails,
+      fullName,
+      isLoading,
+    } = this.state;
+    // debugger;
+
+    if (!isLoading) {
+      return null;
+    }
+    // debugger;
     return (
       <div className="profile_user">
         <link
@@ -70,7 +91,7 @@ export default class EditProfile extends Component {
             </div>
             <div className="col-md-6">
               <div className="profile-head">
-                <h2>{userDetails.name || "Bar Boaron"}</h2>
+                <h2>{fullName}</h2>
               </div>
               {showChangePassword ? (
                 <ChangePassword />

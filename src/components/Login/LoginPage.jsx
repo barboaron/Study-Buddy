@@ -13,6 +13,10 @@ export default class LoginPage extends Component {
       showLoginFailErr: false,
     };
   }
+  componentDidMount() {
+    const { history } = this.props;
+    isUserLoggedIn(history, "/");
+  }
 
   loginReq = (event) => {
     event.preventDefault();
@@ -46,8 +50,6 @@ export default class LoginPage extends Component {
 
   render() {
     const { showLoginFailErr } = this.state;
-    const { history } = this.props;
-    isUserLoggedIn(history, "/");
     return (
       <div>
         <img className="loginLogo" src="LogoStudyBuddy.png" alt="Study-Buddy" />

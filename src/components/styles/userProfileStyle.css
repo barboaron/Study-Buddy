@@ -83,7 +83,7 @@
   width: 50% !important;
 }
 .changePassword {
-  margin-top: 15px;
+  margin-top: 15px !important;
 }
 .msgPasswodSuccess {
   font-weight: 700 !important;

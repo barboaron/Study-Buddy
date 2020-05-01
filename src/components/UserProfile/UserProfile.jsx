@@ -12,16 +12,20 @@ export default class UserProfile extends Component {
     super(props);
     this.state = {
       currTab: 0,
-      list: this.getMyGroup(),
+      isLoading: false,
     };
     this.getUserID = this.getUserID.bind(this);
     this.getUserDetails = this.getUserDetails.bind(this);
   }
 
   async componentDidMount() {
+    const { history } = this.props;
+    isUserLoggedIn(history, "/UserProfile", "/login");
+
+    debugger;
     const user_id = await this.getUserID();
     const user_details = await this.getUserDetails(user_id);
-    this.setState({ user_id, user_details });
+    this.setState({ user_id, userDetails: user_details.data, isLoading: true });
   }
 
   handleChange = (_, newValue) => {
@@ -40,11 +44,13 @@ export default class UserProfile extends Component {
   };
 
   getMyGroup = () => {
-    return ["groups", "bla"];
+    const { study_groups } = this.state?.userDetails;
+    return study_groups.length !== 0 ? study_groups : ["No Groups"];
   };
 
   getMyCourses = () => {
-    return ["courses", "bla"];
+    const { courses } = this.state?.userDetails;
+    return courses.length !== 0 ? courses : ["No Courses"];
   };
 
   async getUserID() {
@@ -60,7 +66,6 @@ export default class UserProfile extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          // this.setState({ user_id: res.data.id });
           return res.data.id;
         }
       })
@@ -71,7 +76,6 @@ export default class UserProfile extends Component {
 
   async getUserDetails(user_id) {
     const token = await localStorage.getItem("jwtToken");
-    // const { user_id } = this.state;
 
     const reqData = {
       jwt: token,
@@ -94,11 +98,47 @@ export default class UserProfile extends Component {
       });
   }
 
+  async getAllPossibleCourses() {
+    let token = await localStorage.getItem("jwtToken");
+
+    const reqData = {
+      jwt: token,
+    };
+    debugger;
+    return axios
+      .post("/api/courses/", reqData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.courses;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+  createFullName = (userDetails) => {
+    const { firstName, lastName } = userDetails;
+    return (
+      firstName[0].toUpperCase() +
+      firstName.substring(1) +
+      " " +
+      lastName[0].toUpperCase() +
+      lastName.substring(1)
+    );
+  };
+  toggleEditProfile = () => {
+    const { isEditProfile } = this.state;
+    this.setState({ isEditProfile: !isEditProfile });
+  };
+
   render() {
-    const userDetails = {};
-    const { list } = this.state;
-    const { history } = this.props;
-    isUserLoggedIn(history, "/UserProfile", "/login");
+    const { list, userDetails, isLoading, currTab } = this.state;
+    if (!isLoading) {
+      return null;
+    }
+    const fullName = this.createFullName(userDetails);
 
     return (
       <div className="profile_user">
@@ -119,15 +159,15 @@ export default class UserProfile extends Component {
             </div>
             <div className="col-md-6">
               <div className="profile-head">
-                <h2>{userDetails.name || "Bar Boaron"}</h2>
+                <h2>{fullName}</h2>
                 <h5>
-                  Degree name: {userDetails.degreeName || "Computer Science"}
-                  <br /> University name: {userDetails.university || "MTA"}
-                  <br /> Year of study: {userDetails.year || "2"}
+                  Degree name: {userDetails.degree_name || " "}
+                  <br /> University name: {userDetails.university_name}
+                  <br /> Year of study: {userDetails.year_of_study || " "}
                 </h5>
                 <Paper square>
                   <Tabs
-                    value={this.state.currTab}
+                    value={currTab}
                     onChange={this.handleChange}
                     variant="fullWidth"
                     indicatorColor="primary"
@@ -137,11 +177,28 @@ export default class UserProfile extends Component {
                     <Tab label="My Courses" />
                   </Tabs>
                 </Paper>
-                <div>{list}</div>
+                <div>{list || this.getMyGroup()}</div>
+                {userDetails.canEdit && currTab === 1 ? (
+                  <button
+                    className="editCoursesBtn"
+                    onClick={this.getAllPossibleCourses}
+                  >
+                    Edit Courses
+                  </button>
+                ) : null}
               </div>
             </div>
-            {userDetails.edit || true ? (
-              <Link to="/EditProfile">
+            {userDetails.canEdit ? (
+              /* <button className="col-md-2" onClick={this.toggleEditProfile}>Edit Profile</button> */
+              <Link
+                to={{
+                  pathname: "/EditProfile",
+                  state: {
+                    fullName,
+                    userDetails,
+                  },
+                }}
+              >
                 <div className="col-md-2">Edit Profile</div>
               </Link>
             ) : null}

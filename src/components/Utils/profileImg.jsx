@@ -6,7 +6,7 @@ export default class ProfileImg extends Component {
     const { userDetails, showChangePassword } = this.props;
     return (
       <div className="profile-img">
-        <img src={userDetails.profilePic || "defaultPicUser.png"} alt="" />
+        <img src={userDetails?.profilePic || "defaultPicUser.png"} alt="" />
         {!showChangePassword && (
           <div className="file btn btn-lg btn-primary">
             Change Photo
