@@ -265,4 +265,23 @@ router.post("/isLoggedIn", (req, res) => {
 //   .catch(err => res.status(400).json(err));
 // });
 
+router.get("/allUniversities", (req, res) => {
+
+  Course.find({}).then (coursesArray => {
+    const universities = getAllUniversities(coursesArray);
+
+    return res.status(200).json(universities);
+  })
+  .catch(err => res.status(400).json(err));
+  
+});
+
+function getAllUniversities(courseObjects) {
+  const universityNames = courseObjects.map(courseObject => {
+      return courseObject.universityName;
+  })
+  const universitiesSet = new Set(universityNames);
+  return Array.from(universitiesSet);
+}
+
 module.exports = router;

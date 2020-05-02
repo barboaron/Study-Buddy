@@ -5,6 +5,7 @@ const Profile = require("../../models/Profile");
 const Course = require("../../models/Course");
 const jwt_decode = require("jwt-decode");
 const { isLoggedIn } = require("../../authentication/auth");
+const isEmpty = require("is-empty");
 // var fs = require("fs");
 // var multer = require("multer");
 
@@ -48,6 +49,11 @@ router.post("/updateProfile", isLoggedIn,  (req, res) => {
             if (!profile) {
                 return res.status(400).json("Profile does not exist.");
             }  else {
+                const { errors, isValid } = await validateProfileDetails(req.body, profile.university_name);
+                // Check validation
+                if (!isValid) {
+                  return res.status(400).json(errors);
+                }
                 const updatedProfile = {
                     degree_name: req.body.degree_name,
                     year_of_study: req.body.year_of_study,
@@ -87,8 +93,7 @@ router.post("/profile", isLoggedIn, (req, res) => {
 
 router.post("/courses", isLoggedIn, (req, res) => {
     
-    const jwt = req.body.jwt;
-    const { id } = jwt_decode(jwt);
+    const id  = req.body.userId;
     
     Profile.findOne({ user_id: id }).then( (profile) => {
         if (!profile) {
@@ -100,4 +105,59 @@ router.post("/courses", isLoggedIn, (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
+router.post("/allDegrees", isLoggedIn, (req, res) => {
+    
+    const jwt = req.body.jwt;
+    const { id } = jwt_decode(jwt);
+    
+    Profile.findOne({ user_id: id} ).then( profile => {
+        const universityName = profile.university_name;
+        
+        Course.find({universityName}).then (coursesArray => {
+            const degrees = filterDegrees(coursesArray);
+
+            return res.status(200).json(degrees);
+        })
+        .catch(err => res.status(400).json(err));
+    })
+    .catch(err => res.status(400).json(err));
+});
+
+function filterDegrees(courseObjects) {
+    const degreeNames = courseObjects.map(courseObject => {
+        return courseObject.degreeName;
+    })
+    const degreesSet = new Set(degreeNames);
+    return Array.from(degreesSet);
+}
+
+async function validateProfileDetails(data, universityName) {
+    let errors = {};
+  
+  // Convert empty fields to an empty string so we can use validator functions
+
+  // Name checks
+    if (isEmpty(data.degree_name)) {
+      errors.degree = "Degree name field is required";
+    }
+    else {
+        await Course.find({universityName}).then (coursesArray => {
+            const degrees = filterDegrees(coursesArray);
+            if(!degrees.includes(data.degree_name.toLowerCase())){
+                errors.degree = "Degree doesnt exist in your university";
+            };
+        })
+        .catch(err => res.status(400).json(err));
+    }
+    if(isEmpty(data.year_of_study))
+        errors.year_of_study = "Year of study field is required";
+    else if (data.year_of_study < 1 || data.year_of_study > 7) {
+      errors.year_of_study = "Year of study must be between 1 and 7";
+    }
+  
+  return {
+      errors,
+      isValid: isEmpty(errors)
+    };
+  };
 module.exports = router;

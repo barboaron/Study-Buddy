@@ -5,6 +5,7 @@ const passport = require("passport");
 const users = require("./src/routes/api/users");
 const profiles = require("./src/routes/api/profiles");
 const courses = require("./src/routes/api/courses");
+const admins = require("./src/routes/api/admins");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
@@ -38,6 +39,8 @@ require("./config/passport")(passport);
 app.use("/api/users", users);
 app.use("/api/profiles", profiles);
 app.use("/api/courses", courses);
+app.use("/api/admins", admins);
+
 
 
 app.get("/confirmation/:token", async (req, res) => { 
