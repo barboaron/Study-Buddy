@@ -48,6 +48,7 @@ class SearchCourses extends Component {
     return (
       <div>
         <input
+          className="input"
           type="text"
           placeholder="Search..."
           style={elementStyle}

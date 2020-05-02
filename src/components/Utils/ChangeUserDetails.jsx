@@ -3,6 +3,14 @@ import FloatingLabel from "./floatingLabel";
 import axios from "axios";
 
 export default class ChangeUserDetails extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showSucceedMsg: false,
+    };
+    this.editProfile = this.editProfile.bind(this);
+  }
+
   async editProfile(event) {
     event.preventDefault();
 
@@ -22,7 +30,7 @@ export default class ChangeUserDetails extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          return res.data;
+          this.setState({ showSucceedMsg: true, detailsUpdated: res.data });
         }
       })
       .catch((err) => {
@@ -31,29 +39,53 @@ export default class ChangeUserDetails extends Component {
   }
 
   render() {
-    const { showErrMsg, userDetails, showChangePass } = this.props;
+    const {
+      showErrMsg,
+      userDetails,
+      showChangePass,
+      toggleEditProfile,
+    } = this.props;
+    const { showSucceedMsg, detailsUpdated } = this.state;
+
     return (
-      <form className="form" onSubmit={this.editProfile}>
-        <FloatingLabel
-          placeholder={userDetails.degree_name}
-          type="text"
-          name="degreeName"
-          content="Degree name:"
-        />
-        <FloatingLabel
-          placeholder={userDetails.year_of_study}
-          type="text"
-          name="year"
-          content="Year of study:"
-        />
-        {showErrMsg ? (
-          <span className="errMsg">Error. Please try again</span>
-        ) : null}
-        <button className="changePassword" onClick={showChangePass}>
-          Change Password
+      <div className="floating-label">
+        {showSucceedMsg ? (
+          <span className="msgPasswodSuccess">
+            Details updated successfully!
+            <br />
+          </span>
+        ) : (
+          <form className="form" onSubmit={this.editProfile}>
+            <FloatingLabel
+              placeholder={userDetails.degree_name}
+              type="text"
+              name="degreeName"
+              content="Degree name:"
+              defaultValue={userDetails.degree_name}
+            />
+            <FloatingLabel
+              placeholder={userDetails.year_of_study}
+              type="text"
+              name="year"
+              content="Year of study:"
+              defaultValue={userDetails.year_of_study}
+            />
+            {showErrMsg ? (
+              <span className="errMsg">Error. Please try again</span>
+            ) : null}
+            <button className="changePassword" onClick={showChangePass}>
+              Change Password
+            </button>
+            <button type="submit">Send</button>
+          </form>
+        )}
+        <button
+          className="BackBtn"
+          onClick={() => toggleEditProfile(detailsUpdated)}
+        >
+          Back
         </button>
-        <button type="submit">Send</button>
-      </form>
+      </div>
     );
   }
 }

@@ -53,7 +53,13 @@ export default class Admin extends Component {
             </form>
             <form id="addCourseManually" onSubmit={this.addNewCourses}>
               <h4> Add Courses By File: </h4>
-              <input id="chooseFile" type="file" name="myfile" multiple />
+              <input
+                id="chooseFile"
+                className="input"
+                type="file"
+                name="myfile"
+                multiple
+              />
               <br />
               <br />
               <button className="uploadFileBtn" type="submit">

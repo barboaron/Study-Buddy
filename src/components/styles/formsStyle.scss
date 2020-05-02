@@ -135,7 +135,7 @@ button {
     }
   }
 }
-input {
+.input {
   font-size: 16px;
   padding: 20px 0px;
   height: 56px;
@@ -166,7 +166,7 @@ input {
     transition: all 0.3s ease;
     padding-left: 44px;
   }
-  input {
+  .input {
     width: calc(100% - 44px);
     margin-left: auto;
     display: flex;
@@ -189,14 +189,14 @@ input {
       }
     }
   }
-  input:not(:placeholder-shown) {
+  .input:not(:placeholder-shown) {
     padding: 28px 0px 12px 0px;
   }
-  input:not(:placeholder-shown) + label {
-    transform: translateY(-10px);
+  .input:not(:placeholder-shown) + label {
+    transform: translateY(-30px);
     opacity: 0.7;
   }
-  input:valid:not(:placeholder-shown) + label + .icon {
+  .input:valid:not(:placeholder-shown) + label + .icon {
     svg {
       opacity: 1;
       path {
@@ -204,7 +204,7 @@ input {
       }
     }
   }
-  input:not(:valid):not(:focus) + label + .icon {
+  .input:not(:valid):not(:focus) + label + .icon {
     animation-name: shake-shake;
     animation-duration: 0.3s;
   }

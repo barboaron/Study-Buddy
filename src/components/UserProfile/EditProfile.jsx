@@ -1,79 +1,23 @@
 import React, { Component } from "react";
-import axios from "axios";
 import ChangePassword from "../Utils/ChangePassword";
 import ChangeUserDetails from "../Utils/ChangeUserDetails";
 import ProfileImg from "../Utils/profileImg";
-import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 import "../styles/userProfileStyle.css";
 
 export default class EditProfile extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      isLoading: false,
-    };
+    this.state = {};
   }
-
-  componentDidMount() {
-    const { history } = this.props;
-    isUserLoggedIn(history, "/EditProfile", "/login");
-    // debugger;
-    const { userDetails, fullName } = this.props.location.state;
-    this.setState({ userDetails, fullName, isLoading: true });
-  }
-
-  async getUserDetails(user_id) {
-    const token = await localStorage.getItem("jwtToken");
-
-    const reqData = {
-      jwt: token,
-      userId: user_id,
-    };
-    debugger;
-
-    return axios
-      .post("/api/profiles/profile", reqData)
-      .then((res) => {
-        if (res.status !== 200) {
-          console.log("error");
-        } else {
-          debugger;
-          return res;
-        }
-      })
-      .catch((err) => {
-        console.log("error");
-      });
-  }
-  createFullName = (userDetails) => {
-    const { firstName, lastName } = userDetails;
-    return (
-      firstName[0].toUpperCase() +
-      firstName.substring(1) +
-      " " +
-      lastName[0].toUpperCase() +
-      lastName.substring(1)
-    );
-  };
 
   showChangePass = () => {
     this.setState({ showChangePassword: true });
   };
 
   render() {
-    const {
-      showChangePassword,
-      showErrMsg,
-      userDetails,
-      fullName,
-      isLoading,
-    } = this.state;
-    // debugger;
+    const { showChangePassword, showErrMsg } = this.state;
+    const { userDetails, fullName, toggleEditProfile } = this.props;
 
-    if (!isLoading) {
-      return null;
-    }
-    // debugger;
     return (
       <div className="profile_user">
         <link
@@ -86,7 +30,7 @@ export default class EditProfile extends Component {
             <div className="col-md-4">
               <ProfileImg
                 userDetails={userDetails}
-                showChangePassword={showChangePassword}
+                hideChangePic={showChangePassword}
               />
             </div>
             <div className="col-md-6">
@@ -94,13 +38,13 @@ export default class EditProfile extends Component {
                 <h2>{fullName}</h2>
               </div>
               {showChangePassword ? (
-                <ChangePassword />
+                <ChangePassword toggleEditProfile={toggleEditProfile} />
               ) : (
                 <ChangeUserDetails
                   userDetails={userDetails}
                   showErrMsg={showErrMsg}
-                  editProfile={this.editProfile}
                   showChangePass={this.showChangePass}
+                  toggleEditProfile={toggleEditProfile}
                 />
               )}
             </div>
