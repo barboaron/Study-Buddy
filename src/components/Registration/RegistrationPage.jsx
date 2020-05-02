@@ -12,14 +12,17 @@ export default class RegistrationPage extends Component {
     };
   }
 
+  componentDidMount() {
+    const { history } = this.props;
+    isUserLoggedIn(history, "/");
+  }
   signUpReq = (event) => {
     console.log("in signupreq");
     event.preventDefault();
     const firstName = event?.target?.elements?.firstName?.value;
     const lastName = event?.target?.elements?.lastName?.value;
     debugger;
-    const university = event.target.elements.university.value; //bug here
-    // const university = "MTA";
+    const university = event.target.elements.university.value;
     const email = event?.target?.elements?.email?.value;
     const password = event?.target?.elements?.password?.value;
     const confirmPassword = event?.target?.elements?.confirmPassword?.value;
@@ -52,8 +55,6 @@ export default class RegistrationPage extends Component {
 
   render() {
     const { isRegSucceed, errMsg } = this.state;
-    const { history } = this.props;
-    isUserLoggedIn(history, "/");
     return (
       <div className="session">
         <div className="leftPicture"></div>

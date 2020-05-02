@@ -1,50 +1,63 @@
 import React, { Component } from "react";
-import "../styles/userProfileStyle.css";
 import Paper from "@material-ui/core/Paper";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
+import EditProfile from "./EditProfile";
+import "../styles/userProfileStyle.css";
 
 export default class UserProfile extends Component {
   constructor(props) {
     super(props);
     this.state = {
       currTab: 0,
-      list: this.getMyGroup(),
+      isLoading: false,
+      isEditProfile: false,
     };
     this.getUserID = this.getUserID.bind(this);
     this.getUserDetails = this.getUserDetails.bind(this);
+    this.renderPossibleCourses = this.renderPossibleCourses.bind(this);
+    this.getAllPossibleCourses = this.getAllPossibleCourses.bind(this);
+    this.editUserCourses = this.editUserCourses.bind(this);
   }
 
   async componentDidMount() {
+    const { history } = this.props;
+    isUserLoggedIn(history, "/UserProfile", "/login");
+
     const user_id = await this.getUserID();
     const user_details = await this.getUserDetails(user_id);
-    this.setState({ user_id, user_details });
+    this.setState({ user_id, userDetails: user_details.data, isLoading: true });
   }
 
   handleChange = (_, newValue) => {
-    let list = [];
+    let isEditCourses,
+      list = [];
     switch (newValue) {
       case 0:
         list = this.getMyGroup();
         break;
       case 1:
         list = this.getMyCourses();
+        isEditCourses = false;
         break;
       default:
         break;
     }
-    this.setState({ currTab: newValue, list });
+    this.setState({ currTab: newValue, list, isEditCourses });
   };
 
   getMyGroup = () => {
-    return ["groups", "bla"];
+    const { study_groups } = this.state?.userDetails;
+    return study_groups.length !== 0 ? study_groups : ["No Groups"];
   };
 
   getMyCourses = () => {
-    return ["courses", "bla"];
+    const { courses } = this.state?.userDetails;
+    return courses.length !== 0
+      ? this.createListFromArray(courses)
+      : ["No Courses"];
   };
 
   async getUserID() {
@@ -60,7 +73,6 @@ export default class UserProfile extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          // this.setState({ user_id: res.data.id });
           return res.data.id;
         }
       })
@@ -71,8 +83,6 @@ export default class UserProfile extends Component {
 
   async getUserDetails(user_id) {
     const token = await localStorage.getItem("jwtToken");
-    // const { user_id } = this.state;
-
     const reqData = {
       jwt: token,
       userId: user_id,
@@ -85,7 +95,6 @@ export default class UserProfile extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           return res;
         }
       })
@@ -94,13 +103,152 @@ export default class UserProfile extends Component {
       });
   }
 
-  render() {
-    const userDetails = {};
-    const { list } = this.state;
-    const { history } = this.props;
-    isUserLoggedIn(history, "/UserProfile", "/login");
+  createListFromArray = (array) => (
+    <div className="cousrsesList">
+      {array.map((elem) => (
+        <div className="cousrsesList_Item">
+          {elem.name}
+          <br />
+        </div>
+      ))}
+    </div>
+  );
 
+  async editUserCourses(event) {
+    event.preventDefault();
+    const coursesIds = Array.from(event?.target?.elements)
+      .filter((elem) => elem.checked)
+      .map((elem) => elem.value);
+
+    let token = await localStorage.getItem("jwtToken");
+    const coursesData = {
+      jwt: token,
+      coursesIds,
+    };
+
+    return axios
+      .post("/api/profiles/editCourses", coursesData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          const { userDetails, isEditCourses } = this.state;
+          userDetails.courses = res.data;
+          const list = this.createListFromArray(res.data);
+          this.setState({
+            list,
+            userDetails,
+            isEditCourses: !isEditCourses,
+          });
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  async renderPossibleCourses() {
+    const { isEditCourses, userDetails } = this.state;
+    const courses = await this.getAllPossibleCourses();
+    const currUserCourses = userDetails.courses;
+    const list = (
+      <form onSubmit={this.editUserCourses}>
+        <div className="cousrsesList">
+          {courses.map((course, index) => {
+            const ischecked = currUserCourses.find(
+              (element) => element.id === course.id
+            );
+            return (
+              <>
+                <input
+                  className="courseItemCheckbox"
+                  type="checkbox"
+                  name={index}
+                  value={course.id}
+                  defaultChecked={ischecked}
+                />
+                <label className="cousrsesList_Item" htmlFor={index}>
+                  {course.name}
+                </label>
+                <br />
+              </>
+            );
+          })}
+        </div>
+        <button className="editCoursesBtn" type="submit">
+          Edit
+        </button>
+      </form>
+    );
+    this.setState({ list, isEditCourses: !isEditCourses });
+  }
+
+  async getAllPossibleCourses() {
+    let token = await localStorage.getItem("jwtToken");
+
+    const reqData = {
+      jwt: token,
+    };
+    return axios
+      .post("/api/courses/", reqData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+  createFullName = (userDetails) => {
+    const { firstName, lastName } = userDetails;
     return (
+      firstName[0].toUpperCase() +
+      firstName.substring(1) +
+      " " +
+      lastName[0].toUpperCase() +
+      lastName.substring(1)
+    );
+  };
+
+  updateUserDetails = (newDetails) => {
+    const { userDetails } = this.state;
+    userDetails.degree_name = newDetails?.degree_name;
+    userDetails.year_of_study = newDetails?.year_of_study;
+    return userDetails;
+  };
+
+  toggleEditProfile = (newDetails) => {
+    const { isEditProfile } = this.state;
+    const userDetails = newDetails
+      ? this.updateUserDetails(newDetails)
+      : this.state.userDetails;
+    this.setState({ isEditProfile: !isEditProfile, userDetails });
+  };
+
+  render() {
+    const {
+      list,
+      userDetails,
+      isLoading,
+      currTab,
+      isEditProfile,
+      isEditCourses,
+    } = this.state;
+    if (!isLoading) {
+      return null;
+    }
+    const fullName = this.createFullName(userDetails);
+
+    return isEditProfile ? (
+      <EditProfile
+        fullName={fullName}
+        userDetails={userDetails}
+        toggleEditProfile={this.toggleEditProfile}
+      />
+    ) : (
       <div className="profile_user">
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
@@ -119,15 +267,15 @@ export default class UserProfile extends Component {
             </div>
             <div className="col-md-6">
               <div className="profile-head">
-                <h2>{userDetails.name || "Bar Boaron"}</h2>
+                <h2>{fullName}</h2>
                 <h5>
-                  Degree name: {userDetails.degreeName || "Computer Science"}
-                  <br /> University name: {userDetails.university || "MTA"}
-                  <br /> Year of study: {userDetails.year || "2"}
+                  Degree name: {userDetails.degree_name || " "}
+                  <br /> University name: {userDetails.university_name}
+                  <br /> Year of study: {userDetails.year_of_study || " "}
                 </h5>
                 <Paper square>
                   <Tabs
-                    value={this.state.currTab}
+                    value={currTab}
                     onChange={this.handleChange}
                     variant="fullWidth"
                     indicatorColor="primary"
@@ -137,13 +285,24 @@ export default class UserProfile extends Component {
                     <Tab label="My Courses" />
                   </Tabs>
                 </Paper>
-                <div>{list}</div>
+                {list || this.getMyGroup()}
+                {!isEditCourses && userDetails.canEdit && currTab === 1 && (
+                  <button
+                    className="editCoursesBtn"
+                    onClick={this.renderPossibleCourses}
+                  >
+                    Edit Courses
+                  </button>
+                )}
               </div>
             </div>
-            {userDetails.edit || true ? (
-              <Link to="/EditProfile">
-                <div className="col-md-2">Edit Profile</div>
-              </Link>
+            {userDetails.canEdit ? (
+              <button
+                className="editProfileBtn"
+                onClick={() => this.toggleEditProfile()}
+              >
+                Edit Profile
+              </button>
             ) : null}
           </div>
         </div>

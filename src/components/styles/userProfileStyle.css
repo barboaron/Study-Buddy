@@ -31,7 +31,7 @@
   font-size: 15px;
   background: #212529b8;
 }
-.profile-img .file input {
+.profile-img .file .input {
   position: absolute;
   opacity: 0;
   right: 0;
@@ -82,10 +82,29 @@
 .MuiTabs-indicator {
   width: 50% !important;
 }
+.BackBtn {
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+}
 .changePassword {
-  margin-top: 15px;
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
 }
 .msgPasswodSuccess {
   font-weight: 700 !important;
   font-size: 24px;
+}
+.editProfileBtn {
+  width: max-content;
+  height: max-content;
+}
+.cousrsesList_Item {
+  font-size: large;
+  padding: 5px 15px;
+}
+.cousrsesList {
+  text-align: left;
+  overflow: scroll;
+  height: 300px;
+  margin-top: 10px;
 }

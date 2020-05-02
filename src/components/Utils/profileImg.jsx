@@ -3,14 +3,14 @@ import "../styles/userProfileStyle.css";
 
 export default class ProfileImg extends Component {
   render() {
-    const { userDetails, showChangePassword } = this.props;
+    const { userDetails, hideChangePic } = this.props;
     return (
       <div className="profile-img">
-        <img src={userDetails.profilePic || "defaultPicUser.png"} alt="" />
-        {!showChangePassword && (
+        <img src={userDetails?.profilePic || "defaultPicUser.png"} alt="" />
+        {!hideChangePic && (
           <div className="file btn btn-lg btn-primary">
             Change Photo
-            <input type="file" name="file" />
+            <input className="input" type="file" name="file" />
           </div>
         )}
       </div>

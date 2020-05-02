@@ -14,11 +14,8 @@ export default class ChangePassword extends Component {
     this.changePassword = this.changePassword.bind(this);
   }
 
-  getUserDetails = () => {};
-
   async changePassword(event) {
     event.preventDefault();
-
     const currentPassword = event?.target?.elements?.oldPassword?.value;
     const newPassword = event?.target?.elements?.newPassword?.value;
     const confirmPassword = event?.target?.elements?.confirmPassword?.value;
@@ -49,6 +46,7 @@ export default class ChangePassword extends Component {
 
   render() {
     const { showSucceedMsg, errMsg } = this.state;
+    const { toggleEditProfile } = this.props;
 
     return (
       <div className="floating-label">
@@ -94,11 +92,9 @@ export default class ChangePassword extends Component {
             </button>
           </form>
         )}
-        <Link to="/UserProfile">
-          <button className="changePassword" onClick={this.hideChangePassword}>
-            Back
-          </button>
-        </Link>
+        <button className="BackBtn" onClick={() => toggleEditProfile()}>
+          Back
+        </button>
       </div>
     );
   }
