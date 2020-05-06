@@ -1,10 +1,9 @@
+/* eslint-disable array-callback-return */
 import React, { Component } from "react";
-import Information from "./info-json";
 
 class SearchCourses extends Component {
-  constructor() {
-    super();
-
+  constructor(props) {
+    super(props);
     this.state = {
       search: null,
     };
@@ -15,6 +14,34 @@ class SearchCourses extends Component {
     this.setState({ search: keyword });
   };
 
+  getCoursesList = () =>
+    this.props.coursesList
+      .filter((data) => {
+        if (this.state.search == null) return data;
+        else if (
+          data.degreeName
+            .toLowerCase()
+            .includes(this.state.search.toLowerCase()) ||
+          data.name.toLowerCase().includes(this.state.search.toLowerCase())
+        ) {
+          return data;
+        }
+        return;
+      })
+      .map((data) => {
+        return (
+          <tr>
+            <td>{data.degreeName}</td>
+            <td>{data.name}</td>
+            <td>
+              <button onClick={() => this.props.deleteCourse(data)}>
+                Delete Course
+              </button>
+            </td>
+          </tr>
+        );
+      });
+
   render() {
     const elementStyle = {
       border: "solid",
@@ -23,27 +50,7 @@ class SearchCourses extends Component {
       height: "3px",
       marginBottom: "9px",
     };
-    const items = Information.filter((data) => {
-      if (this.state.search == null) return data;
-      else if (
-        data.degree.toLowerCase().includes(this.state.search.toLowerCase()) ||
-        data.course.toLowerCase().includes(this.state.search.toLowerCase())
-      ) {
-        return data;
-      } else {
-        return;
-      }
-    }).map((data) => {
-      return (
-        <tr>
-          <td>{data.degree}</td>
-          <td>{data.course}</td>
-          <td>
-            <button>Delete Course</button>
-          </td>
-        </tr>
-      );
-    });
+    const items = this.getCoursesList();
 
     return (
       <div>

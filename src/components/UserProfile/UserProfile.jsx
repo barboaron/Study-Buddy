@@ -12,7 +12,6 @@ export default class UserProfile extends Component {
     super(props);
     this.state = {
       currTab: 0,
-      isLoading: false,
       isEditProfile: false,
     };
     this.getUserID = this.getUserID.bind(this);
@@ -202,6 +201,7 @@ export default class UserProfile extends Component {
         console.log("error");
       });
   }
+
   createFullName = (userDetails) => {
     const { firstName, lastName } = userDetails;
     return (
@@ -225,7 +225,7 @@ export default class UserProfile extends Component {
     const userDetails = newDetails
       ? this.updateUserDetails(newDetails)
       : this.state.userDetails;
-    this.setState({ isEditProfile: !isEditProfile, userDetails });
+    this.setState({ isEditProfile: !isEditProfile, userDetails, currTab: 0 });
   };
 
   render() {
@@ -269,9 +269,14 @@ export default class UserProfile extends Component {
               <div className="profile-head">
                 <h2>{fullName}</h2>
                 <h5>
-                  Degree name: {userDetails.degree_name || " "}
-                  <br /> University name: {userDetails.university_name}
-                  <br /> Year of study: {userDetails.year_of_study || " "}
+                  <span className="titleDetails">Degree name: </span>
+                  {userDetails.degree_name || " "}
+                  <br /> <br />
+                  <span className="titleDetails">University name: </span>
+                  {userDetails.university_name}
+                  <br /> <br />
+                  <span className="titleDetails"> Year of study: </span>
+                  {userDetails.year_of_study || " "}
                 </h5>
                 <Paper square>
                   <Tabs

@@ -16,13 +16,13 @@ export default class RegistrationPage extends Component {
     const { history } = this.props;
     isUserLoggedIn(history, "/");
   }
+
   signUpReq = (event) => {
     console.log("in signupreq");
     event.preventDefault();
     const firstName = event?.target?.elements?.firstName?.value;
     const lastName = event?.target?.elements?.lastName?.value;
-    debugger;
-    const university = event.target.elements.university.value;
+    const university = event.target.elements.option.value;
     const email = event?.target?.elements?.email?.value;
     const password = event?.target?.elements?.password?.value;
     const confirmPassword = event?.target?.elements?.confirmPassword?.value;
