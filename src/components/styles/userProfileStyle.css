@@ -42,10 +42,16 @@
   margin-bottom: 5%;
   font-size: 50px;
   font-weight: bold;
+  text-align: left;
 }
 .profile-head h5 {
   color: #0062cc;
   margin-bottom: 10%;
+  text-align: left;
+}
+.titleDetails {
+  font-weight: 600;
+  padding-right: 6px;
 }
 .profile-edit-btn {
   border: none;

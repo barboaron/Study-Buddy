@@ -14,7 +14,7 @@ const validateLoginInput = require("../../validation/login");
 const User = require("../../models/User");
 const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");
-
+const Course = require("../../models/Course");
 // @route POST api/users/register
 // @desc Register user
 // @access Public
@@ -266,20 +266,19 @@ router.post("/isLoggedIn", (req, res) => {
 // });
 
 router.get("/allUniversities", (req, res) => {
+  Course.find({})
+    .then((coursesArray) => {
+      const universities = getAllUniversities(coursesArray);
 
-  Course.find({}).then (coursesArray => {
-    const universities = getAllUniversities(coursesArray);
-
-    return res.status(200).json(universities);
-  })
-  .catch(err => res.status(400).json(err));
-  
+      return res.status(200).json(universities);
+    })
+    .catch((err) => res.status(400).json(err));
 });
 
 function getAllUniversities(courseObjects) {
-  const universityNames = courseObjects.map(courseObject => {
-      return courseObject.universityName;
-  })
+  const universityNames = courseObjects.map((courseObject) => {
+    return courseObject.universityName;
+  });
   const universitiesSet = new Set(universityNames);
   return Array.from(universitiesSet);
 }

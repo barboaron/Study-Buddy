@@ -4,20 +4,132 @@ import FloatingLabel from "../Utils/floatingLabel";
 import uploadFileIcon from "../Icons/uploadFileIcon";
 import SearchCourses from "./SearchCourses";
 // import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
+import axios from "axios";
 
 export default class Admin extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      isLoading: false,
+    };
+    this.getAdminCoursesList = this.getAdminCoursesList.bind(this);
+    this.addNewCourseManually = this.addNewCourseManually.bind(this);
+    this.deleteCourse = this.deleteCourse.bind(this);
+    this.addNewCoursesByFile = this.addNewCoursesByFile.bind(this);
   }
 
-  componentDidMount() {}
+  async componentDidMount() {
+    const coursesList = await this.getAdminCoursesList();
+    this.setState({ coursesList, isLoading: true });
+  }
 
-  addNewCourses = () => {};
-  addNewCourseManually = () => {};
+  async addNewCoursesByFile(event) {
+    //need to check
+    event.preventDefault();
+
+    const file = event?.target?.elements?.myfile?.files[0];
+    let token = await localStorage.getItem("jwtToken");
+    debugger;
+    const courseDetails = {
+      jwt: token,
+      file: file,
+    };
+
+    return axios
+      .post("/api/admins/readFromCsv", courseDetails)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          alert("Courses Added successfuly!");
+          // this.setState({ coursesList: res.data });
+          return res.data; //res.data should be the coursesList
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  async addNewCourseManually(event) {
+    event.preventDefault();
+
+    const degreeName = event?.target?.elements?.degreeName?.value;
+    const courseName = event?.target?.elements?.courseName?.value;
+    let token = await localStorage.getItem("jwtToken");
+    debugger;
+    const courseDetails = {
+      jwt: token,
+      degreeName: degreeName,
+      courseName: courseName,
+    };
+
+    return axios
+      .post("/api/admins/addCourse", courseDetails)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          // this.setState({ coursesList: res.data });
+          alert("Course added successfuly!");
+          debugger; //res.data should be the coursesList
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  async deleteCourse(data) {
+    let token = await localStorage.getItem("jwtToken");
+
+    const courseDetails = {
+      jwt: token,
+      courseId: data.id,
+    };
+    debugger;
+    return axios
+      .post("/api/admins/deleteCourse", courseDetails)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          alert("Course deleted successfuly!");
+          // this.setState({ coursesList: res.data });
+          debugger; //res.data should be the coursesList
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  async getAdminCoursesList() {
+    let token = await localStorage.getItem("jwtToken");
+
+    const myToken = {
+      jwt: token,
+    };
+
+    return axios
+      .post("/api/admins/courses", myToken)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
 
   render() {
-    const userDetails = {};
+    const { coursesList, isLoading } = this.state;
+    if (!isLoading) {
+      return null;
+    }
     // const { history } = this.props;
     // isUserLoggedIn(history, "/");
     return (
@@ -30,20 +142,20 @@ export default class Admin extends Component {
 
         <div className="container emp-profile">
           <div className="profile-head">
-            <h2> Admin Panel - {userDetails.university || "MTA"}</h2>
-            <form id="addCourseManually" onSubmit={this.addNewCourseManually}>
+            <h2> Admin Panel </h2>
+            <form id="addCourse" onSubmit={this.addNewCourseManually}>
               <h4> Add Course Manually: </h4>
               <FloatingLabel
-                placeholder="Degree name"
+                placeholder="Degree Name"
                 type="text"
-                name="degree"
-                content="Degree name:"
+                name="degreeName"
+                content="Degree Name:"
                 className="addCourseLabels"
               />
               <FloatingLabel
                 placeholder="Course Name"
                 type="text"
-                name="CourseName"
+                name="courseName"
                 content="Course Name:"
                 className="addCourseLabels"
               />
@@ -51,22 +163,23 @@ export default class Admin extends Component {
                 Add Course
               </button>
             </form>
-            <form id="addCourseManually" onSubmit={this.addNewCourses}>
+            <form id="addCourse" onSubmit={this.addNewCoursesByFile}>
               <h4> Add Courses By File: </h4>
+              <button className="uploadFileBtn" type="submit">
+                {uploadFileIcon()}
+              </button>
               <input
                 id="chooseFile"
                 className="input"
                 type="file"
+                accept=".csv"
                 name="myfile"
-                multiple
               />
-              <br />
-              <br />
-              <button className="uploadFileBtn" type="submit">
-                {uploadFileIcon()}
-              </button>
             </form>
-            <SearchCourses />
+            <SearchCourses
+              coursesList={coursesList}
+              deleteCourse={this.deleteCourse}
+            />
           </div>
         </div>
       </div>
