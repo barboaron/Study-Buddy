@@ -11,6 +11,7 @@ const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
 const keys = require("./config/keys");
 //const multer = require('multer');
+const cors = require('cors');
 
 const app = express();
 // Bodyparser middleware
@@ -40,7 +41,7 @@ app.use("/api/users", users);
 app.use("/api/profiles", profiles);
 app.use("/api/courses", courses);
 app.use("/api/admins", admins);
-
+app.use(cors());
 
 
 app.get("/confirmation/:token", async (req, res) => { 

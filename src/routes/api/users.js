@@ -254,6 +254,15 @@ router.post("/isLoggedIn", (req, res) => {
   });
 });
 
+router.post("/isAdmin", (req, res) => {
+  
+  const { id } = jwt_decode(req.body.jwt);
+
+  User.findOne( {_id:id} ).then( user => {
+    return res.status(200).json( {isAdmin: user.isAdmin});
+  }).catch(err => res.status(400).json(err));
+});
+
 // router.get("/usersAndIds", isLoggedIn,  (req, res) => {
 
 //   User.find({}).then( (usersArray) => {
