@@ -25,24 +25,28 @@ export default class Admin extends Component {
 
   async addNewCoursesByFile(event) {
     //need to check
+    event.persist();
     event.preventDefault();
 
-    const file = event?.target?.elements?.myfile?.files[0];
+    const file = event?.target?.elements[1].files[0];
+    console.log(file);
+    const data = new FormData();
+    data.append("file", file);
     let token = await localStorage.getItem("jwtToken");
-    const courseDetails = {
-      jwt: token,
-      file: file,
-    };
 
     return axios
-      .post("/api/admins/readFromCsv", courseDetails)
+      .post("/api/admins/readFromCsv", data, {
+        headers: {
+          jwt: `${token}`,
+        },
+      })
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
           alert("Courses Added successfuly!");
           // this.setState({ coursesList: res.data });
-          return res.data; //res.data should be the coursesList
+          // return res.data; //res.data should be the coursesList
         }
       })
       .catch((err) => {

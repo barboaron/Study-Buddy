@@ -6,10 +6,11 @@ const keys = require("../../config/keys");
 function isLoggedIn(req, res, next) {
   
     if(!req.body.jwt) {
-        res.status(401).json("please sign in");
+        if(!req.headers['jwt'])
+            res.status(401).json("please sign in");
     }
     
-    const token = (req.body.jwt).substring(7);
+    const token = req.body.jwt ? (req.body.jwt).substring(7) : (req.headers['jwt']).substring(7);
   
     jwt.verify(token, keys.secretOrKey, function(err, decoded) {
         if (err) {
@@ -22,7 +23,7 @@ function isLoggedIn(req, res, next) {
 
 function isAdminUser(req, res, next) {
   
-    const jwt = req.body.jwt;
+    const jwt = req.body.jwt ? req.body.jwt : req.headers['jwt'];
     const { id } = jwt_decode(jwt);
 
     User.findOne({ _id: id }).then(user => {
