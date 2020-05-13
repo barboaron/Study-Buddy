@@ -98,10 +98,12 @@ export default class ChangeUserDetails extends Component {
             />
             <FloatingLabel
               placeholder={userDetails.year_of_study}
-              type="text"
+              type="number"
               name="year"
               content="Year of study:"
               defaultValue={userDetails.year_of_study}
+              minVal="1"
+              maxVal="10"
             />
             {showErrMsg ? (
               <span className="errMsg">Error. Please try again</span>

@@ -1,0 +1,33 @@
+#descriptionInput {
+  padding: 10px;
+  line-height: 1.5;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-shadow: 1px 1px 1px #999;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  margin-left: 40px;
+}
+/* 
+.descriptionLabel {
+  display: block;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+} */
+.studyGroupCreation_Btn {
+  margin-left: -20px;
+}
+
+.Checkbox {
+}
+
+.CheckboxLabel {
+  font-size: medium;
+  padding: 5px 15px;
+  margin-bottom: 10px !important;
+}
+
+.addQuestions {
+  text-align: left !important;
+  padding-left: 13%;
+}

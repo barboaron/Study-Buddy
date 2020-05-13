@@ -11,6 +11,8 @@ export default class FloatingLabel extends Component {
       Icon,
       className,
       defaultValue,
+      minVal,
+      maxVal,
     } = this.props;
     return (
       <div className={classNames("floating-label", className)}>
@@ -20,6 +22,8 @@ export default class FloatingLabel extends Component {
           type={type}
           name={name}
           defaultValue={defaultValue}
+          min={minVal}
+          max={maxVal}
         />
         <label htmlFor={name}>{content}</label>
         {Icon && (
