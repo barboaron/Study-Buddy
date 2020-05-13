@@ -45,8 +45,7 @@ export default class Admin extends Component {
           console.log("error");
         } else {
           alert("Courses Added successfuly!");
-          // this.setState({ coursesList: res.data });
-          // return res.data; //res.data should be the coursesList
+          this.setState({ coursesList: res.data });
         }
       })
       .catch((err) => {
@@ -72,9 +71,8 @@ export default class Admin extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          // this.setState({ coursesList: res.data });
           alert("Course added successfuly!");
-          //res.data should be the coursesList
+          this.setState({ coursesList: res.data });
         }
       })
       .catch((err) => {
@@ -97,8 +95,7 @@ export default class Admin extends Component {
           console.log("error");
         } else {
           alert("Course deleted successfuly!");
-          // this.setState({ coursesList: res.data });
-          //res.data should be the coursesList
+          this.setState({ coursesList: res.data });
         }
       })
       .catch((err) => {

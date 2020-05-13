@@ -22,7 +22,9 @@ class SearchCourses extends Component {
           data.degreeName
             .toLowerCase()
             .includes(this.state.search.toLowerCase()) ||
-          data.name.toLowerCase().includes(this.state.search.toLowerCase())
+          data.courseName
+            .toLowerCase()
+            .includes(this.state.search.toLowerCase())
         ) {
           return data;
         }
@@ -32,7 +34,7 @@ class SearchCourses extends Component {
         return (
           <tr>
             <td>{data.degreeName}</td>
-            <td>{data.name}</td>
+            <td>{data.courseName}</td>
             <td>
               <button onClick={() => this.props.deleteCourse(data)}>
                 Delete Course
