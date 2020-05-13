@@ -31,22 +31,21 @@ export default class Admin extends Component {
     const file = event?.target?.elements[1].files[0];
     console.log(file);
     const data = new FormData();
-    data.append('file', file);
+    data.append("file", file);
     let token = await localStorage.getItem("jwtToken");
-    debugger;
 
     return axios
       .post("/api/admins/readFromCsv", data, {
-      headers: {
-        'jwt': `${token}`
-      }})
+        headers: {
+          jwt: `${token}`,
+        },
+      })
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
           alert("Courses Added successfuly!");
-          // this.setState({ coursesList: res.data });
-          return res.data; //res.data should be the coursesList
+          this.setState({ coursesList: res.data });
         }
       })
       .catch((err) => {
@@ -60,7 +59,6 @@ export default class Admin extends Component {
     const degreeName = event?.target?.elements?.degreeName?.value;
     const courseName = event?.target?.elements?.courseName?.value;
     let token = await localStorage.getItem("jwtToken");
-    debugger;
     const courseDetails = {
       jwt: token,
       degreeName: degreeName,
@@ -73,9 +71,8 @@ export default class Admin extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          // this.setState({ coursesList: res.data });
           alert("Course added successfuly!");
-          debugger; //res.data should be the coursesList
+          this.setState({ coursesList: res.data });
         }
       })
       .catch((err) => {
@@ -90,7 +87,7 @@ export default class Admin extends Component {
       jwt: token,
       courseId: data.id,
     };
-    debugger;
+
     return axios
       .post("/api/admins/deleteCourse", courseDetails)
       .then((res) => {
@@ -98,8 +95,7 @@ export default class Admin extends Component {
           console.log("error");
         } else {
           alert("Course deleted successfuly!");
-          // this.setState({ coursesList: res.data });
-          debugger; //res.data should be the coursesList
+          this.setState({ coursesList: res.data });
         }
       })
       .catch((err) => {
@@ -145,7 +141,7 @@ export default class Admin extends Component {
 
         <div className="container emp-profile">
           <div className="profile-head">
-            <h2> Admin Panel </h2>
+            <h2 className="adminPanelTitle"> Admin Panel </h2>
             <form id="addCourse" onSubmit={this.addNewCourseManually}>
               <h4> Add Course Manually: </h4>
               <FloatingLabel

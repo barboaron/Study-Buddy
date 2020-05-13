@@ -8,10 +8,8 @@ export default function DropDownSelect({ options = [], label_name, selected }) {
   const [option, setSelection] = React.useState("");
 
   const handleChange = (event) => {
-    debugger;
     setSelection(event.target.value);
   };
-  debugger;
   return (
     <FormControl className="formControl">
       <InputLabel id="demo-simple-select-label">{label_name}</InputLabel>

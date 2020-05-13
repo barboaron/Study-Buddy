@@ -52,14 +52,12 @@ export default class ChangeUserDetails extends Component {
     const myToken = {
       jwt: token,
     };
-    debugger;
     return axios
       .post("/api/profiles/allDegrees", myToken)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           return res.data;
         }
       })
@@ -100,10 +98,12 @@ export default class ChangeUserDetails extends Component {
             />
             <FloatingLabel
               placeholder={userDetails.year_of_study}
-              type="text"
+              type="number"
               name="year"
               content="Year of study:"
               defaultValue={userDetails.year_of_study}
+              minVal="1"
+              maxVal="10"
             />
             {showErrMsg ? (
               <span className="errMsg">Error. Please try again</span>
