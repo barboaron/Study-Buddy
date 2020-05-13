@@ -52,14 +52,12 @@ export default class ChangeUserDetails extends Component {
     const myToken = {
       jwt: token,
     };
-    debugger;
     return axios
       .post("/api/profiles/allDegrees", myToken)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           return res.data;
         }
       })

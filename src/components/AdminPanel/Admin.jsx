@@ -29,7 +29,6 @@ export default class Admin extends Component {
 
     const file = event?.target?.elements?.myfile?.files[0];
     let token = await localStorage.getItem("jwtToken");
-    debugger;
     const courseDetails = {
       jwt: token,
       file: file,
@@ -57,7 +56,6 @@ export default class Admin extends Component {
     const degreeName = event?.target?.elements?.degreeName?.value;
     const courseName = event?.target?.elements?.courseName?.value;
     let token = await localStorage.getItem("jwtToken");
-    debugger;
     const courseDetails = {
       jwt: token,
       degreeName: degreeName,
@@ -72,7 +70,7 @@ export default class Admin extends Component {
         } else {
           // this.setState({ coursesList: res.data });
           alert("Course added successfuly!");
-          debugger; //res.data should be the coursesList
+          //res.data should be the coursesList
         }
       })
       .catch((err) => {
@@ -87,7 +85,7 @@ export default class Admin extends Component {
       jwt: token,
       courseId: data.id,
     };
-    debugger;
+
     return axios
       .post("/api/admins/deleteCourse", courseDetails)
       .then((res) => {
@@ -96,7 +94,7 @@ export default class Admin extends Component {
         } else {
           alert("Course deleted successfuly!");
           // this.setState({ coursesList: res.data });
-          debugger; //res.data should be the coursesList
+          //res.data should be the coursesList
         }
       })
       .catch((err) => {
@@ -142,7 +140,7 @@ export default class Admin extends Component {
 
         <div className="container emp-profile">
           <div className="profile-head">
-            <h2> Admin Panel </h2>
+            <h2 className="adminPanelTitle"> Admin Panel </h2>
             <form id="addCourse" onSubmit={this.addNewCourseManually}>
               <h4> Add Course Manually: </h4>
               <FloatingLabel

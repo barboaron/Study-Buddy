@@ -33,14 +33,12 @@ export default class RegistrationForm extends Component {
       .then((res) => {
         console.log("then");
         if (res.status !== 200) {
-          debugger;
           console.log("error");
         } else {
           return res.data;
         }
       })
       .catch((err) => {
-        debugger;
         console.log("error");
       });
   }

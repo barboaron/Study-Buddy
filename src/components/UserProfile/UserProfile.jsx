@@ -86,7 +86,6 @@ export default class UserProfile extends Component {
       jwt: token,
       userId: user_id,
     };
-    debugger;
 
     return axios
       .post("/api/profiles/profile", reqData)
@@ -267,7 +266,7 @@ export default class UserProfile extends Component {
             </div>
             <div className="col-md-6">
               <div className="profile-head">
-                <h2>{fullName}</h2>
+                <h2 className="UserProfileTitle">{fullName}</h2>
                 <h5>
                   <span className="titleDetails">Degree name: </span>
                   {userDetails.degree_name || " "}

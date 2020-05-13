@@ -29,6 +29,10 @@
   margin-top: -18px;
 }
 
+.adminPanelTitle {
+  text-align: center;
+}
+
 #chooseFile {
   border-bottom: 0;
   padding: 0px;
