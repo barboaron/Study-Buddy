@@ -23,6 +23,13 @@ export default class StudyGroupCreation extends Component {
     const question3 = event?.target?.elements?.question3?.value;
     const question4 = event?.target?.elements?.question4?.value;
     const question5 = event?.target?.elements?.question5?.value;
+    const questions = [];
+    question1 && questions.push(question1);
+    question2 && questions.push(question2);
+    question3 && questions.push(question3);
+    question4 && questions.push(question4);
+    question5 && questions.push(question5);
+
 
     let token = await localStorage.getItem("jwtToken");
 
@@ -33,11 +40,7 @@ export default class StudyGroupCreation extends Component {
       description: description,
       numberOfParticipants: numberOfParticipants,
       dateAndTime: dateAndTime,
-      question1: question1,
-      question2: question2,
-      question3: question3,
-      question4: question4,
-      question5: question5,
+      questions,
     };
 
     return axios

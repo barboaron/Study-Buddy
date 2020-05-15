@@ -14,7 +14,7 @@ const Profile = require("../../models/Profile");
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public");
+    cb(null, "uploads");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -127,7 +127,8 @@ router.post("/deleteCourse", isLoggedIn, isAdminUser, (req, res) => {
           }
 
           Course.deleteOne(course)
-            .then((course) => {
+            .then((deleteInfo) => {
+              deleteCourseFromProfiles(course);
               Course.find({ universityName: userUniversity })
                 .then((coursesArray) => {
                   const returnArray = coursesArray.map((course) => {
@@ -148,6 +149,18 @@ router.post("/deleteCourse", isLoggedIn, isAdminUser, (req, res) => {
     })
     .catch((err) => res.status(400).json(err));
 });
+
+function deleteCourseFromProfiles(course) {
+  console.log(course);
+  Profile.find({university_name: course.universityName, degree_name: course.degreeName}).then(profiles => {
+    profiles.forEach(async profile => {
+      const updatedCourses = profile.courses.filter(theCourse => theCourse.id != course._id.toString() );
+      if(updatedCourses.length != profile.courses.length){
+        await Profile.update({_id:profile._id}, {courses:updatedCourses});
+      }
+    })
+  })
+}
 
 router.post("/courses", isLoggedIn, isAdminUser, async (req, res) => {
   const { id } = jwt_decode(req.body.jwt);

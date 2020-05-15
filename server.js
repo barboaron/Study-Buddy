@@ -6,11 +6,12 @@ const users = require("./src/routes/api/users");
 const profiles = require("./src/routes/api/profiles");
 const courses = require("./src/routes/api/courses");
 const admins = require("./src/routes/api/admins");
+const studyGroups = require("./src/routes/api/studyGroups");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
 const keys = require("./config/keys");
-//const multer = require('multer');
+const multer = require('multer');
 const cors = require('cors');
 
 const app = express();
@@ -41,7 +42,13 @@ app.use("/api/users", users);
 app.use("/api/profiles", profiles);
 app.use("/api/courses", courses);
 app.use("/api/admins", admins);
+app.use("/api/studyGroups", studyGroups);
 app.use(cors());
+// app.use(multer({ dest: './uploads/',
+//   rename: function (fieldname, filename) {
+//     return filename;
+//   },
+//  }).single("photo"));
 
 
 app.get("/confirmation/:token", async (req, res) => { 
@@ -57,11 +64,7 @@ app.get("/confirmation/:token", async (req, res) => {
 }
 );
 
-// app.use(multer({ dest: "./uploads/",
-//   rename: function (fieldname, filename) {
-//     return filename;
-//   },
-//  }));
+
 
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
