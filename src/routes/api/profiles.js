@@ -6,8 +6,21 @@ const Course = require("../../models/Course");
 const jwt_decode = require("jwt-decode");
 const { isLoggedIn } = require("../../authentication/auth");
 const isEmpty = require("is-empty");
-// var fs = require("fs");
-// var multer = require("multer");
+var fs = require("fs");
+var multer = require("multer");
+const { promisify } = require("util");
+const unlinkAsync = promisify(fs.unlink);
+
+ var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads");
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + "-" + file.originalname);
+    },
+  });
+  
+  var upload = multer({ storage: storage }).single("file");
 
 router.post("/editCourses", isLoggedIn, (req, res) => {
     const jwt = req.body.jwt;
@@ -21,7 +34,6 @@ router.post("/editCourses", isLoggedIn, (req, res) => {
             let coursesArray = [];
             if (!(req.body.coursesIds === undefined || req.body.coursesIds.length === 0)) {
                 const filteredCourses = courses.filter( course => {
-                    console.log(course._id);
                     return req.body.coursesIds.includes(course._id.toString());
                 });
                 coursesArray = filteredCourses.map( course => {
@@ -86,6 +98,57 @@ router.post("/profile", isLoggedIn, (req, res) => {
             }
 
             return res.status(200).json(convertedProfile);
+        };
+    })
+    .catch(err => res.status(400).json(err));
+});
+
+router.post("/profileByJWT", isLoggedIn, (req, res) => {
+    
+    const jwt = req.body.jwt;
+    const { id } = jwt_decode(jwt);
+
+    Profile.findOne({ user_id: id }).then( (profile) => {
+        if (!profile) {
+            return res.status(400).json("Profile does not exist.");
+        }  else {
+            let convertedProfile = JSON.parse(JSON.stringify(profile));
+
+            if(id === profile.user_id) {
+                convertedProfile.canEdit = true;
+            } else {
+                convertedProfile.canEdit = false;
+                delete convertedProfile.study_groups;
+            }
+
+            return res.status(200).json(convertedProfile);
+        };
+    })
+    .catch(err => res.status(400).json(err));
+});
+
+
+router.post("/changeProfilePic", isLoggedIn, (req, res) => {
+    
+    const { id } = jwt_decode(req.headers["jwt"]);
+
+    upload(req, res, async function (err) {
+        if (err instanceof multer.MulterError) {
+          return res.status(500).json(err);
+        } else if (err) {
+          return res.status(500).json(err);
+        }
+    });
+    Profile.findOne({ user_id: id }).then( async (profile) => {
+        if (!profile) {
+            return res.status(400).json("Profile does not exist.");
+        }  else {
+            let imgObject = {};
+            imgObject.data = fs.readFileSync(req.file.path);
+            imgObject.contentType = 'image/png';
+            const updatedProfile = await Profile.update({user_id:id}, {img:imgObject} );
+            await unlinkAsync(req.file.path);
+            return res.status(200).json(imgObject);
         };
     })
     .catch(err => res.status(400).json(err));

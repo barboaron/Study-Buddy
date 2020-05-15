@@ -227,6 +227,20 @@ export default class UserProfile extends Component {
     this.setState({ isEditProfile: !isEditProfile, userDetails, currTab: 0 });
   };
 
+  arrayBufferToBase64 = (buffer) => {
+    var binary = '';
+    var bytes = [].slice.call(new Uint8Array(buffer));
+    bytes.forEach((b) => binary += String.fromCharCode(b));
+    return window.btoa(binary);
+};
+
+  createProfileImgSrc = (buffer) => {
+          let base64Flag = 'data:image/*;base64,';
+          let imageStr = this.arrayBufferToBase64(buffer);
+          const imageSource = base64Flag + imageStr; 
+          return imageSource;
+  }
+
   render() {
     const {
       list,
@@ -240,6 +254,7 @@ export default class UserProfile extends Component {
       return null;
     }
     const fullName = this.createFullName(userDetails);
+    const profilePicSrc = userDetails.img ? this.createProfileImgSrc(userDetails.img.data.data) : "defaultPicUser.png";
 
     return isEditProfile ? (
       <EditProfile
@@ -259,7 +274,7 @@ export default class UserProfile extends Component {
             <div className="col-md-4">
               <div className="profile-img">
                 <img
-                  src={userDetails.profilePic || "defaultPicUser.png"}
+                  src={profilePicSrc}
                   alt=""
                 />
               </div>
