@@ -15,9 +15,7 @@ const User = require("../../models/User");
 const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");
 const Course = require("../../models/Course");
-// @route POST api/users/register
-// @desc Register user
-// @access Public
+
 router.post("/register", (req, res) => {
   // Form validation
   const { errors, isValid } = validateRegisterInput(req.body);
@@ -77,9 +75,6 @@ router.post("/register", (req, res) => {
   });
 });
 
-// @route POST api/users/login
-// @desc Login user and return JWT token
-// @access Public
 router.post("/login", (req, res) => {
   // Form validation
   const { errors, isValid } = validateLoginInput(req.body);

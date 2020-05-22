@@ -127,7 +127,6 @@ router.post("/profileByJWT", isLoggedIn, (req, res) => {
     .catch(err => res.status(400).json(err));
 });
 
-
 router.post("/changeProfilePic", isLoggedIn, (req, res) => {
     
     const { id } = jwt_decode(req.headers["jwt"]);
