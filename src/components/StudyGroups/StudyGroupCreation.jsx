@@ -17,7 +17,7 @@ export default class StudyGroupCreation extends Component {
     const description = event?.target?.elements?.description?.value;
     const numberOfParticipants =
       event?.target?.elements?.numberOfParticipants?.value;
-    const dateAndTime = event?.target?.elements?.dateandTime?.value;
+    const dateAndTime = new Date(event?.target?.elements?.dateandTime?.value);
     const question1 = event?.target?.elements?.question1?.value;
     const question2 = event?.target?.elements?.question2?.value;
     const question3 = event?.target?.elements?.question3?.value;

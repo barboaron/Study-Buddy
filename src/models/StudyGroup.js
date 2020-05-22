@@ -34,8 +34,11 @@ const StudyGroupSchema = new Schema({
     date: {
         type: Date,
         required: false
+    },
+    isFull: {
+        type: Boolean,
+        required: true,
     }
-
 });
 
 module.exports = StudyGroup = mongoose.model("studyGroups", StudyGroupSchema);
