@@ -23,38 +23,33 @@ export default class Questions extends React.Component {
     this.setState({ questions: newShareholders });
   };
 
-  handleSubmit = (evt) => {
-    const { name, questions } = this.state;
-    alert(`Incorporated: ${name} with ${questions.length} questions`);
-  };
-
   handleAddShareholder = () => {
-    this.setState({
-      questions: this.state.questions.concat([{ name: "" }]),
-    });
+    const { questions } = this.state;
+    questions.length === 4
+      ? this.setState({
+          questions: questions.concat([{ name: "" }]),
+          maxQuestionsErr: true,
+        })
+      : this.setState({
+          questions: questions.concat([{ name: "" }]),
+        });
   };
 
   handleRemoveShareholder = (idx) => () => {
     this.setState({
       questions: this.state.questions.filter((s, sidx) => idx !== sidx),
+      maxQuestionsErr: false,
     });
   };
 
   render() {
+    const { maxQuestionsErr } = this.state;
     return (
-      //   <form onSubmit={this.handleSubmit}>
-      //     <input
-      //       type="text"
-      //       placeholder="Company name, e.g. Magic Everywhere LLC"
-      //       value={this.state.name}
-      //       onChange={this.handleNameChange}
-      //     />
-
-      //     <h4>Shareholders</h4>
       <div className="questionsLabels">
         {this.state.questions.map((question, idx) => (
-          <div className="question">
+          <div className="question" key={idx}>
             <input
+              name={`Question${idx + 1}`}
               className="inputQuestion"
               type="text"
               placeholder={`Question #${idx + 1}`}
@@ -62,27 +57,25 @@ export default class Questions extends React.Component {
               onChange={this.handleShareholderNameChange(idx)}
             />
             <button
-              // type="button"
               onClick={this.handleRemoveShareholder(idx)}
               className="deleteQuestionBtn"
+              type="button"
             >
               -
             </button>
           </div>
         ))}
-        <button
-          // type="button"
-          onClick={this.handleAddShareholder}
-          className="addNewQuestionBtn"
-        >
-          Add Question
-        </button>
+        {!maxQuestionsErr && (
+          <button
+            onClick={this.handleAddShareholder}
+            disabled={maxQuestionsErr}
+            className="addNewQuestionBtn"
+            type="button"
+          >
+            Add Question
+          </button>
+        )}
       </div>
-      //     {/* <button>Incorporate</button>
-      //   </form> */}
     );
   }
 }
-
-// const rootElement = document.getElementById("root");
-// ReactDOM.render(<temp />, rootElement);

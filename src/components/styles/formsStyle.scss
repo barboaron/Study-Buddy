@@ -101,11 +101,34 @@ label {
   background: #fefefe;
   flex-direction: column;
   padding-bottom: 20px;
-  width: 300px;
+}
+
+.col1 {
+  display: block;
+  float: left;
+  line-height: 30px;
+  width: 301px;
+  height: 30px;
+  border: 0;
   & > * {
     margin-bottom: 25px !important;
   }
 }
+.col2 {
+  position: relative;
+  top: -30px;
+  display: block;
+  float: right;
+  line-height: 30px;
+  width: 299px;
+  height: 30px;
+  border: 0;
+  & > * {
+    margin-bottom: 25px !important;
+    text-align: left !important;
+  }
+}
+
 a {
   color: rgba(#000, 0.4);
 }
@@ -127,8 +150,7 @@ button {
   margin-bottom: 15px;
   -webkit-appearance: none;
   width: auto;
-  min-width: 100px;
-  border-radius: 24px;
+  border-radius: 5px !important;
   text-align: center;
   padding: 15px 40px;
   margin-top: 5px;
