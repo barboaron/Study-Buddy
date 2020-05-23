@@ -15,7 +15,7 @@
   letter-spacing: 1px;
 } */
 .studyGroupCreation_Btn {
-  margin-left: -20px;
+  margin-top: 50%;
 }
 
 .Checkbox {
@@ -28,6 +28,6 @@
 }
 
 .addQuestions {
-  text-align: left !important;
-  padding-left: 13%;
+  /* text-align: left !important;
+  padding-left: 13%; */
 }

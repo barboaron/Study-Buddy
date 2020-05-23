@@ -4,7 +4,12 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
-export default function DropDownSelect({ options = [], label_name, selected }) {
+export default function DropDownSelect({
+  options = [],
+  label_name,
+  selected,
+  name = "option",
+}) {
   const [option, setSelection] = React.useState("");
 
   const handleChange = (event) => {
@@ -17,11 +22,13 @@ export default function DropDownSelect({ options = [], label_name, selected }) {
         labelId="demo-simple-select-label"
         id="demo-simple-select"
         value={option || selected}
-        name="option"
+        name={name}
         onChange={handleChange}
       >
-        {options.map((item) => (
-          <MenuItem value={item}>{item}</MenuItem>
+        {options.map((item, index) => (
+          <MenuItem key={index} value={item}>
+            {item}
+          </MenuItem>
         ))}
       </Select>
     </FormControl>

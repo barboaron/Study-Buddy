@@ -9,20 +9,41 @@ export default class StudyGroupCreation extends Component {
   constructor(props) {
     super(props);
     this.state = { showDateAndTime: false, showAddingQuestions: false };
+    this.getGroupTypes = this.getGroupTypes.bind(this);
+    this.getMyDeatils = this.getMyDeatils.bind(this);
+    this.addNewStudyGroup = this.addNewStudyGroup.bind(this);
   }
+
+  async componentDidMount() {
+    const group_types = await this.getGroupTypes();
+    const list = await this.getMyDeatils();
+    const coursesList = {};
+    list.map((element) => (coursesList[element.name] = element.id));
+
+    this.setState({
+      coursesList,
+      possibleTypesForGroup: group_types,
+      isLoading: true,
+    });
+  }
+
   async addNewStudyGroup(event) {
+    event.persist();
     event.preventDefault();
-    const course = event?.target?.elements?.course?.value;
+
+    const { coursesList } = this.state;
+    const courseName = event?.target?.elements?.courseName?.value;
+    const courseId = coursesList[courseName];
     const groupType = event?.target?.elements?.groupType?.value;
-    const description = event?.target?.elements?.description?.value;
+    const description = event?.target?.elements?.descriptionInput?.value;
     const numberOfParticipants =
-      event?.target?.elements?.numberOfParticipants?.value;
-    const dateAndTime = new Date(event?.target?.elements?.dateandTime?.value);
-    const question1 = event?.target?.elements?.question1?.value;
-    const question2 = event?.target?.elements?.question2?.value;
-    const question3 = event?.target?.elements?.question3?.value;
-    const question4 = event?.target?.elements?.question4?.value;
-    const question5 = event?.target?.elements?.question5?.value;
+      event?.target?.elements?.maxParticipants?.value;
+    const dateAndTime = new Date(event?.target?.elements?.date?.value);
+    const question1 = event?.target?.elements?.Question1?.value;
+    const question2 = event?.target?.elements?.Question2?.value;
+    const question3 = event?.target?.elements?.Question3?.value;
+    const question4 = event?.target?.elements?.Question4?.value;
+    const question5 = event?.target?.elements?.Question5?.value;
     const questions = [];
     question1 && questions.push(question1);
     question2 && questions.push(question2);
@@ -30,26 +51,26 @@ export default class StudyGroupCreation extends Component {
     question4 && questions.push(question4);
     question5 && questions.push(question5);
 
-
     let token = await localStorage.getItem("jwtToken");
-
     const studyGroupDetails = {
       jwt: token,
-      course: course,
-      groupType: groupType,
-      description: description,
-      numberOfParticipants: numberOfParticipants,
-      dateAndTime: dateAndTime,
+      courseName,
+      courseId,
+      groupType,
+      description,
+      numberOfParticipants,
+      dateAndTime,
       questions,
     };
 
     return axios
-      .post("/api/studygroups", studyGroupDetails) //change the api path
+      .post("/api/studyGroups/create", studyGroupDetails)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
           //success
+          debugger;
         }
       })
       .catch((err) => {
@@ -62,14 +83,13 @@ export default class StudyGroupCreation extends Component {
     const reqData = {
       jwt: token,
     };
-
     return axios
-      .post("/api/users/getMyDeatils", reqData) //change the api path
+      .post("/api/profiles/profileByJWT", reqData)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          return res.data;
+          return res.data.courses;
         }
       })
       .catch((err) => {
@@ -84,7 +104,7 @@ export default class StudyGroupCreation extends Component {
     };
 
     return axios
-      .post("/api/studygroups/getGroupTypes", reqData) //change the api path
+      .post("/api/studyGroups/types", reqData)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
@@ -106,15 +126,19 @@ export default class StudyGroupCreation extends Component {
     const { showAddingQuestions } = this.state;
     this.setState({ showAddingQuestions: !showAddingQuestions });
   };
+
   render() {
     const {
       possibleTypesForGroup,
-      userDetails,
+      coursesList,
       showDateAndTime,
       showAddingQuestions,
+      isLoading,
     } = this.state;
-    // const { userDetails, toggleEditProfile } = this.props;
-    const list = ["11", "111", "1111"];
+
+    if (!isLoading) {
+      return null;
+    }
 
     return (
       <div className="profile_user">
@@ -127,62 +151,76 @@ export default class StudyGroupCreation extends Component {
           <div className="profile-head">
             <h2>Create Study Group</h2>
           </div>
-          <form className="studyGroupCreation_Form" onSubmit={this.editProfile}>
-            <DropDownOptions
-              options={userDetails?.coursesList || list}
-              label_name="Course:"
-              selected="Choose Course..."
-            />
-            <DropDownOptions
-              options={possibleTypesForGroup}
-              label_name="Type Of Group:"
-              selected="Choose Course..."
-            />
-            <textarea
-              id="descriptionInput"
-              rows="4"
-              cols="50"
-              placeholder="Describe the group's purpose..."
-            />
-            <FloatingLabel
-              type="number"
-              name="maxParticipants"
-              content="Maximum Participants:"
-              defaultValue="2"
-              minVal="2"
-              maxVal="10"
-            />
-            <div>
-              <input
-                className="Checkbox"
-                type="checkbox"
-                name="dateCheckBox"
-                checked={showDateAndTime}
-                onChange={this.triggersShowDateAndTime}
-              />
-              <label className="CheckboxLabel" htmlFor="dateCheckBox">
-                Pick time and date
-              </label>
-              {showDateAndTime && (
-                <div className="floating-label">
-                  <input className="input" type="datetime-local" name="date" />
-                  <label htmlFor="date">When:</label>
-                </div>
-              )}
-            </div>
 
-            <div className="addQuestions">
-              <input
-                className="Checkbox"
-                type="checkbox"
-                name="questionsCheckBox"
-                checked={showAddingQuestions}
-                onChange={this.triggersShowAddingQuestions}
+          <form
+            className="studyGroupCreation_Form"
+            onSubmit={this.addNewStudyGroup}
+          >
+            <div id="i1" className="col1">
+              <DropDownOptions
+                options={Object.keys(coursesList)}
+                label_name="Course:"
+                selected="Choose Course..."
+                name="courseName"
               />
-              <label className="CheckboxLabel" htmlFor="questionsCheckBox">
-                Add questions
-              </label>
-              {showAddingQuestions && <Questions />}
+              <DropDownOptions
+                options={possibleTypesForGroup}
+                label_name="Type Of Group:"
+                selected="Choose Course..."
+                name="groupType"
+              />
+              <FloatingLabel
+                type="number"
+                name="maxParticipants"
+                content="Maximum Participants:"
+                defaultValue="2"
+                minVal="2"
+                maxVal="10"
+              />
+              <textarea
+                id="descriptionInput"
+                rows="4"
+                cols="50"
+                placeholder="Describe the group's purpose..."
+              />
+            </div>
+            <div id="i2" className="col2">
+              <div>
+                <input
+                  className="Checkbox"
+                  type="checkbox"
+                  name="dateCheckBox"
+                  checked={showDateAndTime}
+                  onChange={this.triggersShowDateAndTime}
+                />
+                <label className="CheckboxLabel" htmlFor="dateCheckBox">
+                  Pick time and date
+                </label>
+                {showDateAndTime && (
+                  <div className="floating-label">
+                    <input
+                      className="input"
+                      type="datetime-local"
+                      name="date"
+                    />
+                    <label htmlFor="date">When:</label>
+                  </div>
+                )}
+              </div>
+
+              <div className="addQuestions">
+                <input
+                  className="Checkbox"
+                  type="checkbox"
+                  name="questionsCheckBox"
+                  checked={showAddingQuestions}
+                  onChange={this.triggersShowAddingQuestions}
+                />
+                <label className="CheckboxLabel" htmlFor="questionsCheckBox">
+                  Add questions
+                </label>
+                {showAddingQuestions && <Questions />}
+              </div>
             </div>
             <button className="studyGroupCreation_Btn" type="submit">
               Create
