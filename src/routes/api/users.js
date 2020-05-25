@@ -147,7 +147,6 @@ function sendMail(user) {
     },
     (err, token) => {
       var decoded = jwt_decode(token);
-      console.log(decoded);
       const mailOptions = {
         from: "studybuddynoreply@gmail.com",
         to: user.email,

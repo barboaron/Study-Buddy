@@ -13,6 +13,19 @@ const User = require("./src/models/User");
 const keys = require("./config/keys");
 const multer = require('multer');
 const cors = require('cors');
+const io = require('socket.io')(5500);
+
+
+io.on('connection', socket => {
+  socket.on('disconnect', async () => {
+    await User.updateOne({socketId: socket.id}, {socketId:null});
+  });
+  socket.on('new-user', async data => {
+    const {id} = jwt_decode(data.jwt);
+    await User.updateOne({_id: id}, {socketId:socket.id});
+  });
+  
+})
 
 const app = express();
 // Bodyparser middleware

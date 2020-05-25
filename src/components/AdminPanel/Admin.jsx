@@ -29,7 +29,6 @@ export default class Admin extends Component {
     event.preventDefault();
 
     const file = event?.target?.elements[1].files[0];
-    console.log(file);
     const data = new FormData();
     data.append("file", file);
     let token = await localStorage.getItem("jwtToken");
