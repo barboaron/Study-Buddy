@@ -18,7 +18,6 @@ export default class RegistrationPage extends Component {
   }
 
   signUpReq = (event) => {
-    console.log("in signupreq");
     event.preventDefault();
     const firstName = event?.target?.elements?.firstName?.value;
     const lastName = event?.target?.elements?.lastName?.value;

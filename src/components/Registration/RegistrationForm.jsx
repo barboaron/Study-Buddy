@@ -31,7 +31,6 @@ export default class RegistrationForm extends Component {
     return await axios
       .get("/api/users/allUniversities")
       .then((res) => {
-        console.log("then");
         if (res.status !== 200) {
           console.log("error");
         } else {
