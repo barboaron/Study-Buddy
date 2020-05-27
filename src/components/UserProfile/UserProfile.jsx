@@ -30,6 +30,12 @@ export default class UserProfile extends Component {
     this.setState({ user_id, userDetails: user_details.data, isLoading: true });
   }
 
+  updateProfilePic = (src) => {
+    const { userDetails } = this.state;
+    userDetails.img = src;
+    this.setState({ userDetails });
+  };
+
   handleChange = (_, newValue) => {
     let isEditCourses,
       list = [];
@@ -227,20 +233,6 @@ export default class UserProfile extends Component {
     this.setState({ isEditProfile: !isEditProfile, userDetails, currTab: 0 });
   };
 
-  arrayBufferToBase64 = (buffer) => {
-    var binary = '';
-    var bytes = [].slice.call(new Uint8Array(buffer));
-    bytes.forEach((b) => binary += String.fromCharCode(b));
-    return window.btoa(binary);
-};
-
-  createProfileImgSrc = (buffer) => {
-          let base64Flag = 'data:image/*;base64,';
-          let imageStr = this.arrayBufferToBase64(buffer);
-          const imageSource = base64Flag + imageStr; 
-          return imageSource;
-  }
-
   render() {
     const {
       list,
@@ -250,17 +242,19 @@ export default class UserProfile extends Component {
       isEditProfile,
       isEditCourses,
     } = this.state;
+
     if (!isLoading) {
       return null;
     }
+
     const fullName = this.createFullName(userDetails);
-    const profilePicSrc = userDetails.img ? this.createProfileImgSrc(userDetails.img.data.data) : "defaultPicUser.png";
 
     return isEditProfile ? (
       <EditProfile
         fullName={fullName}
         userDetails={userDetails}
         toggleEditProfile={this.toggleEditProfile}
+        updateProfilePic={this.updateProfilePic}
       />
     ) : (
       <div className="profile_user">
@@ -273,10 +267,7 @@ export default class UserProfile extends Component {
           <div className="row">
             <div className="col-md-4">
               <div className="profile-img">
-                <img
-                  src={profilePicSrc}
-                  alt=""
-                />
+                <img src={userDetails.img || "defaultPicUser.png"} alt="" />
               </div>
             </div>
             <div className="col-md-6">
