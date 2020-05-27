@@ -85,7 +85,7 @@ export default class ChangeUserDetails extends Component {
     return (
       <div>
         {showSucceedMsg ? (
-          <span className="msgPasswodSuccess">
+          <span className="msgSuccess">
             Details updated successfully!
             <br />
           </span>
