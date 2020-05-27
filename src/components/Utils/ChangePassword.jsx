@@ -51,7 +51,7 @@ export default class ChangePassword extends Component {
     return (
       <div className="floating-label">
         {showSucceedMsg ? (
-          <span className="msgPasswodSuccess">
+          <span className="msgSuccess">
             Password changed successfully!
             <br />
           </span>

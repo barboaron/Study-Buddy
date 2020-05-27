@@ -3,22 +3,7 @@ import axios from "axios";
 import "../styles/userProfileStyle.css";
 
 export default class ProfileImg extends Component {
-
-  arrayBufferToBase64 = (buffer) => {
-    var binary = '';
-    var bytes = [].slice.call(new Uint8Array(buffer));
-    bytes.forEach((b) => binary += String.fromCharCode(b));
-    return window.btoa(binary);
-};
-
-createProfileImgSrc = (buffer) => {
-  let base64Flag = 'data:image/*;base64,';
-  let imageStr = this.arrayBufferToBase64(buffer);
-  const imageSource = base64Flag + imageStr; 
-  return imageSource;
-}
-
-   changeProfilePic = async (event) => {
+  changeProfilePic = async (event) => {
     //need to check
     event.persist();
     event.preventDefault();
@@ -38,25 +23,21 @@ createProfileImgSrc = (buffer) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          let base64Flag = 'data:image/*;base64,';
-          let imageStr = this.arrayBufferToBase64(res.data.data.data);
-          const imageSource = base64Flag + imageStr; //this is the image src you need to set!
-          alert("Profile picture changed successfully!");
+          const imageSource = res.data;
+          this.props.updateProfilePic(imageSource);
         }
       })
       .catch((err) => {
         console.log(err);
       });
-  }
-
-
+  };
 
   render() {
     const { userDetails, hideChangePic } = this.props;
-    const profilePicSrc = userDetails.img ? this.createProfileImgSrc(userDetails.img.data.data) : "defaultPicUser.png";
+
     return (
       <div className="profile-img">
-        <img src={ profilePicSrc} alt="" />
+        <img src={userDetails.img || "defaultPicUser.png"} alt="" />
         {!hideChangePic && (
           <div className="file btn btn-lg btn-primary">
             Change Photo

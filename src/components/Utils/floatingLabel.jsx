@@ -13,6 +13,7 @@ export default class FloatingLabel extends Component {
       defaultValue,
       minVal,
       maxVal,
+      isRequired,
     } = this.props;
     return (
       <div className={classNames("floating-label", className)}>
@@ -24,6 +25,7 @@ export default class FloatingLabel extends Component {
           defaultValue={defaultValue}
           min={minVal}
           max={maxVal}
+          required={isRequired}
         />
         <label htmlFor={name}>{content}</label>
         {Icon && (

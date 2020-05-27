@@ -116,7 +116,6 @@ label {
 }
 .col2 {
   position: relative;
-  top: -30px;
   display: block;
   float: right;
   line-height: 30px;
@@ -265,6 +264,11 @@ $displacement: 3px;
   100% {
     transform: translateX(0px);
   }
+}
+
+.msgSuccess {
+  font-weight: 700 !important;
+  font-size: 24px;
 }
 
 .session {

@@ -16,7 +16,12 @@ export default class EditProfile extends Component {
 
   render() {
     const { showChangePassword, showErrMsg } = this.state;
-    const { userDetails, fullName, toggleEditProfile } = this.props;
+    const {
+      userDetails,
+      fullName,
+      toggleEditProfile,
+      updateProfilePic,
+    } = this.props;
 
     return (
       <div className="profile_user">
@@ -31,6 +36,7 @@ export default class EditProfile extends Component {
               <ProfileImg
                 userDetails={userDetails}
                 hideChangePic={showChangePassword}
+                updateProfilePic={updateProfilePic}
               />
             </div>
             <div className="col-md-6">
