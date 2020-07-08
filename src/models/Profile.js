@@ -36,6 +36,10 @@ const ProfileSchema = new Schema({
         contentType: String,
         required:false
     },
+    imgSrc: {
+        type: String,
+        required:false
+    },
     study_groups: {
         type: [],
         required:false

@@ -32,7 +32,7 @@ export default class UserProfile extends Component {
 
   updateProfilePic = (src) => {
     const { userDetails } = this.state;
-    userDetails.img = src;
+    userDetails.imgSrc = src;
     this.setState({ userDetails });
   };
 
@@ -267,7 +267,7 @@ export default class UserProfile extends Component {
           <div className="row">
             <div className="col-md-4">
               <div className="profile-img">
-                <img src={userDetails.img || "defaultPicUser.png"} alt="" />
+                <img src={userDetails.imgSrc} alt="" />
               </div>
             </div>
             <div className="col-md-6">

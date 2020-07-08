@@ -10,6 +10,8 @@ var fs = require("fs");
 var multer = require("multer");
 const { promisify } = require("util");
 const unlinkAsync = promisify(fs.unlink);
+var btoa = require('btoa');
+var { defaultImgSrc } = require("./../../utils/defaults");
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -103,6 +105,9 @@ router.post("/profile", isLoggedIn, (req, res) => {
           convertedProfile.canEdit = false;
           delete convertedProfile.study_groups;
         }
+        if(!profile.imgSrc) {
+          convertedProfile.imgSrc = defaultImgSrc;
+        }
 
         return res.status(200).json(convertedProfile);
       }
@@ -134,19 +139,19 @@ router.post("/profileByJWT", isLoggedIn, (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
-// function arrayBufferToBase64(buffer) {
-//   var binary = "";
-//   var bytes = [].slice.call(new Uint8Array(buffer));
-//   bytes.forEach((b) => (binary += String.fromCharCode(b)));
-//   return window.btoa(binary);
-// }
+function arrayBufferToBase64(buffer) {
+  var binary = "";
+  var bytes = [].slice.call(new Uint8Array(buffer));
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return btoa(binary);
+}
 
-// function createProfileImgSrc(buffer) {
-//   let base64Flag = "data:image/*;base64,";
-//   let imageStr = arrayBufferToBase64(buffer);
-//   const imageSource = base64Flag + imageStr;
-//   return imageSource;
-// }
+function createProfileImgSrc(buffer) {
+  let base64Flag = "data:image/*;base64,";
+  let imageStr = arrayBufferToBase64(buffer);
+  const imageSource = base64Flag + imageStr;
+  return imageSource;
+}
 
 router.post("/changeProfilePic", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.headers["jwt"]);
@@ -166,19 +171,12 @@ router.post("/changeProfilePic", isLoggedIn, (req, res) => {
       } else {
         let imgObject = {};
         imgObject.data = fs.readFileSync(req.file.path);
+
         imgObject.contentType = "image/png";
-
-        // const imageSource = createProfileImgSrc(imgObject.data);
-        // await Profile.update({ user_id: id }, { img: imageSource });
-        // await unlinkAsync(req.file.path);
-        // return res.status(200).json(imageSource);
-
-        const updatedProfile = await Profile.update(
-          { user_id: id },
-          { img: imgObject }
-        );
+        const imageSource = createProfileImgSrc(imgObject.data);
+        await Profile.update({ user_id: id }, {img: imgObject, imgSrc: imageSource});
         await unlinkAsync(req.file.path);
-        return res.status(200).json(imgObject);
+        return res.status(200).json(imageSource);
       }
     })
     .catch((err) => res.status(400).json(err));
