@@ -37,7 +37,7 @@ export default class ProfileImg extends Component {
 
     return (
       <div className="profile-img">
-        <img src={userDetails.img || "defaultPicUser.png"} alt="" />
+        <img src={userDetails.imgSrc} alt="" />
         {!hideChangePic && (
           <div className="file btn btn-lg btn-primary">
             Change Photo
