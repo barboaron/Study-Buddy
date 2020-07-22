@@ -68,14 +68,16 @@ router.post("/", isLoggedIn, (req, res) => {
                         .map( course => course.id.toString())
                         .includes(studyGroup.courseId.toString());   
             });
-            if(req.body.filters.courseName) 
+            if(req.body.filters) {
+                if(req.body.filters.courseName) 
                 filteredStudyGroups = filterByCourseName(filteredStudyGroups, req.body.filters.courseName);
-            if(req.body.filters.groupType) 
-                filteredStudyGroups = filterByGroupType(filteredStudyGroups, req.body.filters.groupType);
-            if(req.body.filters.date) 
-                filteredStudyGroups = filterByDate(filteredStudyGroups, req.body.filters.date);
-            if(req.body.filters.numOfParticipant) 
-                filteredStudyGroups = filterByNumOfParticipant(filteredStudyGroups, req.body.filters.numOfParticipant);
+                if(req.body.filters.groupType) 
+                    filteredStudyGroups = filterByGroupType(filteredStudyGroups, req.body.filters.groupType);
+                if(req.body.filters.date) 
+                    filteredStudyGroups = filterByDate(filteredStudyGroups, req.body.filters.date);
+                if(req.body.filters.numOfParticipant) 
+                    filteredStudyGroups = filterByNumOfParticipant(filteredStudyGroups, req.body.filters.numOfParticipant);
+            }
             const paginatedData = filteredStudyGroups
                 .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
             const hasMoreGroups = (filteredStudyGroups.length / PAGE_SIZE) - page > 0;
