@@ -1,0 +1,18 @@
+.mainPage_container {
+  max-width: 1400px !important;
+  padding: 1% !important;
+}
+
+.header_container {
+  height: 25%;
+  position: relative;
+}
+
+.columns_container {
+  height: 75%;
+  overflow: scroll;
+}
+.mainPageLogo {
+  height: auto;
+  margin-top: -16px;
+}

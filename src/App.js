@@ -1,10 +1,10 @@
 import React from "react";
 import LoginPage from "./components/Login/LoginPage";
-import MainPage from "./components/MainPage";
+import MainPage from "./components/Main/MainPage";
 import RegistrationPage from "./components/Registration/RegistrationPage";
 import UserProfile from "./components/UserProfile/UserProfile";
 import StudyGroupCreation from "./components/StudyGroups/StudyGroupCreation";
-import Header from "./components/Header";
+// import Header from "./components/Header";
 // import EditProfile from "./components/UserProfile/EditProfile";
 import Admin from "./components/AdminPanel/Admin";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
