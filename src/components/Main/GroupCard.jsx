@@ -3,14 +3,23 @@ import Card from "react-bootstrap/Card";
 
 export default class GroupCard extends Component {
   render() {
-    const { groupName, courseName, typeOfGroup, description } = this.props;
+    const {
+      creatorName,
+      courseName,
+      groupType,
+      description,
+      groupName,
+    } = this.props;
 
     return (
       <Card style={{ width: "18rem" }}>
         <Card.Body>
-          <Card.Title>{groupName || "Study Group"}</Card.Title>
+          <Card.Title>{groupName || "Group Name"}</Card.Title>
           <Card.Subtitle className="mb-2 text-muted">
-            {(courseName || "Complexity") + " - " + (typeOfGroup || "Homework")}
+            {(courseName || "Complexity") + "- " + (groupType || "Homework")}
+          </Card.Subtitle>
+          <Card.Subtitle className="mb-2 text-muted">
+            {(creatorName || "Bar Boaron") + "'s Group"}
           </Card.Subtitle>
           <Card.Text>
             {description ||

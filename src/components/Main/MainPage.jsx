@@ -1,15 +1,10 @@
 import React, { Component } from "react";
 import GroupCard from "./GroupCard";
 import CardColumns from "react-bootstrap/CardColumns";
-import openSocket from "socket.io-client";
 import axios from "axios";
+import Filters from "./FiltersBar";
 import "../styles/mainPageStyles.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-const socket = openSocket("http://localhost:5500");
-
-const jwt =
-  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlYTk0Y2MxZThlNmFlMDVhMGE3Mjk5NCIsIm5hbWUiOiJJdGFpIEZhcmJlciIsImlhdCI6MTU5MDM5OTM5NywiZXhwIjoxNTkwNDIwOTk3fQ.FMNrntOF84UTPHc9lVCcJE0dsk1qoxCwwQ2DPKWAi5U"; //get jwt from somewhere
 
 export default class MainPage extends Component {
   constructor(props) {
@@ -19,39 +14,46 @@ export default class MainPage extends Component {
       groupsList: [],
       currFilter: {},
       page: 1,
+      hasNextPage: true,
     };
+    this.getStudyGroups = this.getStudyGroups.bind(this);
   }
 
   async componentDidMount() {
-    socket.emit("new-user", { jwt });
-    const groupsList = await this.getStudyGroups();
-    debugger;
-    this.setState({ groupsList });
+    await this.getStudyGroups();
   }
 
-  componentWillUnmount() {
-    socket.emit("disconnect");
-    socket.disconnect(true);
-  }
+  // async componentDidUpdate(prevState) {
+  //   if (prevState.currFilter !== this.state.currFilter)
+  //     await this.getStudyGroups(true);
+  // }
 
-  async getStudyGroups() {
+  async getStudyGroups(filter, isNewFilter) {
     const { currFilter, page } = this.state;
     let token = await localStorage.getItem("jwtToken");
-    debugger;
+    let currPage = isNewFilter ? 1 : page;
+
     const studyGroupsFilters = {
       jwt: token,
-      page,
-      filters: currFilter,
+      page: currPage,
+      filters: filter || currFilter,
     };
-
+    debugger;
     return axios
       .post("/api/studyGroups/", studyGroupsFilters)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
-          return res;
+          if (res.data.hasNextPage) {
+            currPage++;
+          }
+          this.setState({
+            groupsList: res.data.studyGroups,
+            hasNextPage: res.data.hasNextPage,
+            page: currPage,
+            currFilter: filter || currFilter,
+          });
         }
       })
       .catch((err) => {
@@ -59,7 +61,30 @@ export default class MainPage extends Component {
       });
   }
 
+  onFilterBy = (event) => {
+    const courseName = event?.target?.elements?.courseName?.value;
+    const groupType = event?.target?.elements?.groupType?.value;
+    const date = event?.target?.elements?.date?.value;
+    const numOfParticipant = event?.target?.elements?.maxParticipants?.value;
+    const filter = {
+      courseName,
+      groupType,
+      date,
+      numOfParticipant,
+    };
+    this.getStudyGroups(filter, true);
+    // this.setState({
+    //   currFilter: {
+    //     courseName,
+    //     groupType,
+    //     date,
+    //     numOfParticipant,
+    //   },
+    // });
+  };
+
   render() {
+    const { groupsList } = this.state;
     return (
       <div className="profile_user">
         <link
@@ -74,18 +99,19 @@ export default class MainPage extends Component {
               src="logoStudyBuddy_Horizontal.png"
               alt="Study-Buddy"
             />
+            <Filters onFilterBy={this.onFilterBy} />
           </div>
           <div className="columns_container">
             <CardColumns>
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
-              <GroupCard />
+              {groupsList.map((group) => (
+                <GroupCard
+                  groupType={group.groupType}
+                  description={group.description}
+                  courseName={group.courseName}
+                  creatorName={group.creatorName}
+                  groupName={group.groupName}
+                />
+              ))}
             </CardColumns>
           </div>
         </div>
