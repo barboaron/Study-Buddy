@@ -8,6 +8,7 @@ export default function DropDownSelect({
   options = [],
   label_name,
   selected,
+  data_id,
   name = "option",
 }) {
   const [option, setSelection] = React.useState("");
@@ -15,12 +16,13 @@ export default function DropDownSelect({
   const handleChange = (event) => {
     setSelection(event.target.value);
   };
+
   return (
     <FormControl className="formControl">
-      <InputLabel id="demo-simple-select-label">{label_name}</InputLabel>
+      <InputLabel id="simple-select-label">{label_name}</InputLabel>
       <Select
-        labelId="demo-simple-select-label"
-        id="demo-simple-select"
+        labelId="simple-select-label"
+        id={data_id || "simple-select"}
         value={option || selected}
         name={name}
         onChange={handleChange}

@@ -2,7 +2,7 @@ import React from "react";
 
 const EmailIcon = (props) => (
   <svg
-    enable-background="new 0 0 100 100"
+    enableBackground="new 0 0 100 100"
     version="1.1"
     viewBox="0 0 100 100"
     {...props}
