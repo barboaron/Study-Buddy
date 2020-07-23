@@ -66,40 +66,73 @@ export default class Filters extends Component {
       });
   }
 
+  clearAllFilter = (e) => {
+    document.getElementById("filter_Form").reset();
+    document.getElementById("courseNameDropdown").textContent = "";
+    document.getElementById("groupTypeDropdown").textContent = "";
+    this.props.onFilterBy({});
+  };
+
+  onFilterBy = (event) => {
+    event.preventDefault();
+    const courseName = event?.target?.elements?.courseName?.value;
+    const groupType = event?.target?.elements?.groupType?.value;
+    const date = event?.target?.elements?.date?.value;
+    const numOfParticipant = event?.target?.elements?.maxParticipants?.value;
+    const filter = {
+      courseName,
+      groupType,
+      date,
+      numOfParticipant,
+    };
+    this.props.onFilterBy(filter);
+  };
+
   render() {
     const { possibleTypesForGroup, coursesList, isLoading } = this.state;
     if (!isLoading) {
       return null;
     }
     return (
-      <form className="filter_Form" onSubmit={this.props.onFilterBy}>
-        <DropDownOptions
-          options={Object.keys(coursesList)}
-          label_name="Course:"
-          name="courseName"
-        />
-        <DropDownOptions
-          options={possibleTypesForGroup}
-          label_name="Type Of Group:"
-          name="groupType"
-        />
-        <FloatingLabel
-          type="number"
-          name="maxParticipants"
-          content="Maximum Participants:"
-          placeholder="Maximum Participants (2-10)"
-          minVal="2"
-          maxVal="10"
-        />
-        <div className="floating-label">
-          <input className="input" type="datetime-local" name="date" />
-          <label htmlFor="date">When (Date & Time):</label>
-        </div>
+      <div className="filter_wrapper">
+        <span className="clearAll" onClick={this.clearAllFilter}>
+          Clear All Filters
+        </span>
+        <form
+          id={"filter_Form"}
+          className="filter_Form"
+          onSubmit={this.onFilterBy}
+        >
+          <DropDownOptions
+            options={Object.keys(coursesList)}
+            label_name="Course:"
+            name="courseName"
+            data_id="courseNameDropdown"
+          />
+          <DropDownOptions
+            options={possibleTypesForGroup}
+            label_name="Type Of Group:"
+            name="groupType"
+            data_id="groupTypeDropdown"
+          />
+          <FloatingLabel
+            type="number"
+            name="maxParticipants"
+            content="Maximum Participants:"
+            placeholder="Maximum Participants (2-10)"
+            minVal="2"
+            maxVal="10"
+          />
+          <div className="floating-label">
+            <input className="input" type="datetime-local" name="date" />
+            <label htmlFor="date">When (Date & Time):</label>
+          </div>
 
-        <button className="filter_Btn" type="submit">
-          <FilterIcon />
-        </button>
-      </form>
+          <button className="filter_Btn" type="submit">
+            <FilterIcon />
+          </button>
+        </form>
+      </div>
     );
   }
 }

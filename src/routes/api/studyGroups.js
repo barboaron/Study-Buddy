@@ -29,12 +29,14 @@ router.post("/create", isLoggedIn, (req, res) => {
     participants,
     courseName: req.body.courseName,
     courseId: req.body.courseId,
+    groupName: req.body.groupName,
     groupType: req.body.groupType,
     description: req.body.description,
     maxParticipants: req.body.numberOfParticipants,
     questions: req.body.questions,
     date: req.body.dateAndTime || null,
     isFull: false,
+    creatorName: name,
   });
   newStudyGroup
     .save()
@@ -67,34 +69,20 @@ router.post("/", isLoggedIn, (req, res) => {
   Profile.findOne({ user_id: id })
     .then((profile) => {
       const courses = profile.courses;
+      let filteredRes = null;
       StudyGroup.find({ isFull: false })
         .then((studyGroups) => {
-          const filteredStudyGroups = studyGroups.filter((studyGroup) => {
+          let filteredStudyGroups = studyGroups.filter((studyGroup) => {
             return courses
               .map((course) => course.id.toString())
               .includes(studyGroup.courseId.toString());
           });
           if (req.body.filters) {
-            if (req.body.filters.courseName)
-              filteredStudyGroups = filterByCourseName(
-                filteredStudyGroups,
-                req.body.filters.courseName
-              );
-            if (req.body.filters.groupType)
-              filteredStudyGroups = filterByGroupType(
-                filteredStudyGroups,
-                req.body.filters.groupType
-              );
-            if (req.body.filters.date)
-              filteredStudyGroups = filterByDate(
-                filteredStudyGroups,
-                req.body.filters.date
-              );
-            if (req.body.filters.numOfParticipant)
-              filteredStudyGroups = filterByNumOfParticipant(
-                filteredStudyGroups,
-                req.body.filters.numOfParticipant
-              );
+            filteredStudyGroups = filterStudyGroup(
+              filteredStudyGroups,
+              req.body.filters
+            );
+            console.log(filteredStudyGroups);
           }
           const paginatedData = filteredStudyGroups.slice(
             (page - 1) * PAGE_SIZE,
@@ -110,6 +98,39 @@ router.post("/", isLoggedIn, (req, res) => {
     })
     .catch((err) => res.status(400).json(err));
 });
+
+function filterStudyGroup(studyGroups, filters) {
+  let f1, f2, f3, f4;
+  let res = [...studyGroups];
+  f1 =
+    filters.courseName && filterByCourseName(studyGroups, filters.courseName);
+  f1
+    ? (f2 = filters.groupType && filterByGroupType(f1, filters.groupType))
+    : (f2 =
+        filters.groupType && filterByGroupType(studyGroups, filters.groupType));
+  f2
+    ? (f3 = filters.date && filterByDate(f2, filters.date))
+    : f1
+    ? (f3 = filters.date && filterByDate(f1, filters.date))
+    : filters.date && filterByDate(studyGroups, filters.date);
+  f3
+    ? (f4 =
+        filters.numOfParticipant &&
+        filterByNumOfParticipant(f3, filters.numOfParticipant))
+    : f2
+    ? (f4 =
+        filters.numOfParticipant &&
+        filterByNumOfParticipant(f2, filters.numOfParticipant))
+    : f1
+    ? (f4 =
+        filters.numOfParticipant &&
+        filterByNumOfParticipant(f1, filters.numOfParticipant))
+    : (f4 =
+        filters.numOfParticipant &&
+        filterByNumOfParticipant(studyGroups, filters.numOfParticipant));
+
+  return f4 || f3 || f2 || f1 || studyGroups;
+}
 
 function filterByCourseName(filteredStudyGroups, courseName) {
   return filteredStudyGroups.filter((studyGroup) => {

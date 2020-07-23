@@ -3,6 +3,7 @@ import GroupCard from "./GroupCard";
 import CardColumns from "react-bootstrap/CardColumns";
 import axios from "axios";
 import Filters from "./FiltersBar";
+import ViewDetailsPopup from "./viewDetailsPopup";
 import "../styles/mainPageStyles.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -15,28 +16,24 @@ export default class MainPage extends Component {
       currFilter: {},
       page: 1,
       hasNextPage: true,
+      showPopup: false,
     };
     this.getStudyGroups = this.getStudyGroups.bind(this);
   }
 
-  async componentDidMount() {
-    await this.getStudyGroups();
+  componentDidMount() {
+    this.getStudyGroups();
   }
 
-  // async componentDidUpdate(prevState) {
-  //   if (prevState.currFilter !== this.state.currFilter)
-  //     await this.getStudyGroups(true);
-  // }
-
-  async getStudyGroups(filter, isNewFilter) {
-    const { currFilter, page } = this.state;
+  async getStudyGroups(isNewFilter) {
+    const { currFilter, page, groupsList } = this.state;
     let token = await localStorage.getItem("jwtToken");
     let currPage = isNewFilter ? 1 : page;
 
     const studyGroupsFilters = {
       jwt: token,
       page: currPage,
-      filters: filter || currFilter,
+      filters: currFilter,
     };
     debugger;
     return axios
@@ -48,11 +45,14 @@ export default class MainPage extends Component {
           if (res.data.hasNextPage) {
             currPage++;
           }
+          const studyGroupsList = isNewFilter
+            ? res.data.studyGroups
+            : [...groupsList, ...res.data.studyGroups];
+
           this.setState({
-            groupsList: res.data.studyGroups,
+            groupsList: studyGroupsList,
             hasNextPage: res.data.hasNextPage,
             page: currPage,
-            currFilter: filter || currFilter,
           });
         }
       })
@@ -61,30 +61,37 @@ export default class MainPage extends Component {
       });
   }
 
-  onFilterBy = (event) => {
-    const courseName = event?.target?.elements?.courseName?.value;
-    const groupType = event?.target?.elements?.groupType?.value;
-    const date = event?.target?.elements?.date?.value;
-    const numOfParticipant = event?.target?.elements?.maxParticipants?.value;
-    const filter = {
-      courseName,
-      groupType,
-      date,
-      numOfParticipant,
-    };
-    this.getStudyGroups(filter, true);
-    // this.setState({
-    //   currFilter: {
-    //     courseName,
-    //     groupType,
-    //     date,
-    //     numOfParticipant,
-    //   },
-    // });
+  onFilterBy = (filter) => {
+    this.setState(
+      {
+        currFilter: filter,
+      },
+      () => this.getStudyGroups(true)
+    );
+  };
+
+  onScroll = () => {
+    const { hasNextPage } = this.state;
+    if (
+      hasNextPage &&
+      document.documentElement.scrollHeight -
+        document.documentElement.scrollTop ===
+        document.documentElement.clientHeight
+    ) {
+      this.getStudyGroups();
+    }
+  };
+
+  togglePopup = (group = {}) => {
+    this.setState({
+      showPopup: !this.state.showPopup,
+      groupForPopup: group,
+    });
   };
 
   render() {
-    const { groupsList } = this.state;
+    const { groupsList, groupForPopup } = this.state;
+    const errorMsg = "Sorry, there are no relevant results";
     return (
       <div className="profile_user">
         <link
@@ -101,19 +108,23 @@ export default class MainPage extends Component {
             />
             <Filters onFilterBy={this.onFilterBy} />
           </div>
-          <div className="columns_container">
-            <CardColumns>
-              {groupsList.map((group) => (
-                <GroupCard
-                  groupType={group.groupType}
-                  description={group.description}
-                  courseName={group.courseName}
-                  creatorName={group.creatorName}
-                  groupName={group.groupName}
-                />
-              ))}
-            </CardColumns>
+          <div className="columns_container" onScroll={this.onScroll}>
+            {groupsList.length === 0 ? (
+              <h1 className="errMsg_NoResults">{errorMsg}</h1>
+            ) : (
+              <CardColumns>
+                {groupsList.map((group) => (
+                  <GroupCard viewDetails={this.togglePopup} group={group} />
+                ))}
+              </CardColumns>
+            )}
           </div>
+          {this.state.showPopup ? (
+            <ViewDetailsPopup
+              closePopup={this.togglePopup}
+              groupForPopup={groupForPopup}
+            />
+          ) : null}
         </div>
       </div>
     );

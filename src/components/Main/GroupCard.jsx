@@ -3,13 +3,15 @@ import Card from "react-bootstrap/Card";
 
 export default class GroupCard extends Component {
   render() {
+    const { group, viewDetails } = this.props;
+
     const {
       creatorName,
       courseName,
       groupType,
       description,
       groupName,
-    } = this.props;
+    } = group;
 
     return (
       <Card style={{ width: "18rem" }}>
@@ -25,7 +27,9 @@ export default class GroupCard extends Component {
             {description ||
               "Some quick example text to build on the card title and make up the bulk of the card's content."}
           </Card.Text>
-          <Card.Link href="#">View Details</Card.Link>
+          <Card.Link href="#" onClick={() => viewDetails(group)}>
+            View Details
+          </Card.Link>
         </Card.Body>
       </Card>
     );

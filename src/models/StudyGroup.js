@@ -15,6 +15,10 @@ const StudyGroupSchema = new Schema({
         type: String,
         required: true
     },
+    groupName: {
+        type: String,
+        required: true,
+    },
     groupType: {
         type: String,
         required: true
@@ -37,6 +41,10 @@ const StudyGroupSchema = new Schema({
     },
     isFull: {
         type: Boolean,
+        required: true,
+    },
+    creatorName: {
+        type: String,
         required: true,
     }
 });
