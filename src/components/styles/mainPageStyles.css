@@ -113,3 +113,19 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.tooltip_fullName {
+  margin-left: 15px;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.tooltip_content {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.participantName {
+  font-weight: 500;
+  cursor: pointer;
+}

@@ -16,14 +16,12 @@ class ViewDetailsPopup extends React.Component {
   }
 
   async getParicipantsDetails() {
-    // need to fix
     const { participants } = this.props.groupForPopup;
-    debugger;
-    const detailsArray = await participants.map(async (user) => {
-      return await this.getUserDetails(user.id);
+    Promise.all(
+      participants.map(async (user) => await this.getUserDetails(user.id))
+    ).then((data) => {
+      this.setState({ detailsArray: data, isLoading: true });
     });
-    debugger;
-    this.setState({ detailsArray });
   }
 
   async getUserDetails(user_id) {
@@ -61,6 +59,82 @@ class ViewDetailsPopup extends React.Component {
     }
   };
 
+  getPopover = (index) => {
+    const { detailsArray } = this.state;
+
+    if (detailsArray) {
+      const fullNameStudent = this.createFullName(
+        detailsArray[index].firstName,
+        detailsArray[index].lastName
+      );
+
+      const popover = (
+        <Popover id="popover-basic">
+          <Popover.Title as="h3">
+            <img
+              width={"55px"}
+              height={"55px"}
+              src={detailsArray[index].imgSrc}
+              alt=""
+            />
+            <span className="tooltip_fullName">{fullNameStudent}</span>
+          </Popover.Title>
+          <Popover.Content>
+            <span className="tooltip_content">
+              {this.createContentForPopover({
+                fullNameStudent,
+                year: detailsArray[index].year_of_study,
+                degree_name: detailsArray[index].degree_name,
+                university_name: detailsArray[index].university_name,
+              })}
+            </span>
+          </Popover.Content>
+        </Popover>
+      );
+
+      return popover;
+    } else {
+      return null;
+    }
+  };
+
+  createFullName = (firstName, lastName) => {
+    return (
+      firstName[0].toUpperCase() +
+      firstName.substring(1) +
+      " " +
+      lastName[0].toUpperCase() +
+      lastName.substring(1)
+    );
+  };
+
+  createContentForPopover = ({
+    fullNameStudent,
+    year,
+    degree_name,
+    university_name,
+  }) => {
+    let ending;
+    if (year === 1) {
+      ending = "st";
+    } else if (year === 2) {
+      ending = "nd";
+    } else {
+      ending = "rd";
+    }
+    return (
+      fullNameStudent +
+      " is a " +
+      year +
+      ending +
+      " year " +
+      degree_name +
+      " student at " +
+      university_name +
+      ".\n"
+    );
+  };
+
   render() {
     const { groupForPopup, closePopup } = this.props;
     const {
@@ -75,19 +149,13 @@ class ViewDetailsPopup extends React.Component {
       groupName,
     } = groupForPopup;
 
-    const { showQuestions } = this.state;
+    const { showQuestions, isLoading } = this.state;
     debugger;
+    if (!isLoading) {
+      return null;
+    }
     const dateAndTime = date && new Date(date);
 
-    const popover = (
-      <Popover id="popover-basic">
-        <Popover.Title as="h3">Popover</Popover.Title>
-        <Popover.Content>
-          And here's some <strong>amazing</strong> content. It's very engaging.
-          right?
-        </Popover.Content>
-      </Popover>
-    );
     return (
       <div className="popup">
         <div className="popup_inner">
@@ -142,13 +210,13 @@ class ViewDetailsPopup extends React.Component {
                 <span className="subtitlePopup">
                   Participants ({participants.length}/{maxParticipants}):
                 </span>
-                {participants.map((elem) => (
+                {participants.map((elem, idx) => (
                   <OverlayTrigger
                     trigger="hover"
                     placement="top"
-                    overlay={popover}
+                    overlay={this.getPopover(idx)}
                   >
-                    <span> {elem.name} </span>
+                    <span className={"participantName"}> {elem.name} </span>
                   </OverlayTrigger>
                 ))}
               </div>
