@@ -37,6 +37,10 @@ const UserSchema = new Schema({
   socketId: {
     type: String,
     required: false
+  },
+  notifications: {
+    type:[],
+    required: true
   }
 });
 module.exports = User = mongoose.model("users", UserSchema);

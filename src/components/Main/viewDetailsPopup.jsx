@@ -2,6 +2,7 @@ import React from "react";
 import Popover from "react-bootstrap/Popover";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import axios from "axios";
+import { socket } from "./../Header";
 
 class ViewDetailsPopup extends React.Component {
   constructor(props) {
@@ -57,6 +58,8 @@ class ViewDetailsPopup extends React.Component {
       );
       //pass the answers to the server
     }
+    let jwt = localStorage.getItem('jwtToken');
+    socket.emit('request-join-group', {jwt, group: this.props.groupForPopup });
   };
 
   getPopover = (index) => {
