@@ -21,10 +21,20 @@ io.on('connection', socket => {
     await User.updateOne({socketId: socket.id}, {socketId:null});
   });
   socket.on('new-user', async data => {
-    const {id} = jwt_decode(data.jwt);
-    await User.updateOne({_id: id}, {socketId:socket.id});
+    if(data.jwt) {
+      const {id} = jwt_decode(data.jwt);
+      await User.updateOne({_id: id}, {socketId:socket.id});
+    }
   });
-  
+  socket.on('send-notification', id => {
+    User.findOne( {_id: id}).then( user => {
+      if(user.socketId) {
+        io.to(user.socketId).emit('message', 'for your eyes only');
+      } else {
+        //todo!
+      }
+    })
+  })
 })
 
 const app = express();
