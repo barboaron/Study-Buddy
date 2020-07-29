@@ -46,6 +46,10 @@ const StudyGroupSchema = new Schema({
     creatorName: {
         type: String,
         required: true,
+    },
+    creatorId: {
+        type: String,
+        required: true,
     }
 });
 

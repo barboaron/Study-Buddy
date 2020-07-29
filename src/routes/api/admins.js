@@ -11,6 +11,7 @@ const { promisify } = require("util");
 const unlinkAsync = promisify(fs.unlink);
 const User = require("../../models/User");
 const Profile = require("../../models/Profile");
+const Forum = require("../../models/Forum");
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -72,6 +73,20 @@ router.post("/addCourse", isLoggedIn, isAdminUser, async (req, res) => {
     if (!course) {
       return res.status(400).json("course already exist");
     }
+
+    const newForum = new Forum({
+      forumName: `${courseName} Forum`,
+      forumType: 'course',
+      universityName,
+      courseName,
+      courseId: course._id,
+      posts: [],
+    });
+
+    newForum
+        .save()
+        .then((forum) => {})
+        .catch((err) => console.log(err));
 
     Course.find({ universityName })
       .then((coursesArray) => {

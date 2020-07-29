@@ -35,6 +35,7 @@ router.post("/register", (req, res) => {
         password: req.body.password,
         confirmed: false,
         isAdmin: false,
+        notifications: [],
       });
       const newProfile = new Profile({
         firstName: req.body.firstName,

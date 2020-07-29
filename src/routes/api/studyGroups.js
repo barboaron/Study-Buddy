@@ -37,6 +37,7 @@ router.post("/create", isLoggedIn, (req, res) => {
     date: req.body.dateAndTime || null,
     isFull: false,
     creatorName: name,
+    creatorId: id,
   });
   newStudyGroup
     .save()
@@ -82,17 +83,26 @@ router.post("/", isLoggedIn, (req, res) => {
               filteredStudyGroups,
               req.body.filters
             );
-            console.log(filteredStudyGroups);
           }
           const paginatedData = filteredStudyGroups.slice(
             (page - 1) * PAGE_SIZE,
             page * PAGE_SIZE
           );
+          const resolvedData = paginatedData.map(group => {
+              let isInGroup = false;
+              group.participants.forEach(participant => {
+                  if(participant.id === id) {
+                      isInGroup = true;
+                  }
+              });
+              return {...group._doc, isInGroup};
+          });
+  
           const hasMoreGroups =
             filteredStudyGroups.length / PAGE_SIZE - page > 0;
           res
             .status(200)
-            .json({ studyGroups: paginatedData, hasNextPage: hasMoreGroups });
+            .json({ studyGroups: resolvedData, hasNextPage: hasMoreGroups });
         })
         .catch((err) => res.status(400).json(err));
     })
