@@ -42,6 +42,7 @@ io.on('connection', socket => {
           senderName: sender.firstName + ' ' + sender.lastName,
           type: groupTypes.join,
           groupId: data.group._id,
+          answers: data.answers,
         };
         await User.updateOne({ _id: receiver._id }, { notifications: receiver.notifications.concat(notification)});
         if(receiver.socketId) {

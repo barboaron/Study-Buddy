@@ -50,16 +50,17 @@ class ViewDetailsPopup extends React.Component {
   joinToGroup = () => {
     const { showQuestions } = this.state;
     const { questions } = this.props.groupForPopup;
+    let answers = null;
     if (!showQuestions) {
       this.setState({ showQuestions: true });
     } else {
-      const answers = questions.map(
+        answers = questions.map(
         (question, idx) => document.getElementById(`Q${idx}`).value
       );
       //pass the answers to the server
     }
     let jwt = localStorage.getItem('jwtToken');
-    socket.emit('request-join-group', {jwt, group: this.props.groupForPopup });
+    socket.emit('request-join-group', {jwt, group: this.props.groupForPopup, answers });
   };
 
   getPopover = (index) => {

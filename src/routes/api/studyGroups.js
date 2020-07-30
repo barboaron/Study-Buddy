@@ -45,6 +45,29 @@ router.post("/create", isLoggedIn, (req, res) => {
     .catch((err) => console.log(err));
 });
 
+router.post("/updateGroup", isLoggedIn, (req, res) => {
+  const { id, name } = jwt_decode(req.body.jwt);
+  const groupId = req.body.groupId;
+  StudyGroup.findOne({_id: groupId}).then(async studyGroup => {   
+    let isInGroup = false; 
+    studyGroup.participants.forEach(participant => {
+      if(participant.id === id) {
+        isInGroup = true;
+        if(!participant.isCreator){
+          res.status(401).json("Only group admin can update group details");
+        }
+      }
+    })
+    if(!isInGroup) res.status(401).json("User is not in the group");
+    if(req.body.updateData.maxParticipants){
+      if(req.body.updateData.maxParticipants < group.participants.length)
+        res.status(400).json("Can't set the maximum participants to less than amount of participants in group");
+    }
+
+    await StudyGroup.updateOne({_id : groupId}, req.body.updateData);
+  }).catch((err) => res.status(400).json(err));
+});
+
 function validateGroupDetails(studyGroup) {
   let errors = {};
   if (
@@ -109,9 +132,73 @@ router.post("/", isLoggedIn, (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
+router.post("/myGroups", isLoggedIn, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  StudyGroup.find({}).then(studyGroups => {
+    const myGroups = studyGroups.filter(group => {
+      return group.participants.map(participant => participant.id.toString()).includes(id.toString());
+    });
+    const resolvedData = myGroups.map(group => {
+      let isAdmin = false;
+      group.participants.forEach(participant => {
+          if(participant.id === id) {
+              if(participant.isCreator)
+                isAdmin = true;
+          }
+      });
+      return {...group._doc, isAdmin};
+  });
+     res
+    .status(200)
+    .json({ studyGroups: resolvedData});
+  }).catch((err) => res.status(400).json(err));
+})
+
+router.post("/deleteGroup", isLoggedIn, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const groupId = req.body.groupId;
+
+  StudyGroup.findOne({_id: groupId}).then(studyGroup => {   
+    let isInGroup = false; 
+    studyGroup.participants.forEach(participant => {
+      if(participant.id === id) {
+        isInGroup = true;
+        if(!participant.isCreator){
+          res.status(401).json("Only group admin can delete a group");
+        }
+      }
+    })
+    if(!isInGroup) res.status(401).json("User is not in the group");
+
+    StudyGroup.deleteOne({_id : groupId}).then(deleteInfo => {
+      res.status(200).json("group was deleted successfuly");
+    });
+  }).catch((err) => res.status(400).json(err));
+})
+
+router.post("/leaveGroup", isLoggedIn, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const groupId = req.body.groupId;
+
+  StudyGroup.findOne({_id: groupId}).then(async studyGroup => {    
+    let foundUser = false;
+    let isAdmin = false;
+    studyGroup.participants.forEach(participant => {
+      if(participant.id === id) {
+        foundUser = true;
+        isAdmin = participant.isCreator;
+      }
+    })
+    if(!foundUser) res.status(400).json("User isn't in the group");
+    if(isAdmin) res.status(400).json("Group admin can't leave the group");
+    const updatedParticipants = studyGroup.participants.filter(participant => participant.id !== id);
+
+    await StudyGroup.updateOne({_id : groupId}, {participants: updatedParticipants});
+  }).catch((err) => res.status(400).json(err));
+})
+
 function filterStudyGroup(studyGroups, filters) {
   let f1, f2, f3, f4;
-  let res = [...studyGroups];
   f1 =
     filters.courseName && filterByCourseName(studyGroups, filters.courseName);
   f1
@@ -164,16 +251,9 @@ function filterByDate(filteredStudyGroups, date) {
   });
 }
 
-function filterByNumOfParticipant(filteredStudyGroups, numOfParticipant) {
-  const filterType = numOfParticipant.filterType;
+function filterByNumOfParticipant(filteredStudyGroups, numOfParticipants) {
   return filteredStudyGroups.filter((studyGroup) => {
-    if (filterType === "lt") {
-      return studyGroup.maxParticipants < numOfParticipant.num;
-    } else if (filterType === "gt") {
-      return studyGroup.maxParticipants > numOfParticipant.num;
-    } else {
-      return studyGroup.maxParticipants === numOfParticipant.num;
-    }
+    return studyGroup.maxParticipants <= numOfParticipants;
   });
 }
 
