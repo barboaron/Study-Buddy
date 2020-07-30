@@ -49,6 +49,7 @@ class ViewDetailsPopup extends React.Component {
   joinToGroup = () => {
     const { showQuestions } = this.state;
     const { questions } = this.props.groupForPopup;
+
     let answers = [];
     if (!showQuestions) {
       this.setState({ showQuestions: true });
@@ -58,6 +59,7 @@ class ViewDetailsPopup extends React.Component {
       );
       //pass the answers to the server
     }
+
     let jwt = localStorage.getItem("jwtToken");
     socket.emit("request-join-group", {
       jwt,
