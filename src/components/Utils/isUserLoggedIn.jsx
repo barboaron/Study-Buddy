@@ -19,6 +19,7 @@ export async function isUserLoggedIn(
         } else {
           if (res.data.isLoggedIn) {
             history.push(loggedIn_path);
+            return true;
           }
         }
       })
@@ -27,5 +28,6 @@ export async function isUserLoggedIn(
       });
   } else {
     not_loggedIn_path && history.push(not_loggedIn_path);
+    return false;
   }
 }

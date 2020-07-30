@@ -23,11 +23,16 @@ export default class UserProfile extends Component {
 
   async componentDidMount() {
     const { history } = this.props;
-    isUserLoggedIn(history, "/UserProfile", "/login");
-
-    const user_id = await this.getUserID();
-    const user_details = await this.getUserDetails(user_id);
-    this.setState({ user_id, userDetails: user_details.data, isLoading: true });
+    const res = await isUserLoggedIn(history, "/UserProfile", "/login");
+    if (res) {
+      const user_id = await this.getUserID();
+      const user_details = await this.getUserDetails(user_id);
+      this.setState({
+        user_id,
+        userDetails: user_details.data,
+        isLoading: true,
+      });
+    }
   }
 
   updateProfilePic = (src) => {

@@ -1,0 +1,11 @@
+.menuLogo {
+  width: 100%;
+}
+
+.navbar-brand {
+  width: 15%;
+}
+.nav-link {
+  padding-right: 1rem !important;
+  font-weight: 500;
+}

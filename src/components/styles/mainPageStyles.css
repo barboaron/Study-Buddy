@@ -2,6 +2,7 @@
   max-width: 1400px !important;
   width: 98% !important;
   padding: 1% !important;
+  height: 83% !important;
 }
 
 .header_container {
@@ -128,4 +129,11 @@
 .participantName {
   font-weight: 500;
   cursor: pointer;
+}
+
+.mainPage_wrapper {
+  flex-direction: column;
+  background: -webkit-linear-gradient(left, #3931af, #00c6ff);
+  display: flex;
+  height: 100%;
 }

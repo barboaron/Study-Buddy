@@ -1,0 +1,29 @@
+.listOfGroups {
+  overflow: scroll;
+  border-style: solid;
+  height: max-content;
+  max-height: 70%;
+}
+
+.myGroupsBtn {
+  padding: 9px 0;
+  width: 60%;
+}
+
+.tableOfGroups {
+  height: max-content;
+  width: 100%;
+  position: relative;
+}
+
+.EditStudyGroup_Form {
+  display: inline-block;
+}
+
+.EditStudyGroup_Form > * {
+  margin-bottom: 10%;
+}
+
+.updateGroup_Btn {
+  margin-left: 20%;
+}

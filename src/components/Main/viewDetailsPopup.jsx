@@ -38,7 +38,6 @@ class ViewDetailsPopup extends React.Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           return res.data;
         }
       })
@@ -50,17 +49,23 @@ class ViewDetailsPopup extends React.Component {
   joinToGroup = () => {
     const { showQuestions } = this.state;
     const { questions } = this.props.groupForPopup;
-    let answers = null;
+
+    let answers = [];
     if (!showQuestions) {
       this.setState({ showQuestions: true });
     } else {
-        answers = questions.map(
+      answers = questions.map(
         (question, idx) => document.getElementById(`Q${idx}`).value
       );
       //pass the answers to the server
     }
-    let jwt = localStorage.getItem('jwtToken');
-    socket.emit('request-join-group', {jwt, group: this.props.groupForPopup, answers });
+
+    let jwt = localStorage.getItem("jwtToken");
+    socket.emit("request-join-group", {
+      jwt,
+      group: this.props.groupForPopup,
+      answers,
+    });
   };
 
   getPopover = (index) => {
@@ -151,10 +156,11 @@ class ViewDetailsPopup extends React.Component {
       maxParticipants,
       description,
       groupName,
+      isInGroup,
+      isFull,
     } = groupForPopup;
 
     const { showQuestions, isLoading } = this.state;
-    debugger;
     if (!isLoading) {
       return null;
     }
@@ -229,9 +235,11 @@ class ViewDetailsPopup extends React.Component {
           <button className="popupsBtn" onClick={closePopup}>
             X Close Me
           </button>
-          <button className="popupsBtn" onClick={this.joinToGroup}>
-            Join Group
-          </button>
+          {!isInGroup && !isFull ? (
+            <button className="popupsBtn" onClick={this.joinToGroup}>
+              Join Group
+            </button>
+          ) : null}
         </div>
       </div>
     );
