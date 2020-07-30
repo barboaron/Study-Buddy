@@ -3,7 +3,6 @@ import "../styles/adminStyle.css";
 import FloatingLabel from "../Utils/floatingLabel";
 import uploadFileIcon from "../Icons/uploadFileIcon";
 import SearchCourses from "./SearchCourses";
-// import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 import axios from "axios";
 
 export default class Admin extends Component {
@@ -16,11 +15,49 @@ export default class Admin extends Component {
     this.addNewCourseManually = this.addNewCourseManually.bind(this);
     this.deleteCourse = this.deleteCourse.bind(this);
     this.addNewCoursesByFile = this.addNewCoursesByFile.bind(this);
+    this.isUserLoggedInAndAdmin = this.isUserLoggedInAndAdmin.bind(this);
   }
 
   async componentDidMount() {
-    const coursesList = await this.getAdminCoursesList();
-    this.setState({ coursesList, isLoading: true });
+    const res = await this.isUserLoggedInAndAdmin();
+    if (res) {
+      const coursesList = await this.getAdminCoursesList();
+      this.setState({ coursesList, isLoading: true });
+    }
+  }
+
+  async isUserLoggedInAndAdmin() {
+    const { history } = this.props;
+    let token = await localStorage.getItem("jwtToken");
+    if (token !== null) {
+      const reqData = {
+        jwt: token,
+      };
+
+      return axios
+        .post("/api/users/isAdmin", reqData)
+        .then((res) => {
+          if (res.status !== 200) {
+            console.log("error");
+            history.push("/login");
+            return false;
+          } else {
+            if (!res.data.isAdmin) {
+              history.push("/login");
+              return false;
+            } else {
+              return true;
+            }
+          }
+        })
+        .catch((err) => {
+          history.push("/login");
+          return false;
+        });
+    } else {
+      history.push("/login");
+      return false;
+    }
   }
 
   async addNewCoursesByFile(event) {

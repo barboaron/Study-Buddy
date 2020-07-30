@@ -19,7 +19,6 @@ export default class Filters extends Component {
     const list = await this.getMyDeatils();
     const coursesList = {};
     list.map((element) => (coursesList[element.name] = element.id));
-    debugger;
     this.setState({
       coursesList,
       possibleTypesForGroup: group_types,

@@ -51,7 +51,7 @@ export default class LoginPage extends Component {
   render() {
     const { showLoginFailErr } = this.state;
     return (
-      <div>
+      <div className="registrationAndLogin_page">
         <img className="loginLogo" src="LogoStudyBuddy.png" alt="Study-Buddy" />
         <div className="session">
           <div className="leftPicture"></div>

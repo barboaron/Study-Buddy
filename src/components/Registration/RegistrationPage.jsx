@@ -55,26 +55,29 @@ export default class RegistrationPage extends Component {
   render() {
     const { isRegSucceed, errMsg } = this.state;
     return (
-      <div className="session">
-        <div className="leftPicture"></div>
-        {!isRegSucceed ? (
-          <RegistrationForm
-            signUpReq={this.signUpReq}
-            isRegSucceed={isRegSucceed}
-            errMsg={errMsg}
-          ></RegistrationForm>
-        ) : (
-          <span className="loginLabel" onClick={this.onClickLogin}>
-            A verification link has been sent to your email account Please click
-            <br />
-            on the verification link to confirm your account
-          </span>
-        )}
-        <img
-          className="signupLogo"
-          src="LogoStudyBuddy.png"
-          alt="Study-Buddy"
-        />
+      <div className="registrationAndLogin_page">
+        <div className="session">
+          <div className="leftPicture"></div>
+          {!isRegSucceed ? (
+            <RegistrationForm
+              signUpReq={this.signUpReq}
+              isRegSucceed={isRegSucceed}
+              errMsg={errMsg}
+            ></RegistrationForm>
+          ) : (
+            <span className="loginLabel" onClick={this.onClickLogin}>
+              A verification link has been sent to your email account Please
+              click
+              <br />
+              on the verification link to confirm your account
+            </span>
+          )}
+          <img
+            className="signupLogo"
+            src="LogoStudyBuddy.png"
+            alt="Study-Buddy"
+          />
+        </div>
       </div>
     );
   }
