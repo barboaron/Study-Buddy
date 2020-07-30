@@ -3,9 +3,10 @@ import GroupCard from "./GroupCard";
 import CardColumns from "react-bootstrap/CardColumns";
 import axios from "axios";
 import Filters from "./FiltersBar";
+import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
+import MenuBar from "../Utils/MenuBar";
 import ViewDetailsPopup from "./viewDetailsPopup";
 import "../styles/mainPageStyles.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 export default class MainPage extends Component {
   constructor(props) {
@@ -21,8 +22,10 @@ export default class MainPage extends Component {
     this.getStudyGroups = this.getStudyGroups.bind(this);
   }
 
-  componentDidMount() {
-    this.getStudyGroups();
+  async componentDidMount() {
+    const { history } = this.props;
+    const res = await isUserLoggedIn(history, "/", "/login");
+    res && this.getStudyGroups();
   }
 
   async getStudyGroups(isNewFilter) {
@@ -35,7 +38,6 @@ export default class MainPage extends Component {
       page: currPage,
       filters: currFilter,
     };
-    debugger;
     return axios
       .post("/api/studyGroups/", studyGroupsFilters)
       .then((res) => {
@@ -53,6 +55,7 @@ export default class MainPage extends Component {
             groupsList: studyGroupsList,
             hasNextPage: res.data.hasNextPage,
             page: currPage,
+            isLoading: true,
           });
         }
       })
@@ -90,10 +93,14 @@ export default class MainPage extends Component {
   };
 
   render() {
-    const { groupsList, groupForPopup } = this.state;
+    const { groupsList, groupForPopup, isLoading } = this.state;
     const errorMsg = "Sorry, there are no relevant results";
+    if (!isLoading) {
+      return null;
+    }
     return (
-      <div className="profile_user">
+      <div className="mainPage_wrapper">
+        <MenuBar />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"
