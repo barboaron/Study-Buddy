@@ -11,62 +11,40 @@ export default class StudyGroupCreation extends Component {
   }
 
   async updateStudyGroup(event) {
+    const { groupForEdit } = this.props;
     event.persist();
     event.preventDefault();
 
-    const { coursesList } = this.state;
     const groupName = event?.target?.elements?.groupName?.value;
-    const courseName = event?.target?.elements?.courseName?.value;
-    const courseId = coursesList[courseName];
-    const groupType = event?.target?.elements?.groupType?.value;
-    if (courseName === "" || groupType === "") {
-      this.setState({ errNotFilledCourseOrType: true });
-    } else {
-      const description = event?.target?.elements?.descriptionInput?.value;
-      const numberOfParticipants =
-        event?.target?.elements?.maxParticipants?.value;
-      const dateAndTime = new Date(event?.target?.elements?.date?.value);
-      const question1 = event?.target?.elements?.Question1?.value;
-      const question2 = event?.target?.elements?.Question2?.value;
-      const question3 = event?.target?.elements?.Question3?.value;
-      const question4 = event?.target?.elements?.Question4?.value;
-      const question5 = event?.target?.elements?.Question5?.value;
-      const questions = [];
-      question1 && questions.push(question1);
-      question2 && questions.push(question2);
-      question3 && questions.push(question3);
-      question4 && questions.push(question4);
-      question5 && questions.push(question5);
+    const description = event?.target?.elements?.descriptionInput?.value;
+    const maxParticipants = event?.target?.elements?.maxParticipants?.value;
+    const date = new Date(event?.target?.elements?.date?.value);
 
-      let token = await localStorage.getItem("jwtToken");
-      const studyGroupDetails = {
-        jwt: token,
+    let token = await localStorage.getItem("jwtToken");
+    const studyGroupDetailsUpdate = {
+      jwt: token,
+      groupId: groupForEdit._id,
+      updateData: {
         groupName,
-        courseName,
-        courseId,
-        groupType,
         description,
-        numberOfParticipants,
-        dateAndTime,
-        questions,
-      };
+        maxParticipants,
+        date,
+      },
+    };
 
-      return axios
-        .post("/api/studyGroups/create", studyGroupDetails)
-        .then((res) => {
-          if (res.status !== 200) {
-            console.log("error");
-          } else {
-            this.setState({
-              showGroupUpdatedMsg: true,
-              errNotFilledCourseOrType: false,
-            });
-          }
-        })
-        .catch((err) => {
+    return axios
+      .post("/api/studyGroups/updateGroup", studyGroupDetailsUpdate)
+      .then((res) => {
+        if (res.status !== 200) {
           console.log("error");
-        });
-    }
+        } else {
+          this.setState({ showGroupUpdatedMsg: true });
+          //   this.props.updateGroupsList(res.data.studyGroups);
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
   }
 
   backToMyGroups = () => {
@@ -90,6 +68,9 @@ export default class StudyGroupCreation extends Component {
               <br />
             </span>
             <br />
+            <button className="BackBtn" onClick={this.backToMyGroups}>
+              Back
+            </button>
           </div>
         ) : (
           <form
@@ -107,7 +88,7 @@ export default class StudyGroupCreation extends Component {
             <FloatingLabel
               type="number"
               name="maxParticipants"
-              content="Maximum Participants:"
+              content={`Maximum Participants: (Minimum ${groupForEdit.participants.length})`}
               defaultValue={groupForEdit.maxParticipants}
               minVal="2"
               maxVal="10"
@@ -117,9 +98,8 @@ export default class StudyGroupCreation extends Component {
               rows="4"
               cols="50"
               placeholder="Describe the group's purpose..."
-            >
-              {groupForEdit.description}
-            </textarea>
+              defaultValue={groupForEdit.description}
+            />
             <div className="floating-label">
               <input
                 className="input"

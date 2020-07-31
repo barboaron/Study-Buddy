@@ -9,3 +9,7 @@
   padding-right: 1rem !important;
   font-weight: 500;
 }
+
+#collasible-nav-dropdown::after {
+  display: none;
+}

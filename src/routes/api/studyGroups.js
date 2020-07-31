@@ -48,24 +48,32 @@ router.post("/create", isLoggedIn, (req, res) => {
 router.post("/updateGroup", isLoggedIn, (req, res) => {
   const { id, name } = jwt_decode(req.body.jwt);
   const groupId = req.body.groupId;
-  StudyGroup.findOne({_id: groupId}).then(async studyGroup => {   
-    let isInGroup = false; 
-    studyGroup.participants.forEach(participant => {
-      if(participant.id === id) {
-        isInGroup = true;
-        if(!participant.isCreator){
-          res.status(401).json("Only group admin can update group details");
+  StudyGroup.findOne({ _id: groupId })
+    .then(async (studyGroup) => {
+      let isInGroup = false;
+      studyGroup.participants.forEach((participant) => {
+        if (participant.id === id) {
+          isInGroup = true;
+          if (!participant.isCreator) {
+            res.status(401).json("Only group admin can update group details");
+          }
         }
+      });
+      if (!isInGroup) res.status(401).json("User is not in the group");
+      if (req.body.updateData.maxParticipants) {
+        if (
+          req.body.updateData.maxParticipants < studyGroup.participants.length
+        )
+          res
+            .status(400)
+            .json(
+              "Can't set the maximum participants to less than amount of participants in group"
+            );
       }
-    })
-    if(!isInGroup) res.status(401).json("User is not in the group");
-    if(req.body.updateData.maxParticipants){
-      if(req.body.updateData.maxParticipants < group.participants.length)
-        res.status(400).json("Can't set the maximum participants to less than amount of participants in group");
-    }
 
-    await StudyGroup.updateOne({_id : groupId}, req.body.updateData);
-  }).catch((err) => res.status(400).json(err));
+      await StudyGroup.updateOne({ _id: groupId }, req.body.updateData);
+    })
+    .catch((err) => res.status(400).json(err));
 });
 
 function validateGroupDetails(studyGroup) {
@@ -111,16 +119,16 @@ router.post("/", isLoggedIn, (req, res) => {
             (page - 1) * PAGE_SIZE,
             page * PAGE_SIZE
           );
-          const resolvedData = paginatedData.map(group => {
-              let isInGroup = false;
-              group.participants.forEach(participant => {
-                  if(participant.id === id) {
-                      isInGroup = true;
-                  }
-              });
-              return {...group._doc, isInGroup};
+          const resolvedData = paginatedData.map((group) => {
+            let isInGroup = false;
+            group.participants.forEach((participant) => {
+              if (participant.id === id) {
+                isInGroup = true;
+              }
+            });
+            return { ...group._doc, isInGroup };
           });
-  
+
           const hasMoreGroups =
             filteredStudyGroups.length / PAGE_SIZE - page > 0;
           res
@@ -134,68 +142,78 @@ router.post("/", isLoggedIn, (req, res) => {
 
 router.post("/myGroups", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
-  StudyGroup.find({}).then(studyGroups => {
-    const myGroups = studyGroups.filter(group => {
-      return group.participants.map(participant => participant.id.toString()).includes(id.toString());
-    });
-    const resolvedData = myGroups.map(group => {
-      let isAdmin = false;
-      group.participants.forEach(participant => {
-          if(participant.id === id) {
-              if(participant.isCreator)
-                isAdmin = true;
-          }
+  StudyGroup.find({})
+    .then((studyGroups) => {
+      const myGroups = studyGroups.filter((group) => {
+        return group.participants
+          .map((participant) => participant.id.toString())
+          .includes(id.toString());
       });
-      return {...group._doc, isAdmin};
-  });
-     res
-    .status(200)
-    .json({ studyGroups: resolvedData});
-  }).catch((err) => res.status(400).json(err));
-})
+      const resolvedData = myGroups.map((group) => {
+        let isAdmin = false;
+        group.participants.forEach((participant) => {
+          if (participant.id === id) {
+            if (participant.isCreator) isAdmin = true;
+          }
+        });
+        return { ...group._doc, isAdmin };
+      });
+      res.status(200).json({ studyGroups: resolvedData });
+    })
+    .catch((err) => res.status(400).json(err));
+});
 
 router.post("/deleteGroup", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
   const groupId = req.body.groupId;
 
-  StudyGroup.findOne({_id: groupId}).then(studyGroup => {   
-    let isInGroup = false; 
-    studyGroup.participants.forEach(participant => {
-      if(participant.id === id) {
-        isInGroup = true;
-        if(!participant.isCreator){
-          res.status(401).json("Only group admin can delete a group");
+  StudyGroup.findOne({ _id: groupId })
+    .then((studyGroup) => {
+      let isInGroup = false;
+      studyGroup.participants.forEach((participant) => {
+        if (participant.id === id) {
+          isInGroup = true;
+          if (!participant.isCreator) {
+            res.status(401).json("Only group admin can delete a group");
+          }
         }
-      }
-    })
-    if(!isInGroup) res.status(401).json("User is not in the group");
+      });
+      if (!isInGroup) res.status(401).json("User is not in the group");
 
-    StudyGroup.deleteOne({_id : groupId}).then(deleteInfo => {
-      res.status(200).json("group was deleted successfuly");
-    });
-  }).catch((err) => res.status(400).json(err));
-})
+      StudyGroup.deleteOne({ _id: groupId }).then((deleteInfo) => {
+        res.status(200).json("group was deleted successfuly");
+      });
+    })
+    .catch((err) => res.status(400).json(err));
+});
 
 router.post("/leaveGroup", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
   const groupId = req.body.groupId;
 
-  StudyGroup.findOne({_id: groupId}).then(async studyGroup => {    
-    let foundUser = false;
-    let isAdmin = false;
-    studyGroup.participants.forEach(participant => {
-      if(participant.id === id) {
-        foundUser = true;
-        isAdmin = participant.isCreator;
-      }
-    })
-    if(!foundUser) res.status(400).json("User isn't in the group");
-    if(isAdmin) res.status(400).json("Group admin can't leave the group");
-    const updatedParticipants = studyGroup.participants.filter(participant => participant.id !== id);
+  StudyGroup.findOne({ _id: groupId })
+    .then(async (studyGroup) => {
+      let foundUser = false;
+      let isAdmin = false;
+      studyGroup.participants.forEach((participant) => {
+        if (participant.id === id) {
+          foundUser = true;
+          isAdmin = participant.isCreator;
+        }
+      });
+      if (!foundUser) res.status(400).json("User isn't in the group");
+      if (isAdmin) res.status(400).json("Group admin can't leave the group");
+      const updatedParticipants = studyGroup.participants.filter(
+        (participant) => participant.id !== id
+      );
 
-    await StudyGroup.updateOne({_id : groupId}, {participants: updatedParticipants});
-  }).catch((err) => res.status(400).json(err));
-})
+      await StudyGroup.updateOne(
+        { _id: groupId },
+        { participants: updatedParticipants }
+      );
+    })
+    .catch((err) => res.status(400).json(err));
+});
 
 function filterStudyGroup(studyGroups, filters) {
   let f1, f2, f3, f4;
