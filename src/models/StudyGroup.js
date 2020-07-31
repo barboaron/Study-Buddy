@@ -50,6 +50,10 @@ const StudyGroupSchema = new Schema({
     creatorId: {
         type: String,
         required: true,
+    },
+    pendingUsers: {
+        type: [],
+        required: true,
     }
 });
 

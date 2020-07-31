@@ -38,7 +38,11 @@ const UserSchema = new Schema({
     type: String,
     required: false
   },
-  notifications: {
+  seenNotifications: {
+    type:[],
+    required: true
+  },
+  unseenNotifications: {
     type:[],
     required: true
   }
