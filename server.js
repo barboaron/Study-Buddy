@@ -46,8 +46,13 @@ io.on("connection", (socket) => {
         };
         await User.updateOne(
           { _id: receiver._id },
-          { notifications: receiver.notifications.concat(notification) }
+          { unseenNotifications: receiver.unseenNotifications.concat(notification) }
         );
+        await StudyGroup.updateOne(
+          { _id: data.group._id },
+          { pendingUsers: data.group.pendingUsers.concat(id)}
+        );
+
         if (receiver.socketId) {
           io.to(receiver.socketId).emit("notification", notification);
         }
@@ -67,7 +72,7 @@ io.on("connection", (socket) => {
         };
         await User.updateOne(
           { _id: receiver._id },
-          { notifications: receiver.notifications.concat(notification) }
+          { unseenNotifications: receiver.unseenNotifications.concat(notification) }
         );
         if (receiver.socketId) {
           io.to(receiver.socketId).emit("notification", notification);
@@ -82,15 +87,26 @@ io.on("connection", (socket) => {
             isCreator: false,
           });
           const isFull = participants.length === studyGroup.maxParticipants;
-          await StudyGroup.updateOne(
-            { _id: studyGroup._id },
-            { participants, isFull }
-          );
+          const pendingUsers = isFull ? [] : studyGroup.pendingUsers;
+          const seenNotifications = isFull 
+            ? removeFullGroupNotification(sender.seenNotifications, studyGroup._id)
+            : sender.seenNotifications;
+          const unseenNotifications = isFull 
+            ? removeFullGroupNotification(sender.unseenNotifications, studyGroup._id)
+            : sender.unseenNotifications;
+          await User.updateOne( { _id: sender._id }, { seenNotifications, unseenNotifications });
+          await StudyGroup.updateOne({ _id: studyGroup._id }, { participants, isFull, pendingUsers });
         });
       });
     });
   });
 });
+
+function removeFullGroupNotification(notifications, groupId) {
+  return notifications.filter( notification => {
+    return notification.groupId !== groupId || notification.type !== groupTypes.join;
+  });
+}
 
 const app = express();
 // Bodyparser middleware

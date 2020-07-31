@@ -31,11 +31,12 @@ router.post("/register", (req, res) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         universityName: req.body.universityName,
-        email: req.body.email,
+        email: req.body.email.toLowerCase(),
         password: req.body.password,
         confirmed: false,
         isAdmin: false,
-        notifications: [],
+        seenNotifications: [],
+        unseenNotifications: [],
       });
       const newProfile = new Profile({
         firstName: req.body.firstName,
@@ -83,7 +84,7 @@ router.post("/login", (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  const email = req.body.email;
+  const email = req.body.email.toLowerCase();
   const password = req.body.password;
   // Find user by email
   User.findOne({ email }).then((user) => {
@@ -286,5 +287,29 @@ function getAllUniversities(courseObjects) {
   const universitiesSet = new Set(universityNames);
   return Array.from(universitiesSet);
 }
+
+router.post("/notifications", isLoggedIn, (req, res) => {
+  const jwt = req.body.jwt;
+  const { id } = jwt_decode(jwt);
+
+  User.findOne( { _id: id }).then( user => {
+    res.status(200).json({ 
+      seenNotifications: user.seenNotifications,
+      unseenNotifications: user.unseenNotifications,
+     });
+  }).catch(err => res.status(400).json('user not found'))
+});
+
+router.post("/updateSeenNotifications", isLoggedIn, (req, res) => {
+  const jwt = req.body.jwt;
+  const { id } = jwt_decode(jwt);
+
+  User.findOne( { _id: id }).then( async user => {
+    const seenNotifications = user.seenNotifications.concat(user.unseenNotifications);
+    await User.updateOne( { _id: id }, { seenNotifications, unseenNotifications: [] });
+
+    res.status(200).json({ seenNotifications, unseenNotifications: [] });
+  }).catch(err => res.status(400).json('user not found'))
+});
 
 module.exports = router;

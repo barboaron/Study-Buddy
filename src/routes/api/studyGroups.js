@@ -38,6 +38,7 @@ router.post("/create", isLoggedIn, (req, res) => {
     isFull: false,
     creatorName: name,
     creatorId: id,
+    pendingUsers: [],
   });
   newStudyGroup
     .save()
@@ -129,12 +130,18 @@ router.post("/", isLoggedIn, (req, res) => {
           );
           const resolvedData = paginatedData.map((group) => {
             let isInGroup = false;
+            let isPending = false;
             group.participants.forEach((participant) => {
               if (participant.id === id) {
                 isInGroup = true;
               }
             });
-            return { ...group._doc, isInGroup };
+            group.pendingUsers.forEach((userId) => {
+              if (userId === id) {
+                isPending = true;
+              }
+            });
+            return { ...group._doc, isInGroup, isPending };
           });
 
           const hasMoreGroups =
