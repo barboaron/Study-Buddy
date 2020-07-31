@@ -49,10 +49,10 @@ router.post("/updateGroup", isLoggedIn, (req, res) => {
   const { id, name } = jwt_decode(req.body.jwt);
   const groupId = req.body.groupId;
   StudyGroup.findOne({ _id: groupId })
-    .then(async (studyGroup) => {
+    .then((studyGroup) => {
       let isInGroup = false;
       studyGroup.participants.forEach((participant) => {
-        if (participant.id === id) {
+        if (participant.id.toString() === id.toString()) {
           isInGroup = true;
           if (!participant.isCreator) {
             res.status(401).json("Only group admin can update group details");
@@ -71,7 +71,15 @@ router.post("/updateGroup", isLoggedIn, (req, res) => {
             );
       }
 
-      await StudyGroup.updateOne({ _id: groupId }, req.body.updateData);
+      StudyGroup.updateOne({ _id: groupId }, req.body.updateData).then(
+        (groupDet) => {
+          getMyGroups(id)
+            .then((groups) => {
+              res.status(200).json({ studyGroups: groups });
+            })
+            .catch((err) => res.status(400).json(err));
+        }
+      );
     })
     .catch((err) => res.status(400).json(err));
 });
@@ -142,26 +150,37 @@ router.post("/", isLoggedIn, (req, res) => {
 
 router.post("/myGroups", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
-  StudyGroup.find({})
+  getMyGroups(id)
+    .then((groups) => {
+      res.status(200).json({ studyGroups: groups });
+    })
+    .catch((err) => res.status(400).json(err));
+});
+
+function getMyGroups(id) {
+  let ret = StudyGroup.find({})
     .then((studyGroups) => {
       const myGroups = studyGroups.filter((group) => {
         return group.participants
           .map((participant) => participant.id.toString())
-          .includes(id.toString());
+          .includes(id);
       });
       const resolvedData = myGroups.map((group) => {
         let isAdmin = false;
         group.participants.forEach((participant) => {
-          if (participant.id === id) {
+          if (participant.id.toString() === id) {
             if (participant.isCreator) isAdmin = true;
           }
         });
         return { ...group._doc, isAdmin };
       });
-      res.status(200).json({ studyGroups: resolvedData });
+      return Promise.resolve(resolvedData);
     })
-    .catch((err) => res.status(400).json(err));
-});
+    .catch((err) => {
+      throw err;
+    });
+  return ret;
+}
 
 router.post("/deleteGroup", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
@@ -171,7 +190,7 @@ router.post("/deleteGroup", isLoggedIn, (req, res) => {
     .then((studyGroup) => {
       let isInGroup = false;
       studyGroup.participants.forEach((participant) => {
-        if (participant.id === id) {
+        if (participant.id.toString() === id) {
           isInGroup = true;
           if (!participant.isCreator) {
             res.status(401).json("Only group admin can delete a group");
@@ -181,10 +200,14 @@ router.post("/deleteGroup", isLoggedIn, (req, res) => {
       if (!isInGroup) res.status(401).json("User is not in the group");
 
       StudyGroup.deleteOne({ _id: groupId }).then((deleteInfo) => {
-        res.status(200).json("group was deleted successfuly");
+        getMyGroups(id)
+          .then((groups) => {
+            res.status(200).json({ studyGroups: groups });
+          })
+          .catch((err) => res.status(400).json(err));
       });
     })
-    .catch((err) => res.status(400).json(err));
+    .catch((err) => res.status(400).json("group does not exist"));
 });
 
 router.post("/leaveGroup", isLoggedIn, (req, res) => {
@@ -192,11 +215,11 @@ router.post("/leaveGroup", isLoggedIn, (req, res) => {
   const groupId = req.body.groupId;
 
   StudyGroup.findOne({ _id: groupId })
-    .then(async (studyGroup) => {
+    .then((studyGroup) => {
       let foundUser = false;
       let isAdmin = false;
       studyGroup.participants.forEach((participant) => {
-        if (participant.id === id) {
+        if (participant.id.toString() === id) {
           foundUser = true;
           isAdmin = participant.isCreator;
         }
@@ -207,10 +230,16 @@ router.post("/leaveGroup", isLoggedIn, (req, res) => {
         (participant) => participant.id !== id
       );
 
-      await StudyGroup.updateOne(
+      StudyGroup.updateOne(
         { _id: groupId },
         { participants: updatedParticipants }
-      );
+      ).then((groupDet) => {
+        getMyGroups(id)
+          .then((groups) => {
+            res.status(200).json({ studyGroups: groups });
+          })
+          .catch((err) => res.status(400).json(err));
+      });
     })
     .catch((err) => res.status(400).json(err));
 });

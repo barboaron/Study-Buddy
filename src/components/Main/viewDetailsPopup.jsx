@@ -66,6 +66,8 @@ class ViewDetailsPopup extends React.Component {
       group: this.props.groupForPopup,
       answers,
     });
+    alert("succeed");
+    this.props.closePopup();
   };
 
   getPopover = (index) => {

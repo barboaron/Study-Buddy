@@ -4,7 +4,7 @@ import CardColumns from "react-bootstrap/CardColumns";
 import axios from "axios";
 import Filters from "./FiltersBar";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
-import MenuBar from "../Utils/MenuBar";
+import { Header } from "../Header";
 import ViewDetailsPopup from "./viewDetailsPopup";
 import "../styles/mainPageStyles.css";
 
@@ -100,7 +100,7 @@ export default class MainPage extends Component {
     }
     return (
       <div className="mainPage_wrapper">
-        <MenuBar />
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"

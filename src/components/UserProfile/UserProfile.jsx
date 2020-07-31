@@ -4,6 +4,8 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import axios from "axios";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
+import { Header } from "../Header";
+
 import EditProfile from "./EditProfile";
 import "../styles/userProfileStyle.css";
 
@@ -13,6 +15,8 @@ export default class UserProfile extends Component {
     this.state = {
       currTab: 0,
       isEditProfile: false,
+      groups: [],
+      list: [],
     };
     this.getUserID = this.getUserID.bind(this);
     this.getUserDetails = this.getUserDetails.bind(this);
@@ -29,11 +33,14 @@ export default class UserProfile extends Component {
       const user_id = await this.getUserID();
       const user_details = await this.getUserDetails(user_id);
       const groups = await this.getMyGroups();
-      debugger;
       this.setState({
         user_id,
         userDetails: user_details.data,
         groups,
+        list:
+          groups.length !== 0
+            ? this.createListFromArray(groups, true)
+            : ["No Groups"],
         isLoading: true,
       });
     }
@@ -140,7 +147,7 @@ export default class UserProfile extends Component {
     <div className="cousrsesList">
       {array.map((elem) => (
         <div className="cousrsesList_Item">
-          {isGroups ? elem.groupName : elem.name}
+          {isGroups ? elem.groupName || elem.courseName : elem.name}
           <br />
         </div>
       ))}
@@ -287,6 +294,7 @@ export default class UserProfile extends Component {
       />
     ) : (
       <div className="profile_user">
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"
@@ -324,7 +332,7 @@ export default class UserProfile extends Component {
                     <Tab label="My Courses" />
                   </Tabs>
                 </Paper>
-                {list || this.state.groups}
+                {list}
                 {!isEditCourses && userDetails.canEdit && currTab === 1 && (
                   <button
                     className="editCoursesBtn"

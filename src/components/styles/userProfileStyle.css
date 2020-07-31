@@ -3,6 +3,7 @@
   height: 100%;
 }
 .profile_user {
+  flex-direction: column;
   background: -webkit-linear-gradient(left, #3931af, #00c6ff);
   display: flex;
   height: 100%;

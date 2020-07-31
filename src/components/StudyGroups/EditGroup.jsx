@@ -39,7 +39,7 @@ export default class StudyGroupCreation extends Component {
           console.log("error");
         } else {
           this.setState({ showGroupUpdatedMsg: true });
-          //   this.props.updateGroupsList(res.data.studyGroups);
+          this.props.updateGroupsList(res.data.studyGroups);
         }
       })
       .catch((err) => {
@@ -51,9 +51,23 @@ export default class StudyGroupCreation extends Component {
     this.props.hideEditGroup();
   };
 
+  fixDateString = (string, subString, index) => {
+    const idx = string.split(subString, index).join(subString).length;
+    return string.substring(0, idx);
+  };
+
+  getMinParticipants = () => {
+    const { participants } = this.props.groupForEdit;
+    return participants.length === 1 ? 2 : participants.length;
+  };
+
   render() {
     const { showGroupUpdatedMsg } = this.state;
     const { groupForEdit } = this.props;
+    const date = groupForEdit.date
+      ? this.fixDateString(groupForEdit.date, ":", 2)
+      : null;
+    const minParticipants = this.getMinParticipants();
 
     return (
       <>
@@ -88,9 +102,9 @@ export default class StudyGroupCreation extends Component {
             <FloatingLabel
               type="number"
               name="maxParticipants"
-              content={`Maximum Participants: (Minimum ${groupForEdit.participants.length})`}
+              content={`Maximum Participants: (Minimum ${minParticipants})`}
               defaultValue={groupForEdit.maxParticipants}
-              minVal="2"
+              minVal={minParticipants}
               maxVal="10"
             />
             <textarea
@@ -105,7 +119,7 @@ export default class StudyGroupCreation extends Component {
                 className="input"
                 type="datetime-local"
                 name="date"
-                value={groupForEdit.dateAndTime}
+                value={date}
               />
               <label htmlFor="date">When:</label>
             </div>

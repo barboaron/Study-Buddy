@@ -1,7 +1,7 @@
 /* eslint-disable array-callback-return */
 import React, { Component } from "react";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
-import MenuBar from "../Utils/MenuBar";
+import { Header } from "../Header";
 import axios from "axios";
 import EditGroup from "./EditGroup";
 import "../styles/myGroupsStyle.css";
@@ -43,7 +43,6 @@ export default class MyGroups extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           return res.data.studyGroups;
         }
       })
@@ -119,15 +118,8 @@ export default class MyGroups extends Component {
     this.setState({ myGroupsList: groups });
   };
 
-  removeGroupFromList = (groupId) => {
-    const { myGroupsList } = this.state;
-    const groups = myGroupsList.filter((group) => group._id !== groupId);
-    this.setState({ myGroupsList: groups });
-  };
-
   async deleteGroup(data) {
     let token = await localStorage.getItem("jwtToken");
-    debugger;
     const deleteGroupReq = {
       jwt: token,
       groupId: data._id,
@@ -140,7 +132,7 @@ export default class MyGroups extends Component {
           alert("Error!");
         } else {
           alert("Group Deleted Successfuly");
-          this.removeGroupFromList(data._id);
+          this.setState({ myGroupsList: res.data.studyGroups });
         }
       })
       .catch((err) => {
@@ -150,7 +142,6 @@ export default class MyGroups extends Component {
 
   async exitGroup(data) {
     let token = await localStorage.getItem("jwtToken");
-    debugger;
     const exitGroupReq = {
       jwt: token,
       groupId: data._id,
@@ -163,7 +154,7 @@ export default class MyGroups extends Component {
           alert("Error!");
         } else {
           alert("Exit Group Completed");
-          this.removeGroupFromList(data._id);
+          this.setState({ myGroupsList: res.data.studyGroups });
         }
       })
       .catch((err) => {
@@ -188,7 +179,7 @@ export default class MyGroups extends Component {
 
     return (
       <div className="mainPage_wrapper">
-        <MenuBar />
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"
