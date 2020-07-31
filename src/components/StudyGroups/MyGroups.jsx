@@ -1,7 +1,8 @@
 /* eslint-disable array-callback-return */
 import React, { Component } from "react";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
-import MenuBar from "../Utils/MenuBar";
+import { Header } from "../Header";
+import axios from "axios";
 import EditGroup from "./EditGroup";
 import "../styles/myGroupsStyle.css";
 
@@ -10,8 +11,9 @@ export default class MyGroups extends Component {
     super(props);
     this.state = {
       search: null,
+      myGroupsList: [],
     };
-    // this.getMyGroups = this.getMyGroups.bind(this);
+    this.getMyGroups = this.getMyGroups.bind(this);
   }
 
   async componentDidMount() {
@@ -27,7 +29,27 @@ export default class MyGroups extends Component {
     let keyword = event.target.value;
     this.setState({ search: keyword });
   };
-  getMyGroups = () => {};
+
+  async getMyGroups() {
+    let token = await localStorage.getItem("jwtToken");
+
+    const myStudyGroups = {
+      jwt: token,
+    };
+
+    return axios
+      .post("/api/studyGroups/myGroups", myStudyGroups)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.studyGroups;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
 
   getGroupsList = () =>
     this.state.myGroupsList
@@ -54,7 +76,7 @@ export default class MyGroups extends Component {
             <td>{data.groupType}</td>
             <td>{data.description}</td>
             <td>
-              {data.isCreator ? (
+              {data.isAdmin ? (
                 <button
                   className="myGroupsBtn"
                   onClick={() => this.deleteGroup(data)}
@@ -70,7 +92,7 @@ export default class MyGroups extends Component {
                 </button>
               )}
             </td>
-            {data.isCreator ? (
+            {data.isAdmin ? (
               <td>
                 <button
                   className="myGroupsBtn"
@@ -92,8 +114,53 @@ export default class MyGroups extends Component {
     this.setState({ edit_group: false, groupForEdit: {} });
   };
 
-  deleteGroup = () => {};
-  exitGroup = () => {};
+  updateGroupsList = (groups) => {
+    this.setState({ myGroupsList: groups });
+  };
+
+  async deleteGroup(data) {
+    let token = await localStorage.getItem("jwtToken");
+    const deleteGroupReq = {
+      jwt: token,
+      groupId: data._id,
+    };
+
+    return axios
+      .post("/api/studyGroups/deleteGroup", deleteGroupReq)
+      .then((res) => {
+        if (res.status !== 200) {
+          alert("Error!");
+        } else {
+          alert("Group Deleted Successfuly");
+          this.setState({ myGroupsList: res.data.studyGroups });
+        }
+      })
+      .catch((err) => {
+        alert("Error!");
+      });
+  }
+
+  async exitGroup(data) {
+    let token = await localStorage.getItem("jwtToken");
+    const exitGroupReq = {
+      jwt: token,
+      groupId: data._id,
+    };
+
+    return axios
+      .post("/api/studyGroups/leaveGroup", exitGroupReq)
+      .then((res) => {
+        if (res.status !== 200) {
+          alert("Error!");
+        } else {
+          alert("Exit Group Completed");
+          this.setState({ myGroupsList: res.data.studyGroups });
+        }
+      })
+      .catch((err) => {
+        alert("Error!");
+      });
+  }
 
   render() {
     const elementStyle = {
@@ -112,7 +179,7 @@ export default class MyGroups extends Component {
 
     return (
       <div className="mainPage_wrapper">
-        <MenuBar />
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"
@@ -123,6 +190,7 @@ export default class MyGroups extends Component {
             <EditGroup
               groupForEdit={groupForEdit}
               hideEditGroup={this.hideEditGroup}
+              updateGroupsList={this.updateGroupsList}
             />
           ) : (
             <>

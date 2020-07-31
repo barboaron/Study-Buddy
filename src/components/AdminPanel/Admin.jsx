@@ -3,6 +3,7 @@ import "../styles/adminStyle.css";
 import FloatingLabel from "../Utils/floatingLabel";
 import uploadFileIcon from "../Icons/uploadFileIcon";
 import SearchCourses from "./SearchCourses";
+import { Header } from "../Header";
 import axios from "axios";
 
 export default class Admin extends Component {
@@ -169,6 +170,7 @@ export default class Admin extends Component {
     // isUserLoggedIn(history, "/");
     return (
       <div className="profile_user">
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"

@@ -16,6 +16,7 @@ export async function isUserLoggedIn(
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
+          return false;
         } else {
           if (res.data.isLoggedIn) {
             history.push(loggedIn_path);
@@ -25,6 +26,7 @@ export async function isUserLoggedIn(
       })
       .catch((err) => {
         console.log("error");
+        return false;
       });
   } else {
     not_loggedIn_path && history.push(not_loggedIn_path);

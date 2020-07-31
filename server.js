@@ -13,75 +13,90 @@ const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
 const StudyGroup = require("./src/models/StudyGroup");
 const keys = require("./config/keys");
-const multer = require('multer');
-const cors = require('cors');
-const io = require('socket.io')(5500);
+const multer = require("multer");
+const cors = require("cors");
+const io = require("socket.io")(5500);
 
 const groupTypes = {
-  join: 'join-request',
-  accepted: 'accepted',
+  join: "join-request",
+  accepted: "accepted",
 };
 
-io.on('connection', socket => {
-  socket.on('disconnect', async () => {
-    await User.updateOne({socketId: socket.id}, {socketId:null});
-  });
-  socket.on('new-user', async data => {
-    if(data.jwt) {
+io.on("connection", (socket) => {
+  // socket.on('disconnect', async () => {
+  //   await User.updateOne({socketId: socket.id}, {socketId:null});
+  // });
+  socket.on("new-user", async (data) => {
+    if (data.jwt) {
       const { id } = jwt_decode(data.jwt);
-      await User.updateOne({_id: id}, {socketId:socket.id});
+      await User.updateOne({ _id: id }, { socketId: socket.id });
     }
   });
-  socket.on('request-join-group', data => {
+  socket.on("request-join-group", (data) => {
     const { id } = jwt_decode(data.jwt);
-    User.findOne( {_id:  id}).then( sender => {
-      User.findOne( {_id: data.group.creatorId}).then( async receiver => {
+    User.findOne({ _id: id }).then((sender) => {
+      User.findOne({ _id: data.group.creatorId }).then(async (receiver) => {
         let notification = {
           timeCreated: Date.now(),
           senderId: sender._id,
-          senderName: sender.firstName + ' ' + sender.lastName,
+          senderName: sender.firstName + " " + sender.lastName,
           type: groupTypes.join,
           groupId: data.group._id,
           answers: data.answers,
         };
-        await User.updateOne({ _id: receiver._id }, { notifications: receiver.notifications.concat(notification)});
-        if(receiver.socketId) {
-          io.to(receiver.socketId).emit('notification', notification);
+        await User.updateOne(
+          { _id: receiver._id },
+          { notifications: receiver.notifications.concat(notification) }
+        );
+        if (receiver.socketId) {
+          io.to(receiver.socketId).emit("notification", notification);
         }
-      })
-    })
+      });
+    });
   });
-  socket.on('join-group-approved', data => {
+  socket.on("join-group-approved", (data) => {
     const { id } = jwt_decode(data.jwt);
-    User.findOne( {_id:  id}).then( sender => {
-      User.findOne( {_id: data.approvedUserId}).then( async receiver => {
+    User.findOne({ _id: id }).then((sender) => {
+      User.findOne({ _id: data.approvedUserId }).then(async (receiver) => {
         let notification = {
           timeCreated: Date.now(),
           senderId: sender._id,
-          senderName: sender.firstName + ' ' + sender.lastName,
+          senderName: sender.firstName + " " + sender.lastName,
           type: groupTypes.accepted,
           groupId: data.groupId,
         };
-        await User.updateOne({ _id: receiver._id }, { notifications: receiver.notifications.concat(notification)});
-        if(receiver.socketId) {
-          io.to(receiver.socketId).emit('notification', notification);
+        await User.updateOne(
+          { _id: receiver._id },
+          { notifications: receiver.notifications.concat(notification) }
+        );
+        if (receiver.socketId) {
+          io.to(receiver.socketId).emit("notification", notification);
         }
-        StudyGroup.findOne( {_id: data.groupId }).then( async studyGroup => {
+        StudyGroup.findOne({ _id: data.groupId }).then(async (studyGroup) => {
           const participants = studyGroup.participants;
-          const newParticipantName = receiver.firstName + ' ' + receiver.lastName;
-          participants.push({ name: newParticipantName, id: receiver._id, isCreator: false });
+          const newParticipantName =
+            receiver.firstName + " " + receiver.lastName;
+          participants.push({
+            name: newParticipantName,
+            id: receiver._id,
+            isCreator: false,
+          });
           const isFull = participants.length === studyGroup.maxParticipants;
-          await StudyGroup.updateOne({ _id: studyGroup._id }, { participants, isFull})});
-        })
-      })
-    })
+          await StudyGroup.updateOne(
+            { _id: studyGroup._id },
+            { participants, isFull }
+          );
+        });
+      });
+    });
   });
+});
 
 const app = express();
 // Bodyparser middleware
 app.use(
   bodyParser.urlencoded({
-    extended: false
+    extended: false,
   })
 );
 app.use(bodyParser.json());
@@ -89,14 +104,11 @@ app.use(bodyParser.json());
 const db = require("./config/keys").mongoURI;
 // Connect to MongoDB
 mongoose
-  .connect(
-    db,
-    { useNewUrlParser: true, useUnifiedTopology: false }
-  )
+  .connect(db, { useNewUrlParser: true, useUnifiedTopology: false })
   .then(() => console.log("MongoDB successfully connected"))
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
-  // Passport middleware
+// Passport middleware
 app.use(passport.initialize());
 // Passport config
 require("./config/passport")(passport);
@@ -115,21 +127,16 @@ app.use(cors());
 //   },
 //  }).single("photo"));
 
-
-app.get("/confirmation/:token", async (req, res) => { 
+app.get("/confirmation/:token", async (req, res) => {
   try {
     const user = jwt_decode(req.params.token);
     const id = user.id;
-    await User.update({_id: id}, {confirmed:true});
-  }
-  catch(err){
+    await User.update({ _id: id }, { confirmed: true });
+  } catch (err) {
     console.log(err);
   }
   return res.redirect("http://localhost:3000");
-}
-);
-
-
+});
 
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));

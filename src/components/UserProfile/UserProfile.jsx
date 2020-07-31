@@ -4,6 +4,8 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import axios from "axios";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
+import { Header } from "../Header";
+
 import EditProfile from "./EditProfile";
 import "../styles/userProfileStyle.css";
 
@@ -13,11 +15,14 @@ export default class UserProfile extends Component {
     this.state = {
       currTab: 0,
       isEditProfile: false,
+      groups: [],
+      list: [],
     };
     this.getUserID = this.getUserID.bind(this);
     this.getUserDetails = this.getUserDetails.bind(this);
     this.renderPossibleCourses = this.renderPossibleCourses.bind(this);
     this.getAllPossibleCourses = this.getAllPossibleCourses.bind(this);
+    this.getMyGroups = this.getMyGroups.bind(this);
     this.editUserCourses = this.editUserCourses.bind(this);
   }
 
@@ -27,9 +32,15 @@ export default class UserProfile extends Component {
     if (res) {
       const user_id = await this.getUserID();
       const user_details = await this.getUserDetails(user_id);
+      const groups = await this.getMyGroups();
       this.setState({
         user_id,
         userDetails: user_details.data,
+        groups,
+        list:
+          groups.length !== 0
+            ? this.createListFromArray(groups, true)
+            : ["No Groups"],
         isLoading: true,
       });
     }
@@ -44,9 +55,13 @@ export default class UserProfile extends Component {
   handleChange = (_, newValue) => {
     let isEditCourses,
       list = [];
+    const { groups } = this.state;
     switch (newValue) {
       case 0:
-        list = this.getMyGroup();
+        list =
+          groups.length !== 0
+            ? this.createListFromArray(groups, true)
+            : ["No Groups"];
         break;
       case 1:
         list = this.getMyCourses();
@@ -58,10 +73,26 @@ export default class UserProfile extends Component {
     this.setState({ currTab: newValue, list, isEditCourses });
   };
 
-  getMyGroup = () => {
-    const { study_groups } = this.state?.userDetails;
-    return study_groups.length !== 0 ? study_groups : ["No Groups"];
-  };
+  async getMyGroups() {
+    let token = await localStorage.getItem("jwtToken");
+
+    const myStudyGroups = {
+      jwt: token,
+    };
+
+    return axios
+      .post("/api/studyGroups/myGroups", myStudyGroups)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.studyGroups;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
 
   getMyCourses = () => {
     const { courses } = this.state?.userDetails;
@@ -112,11 +143,11 @@ export default class UserProfile extends Component {
       });
   }
 
-  createListFromArray = (array) => (
+  createListFromArray = (array, isGroups) => (
     <div className="cousrsesList">
       {array.map((elem) => (
         <div className="cousrsesList_Item">
-          {elem.name}
+          {isGroups ? elem.groupName || elem.courseName : elem.name}
           <br />
         </div>
       ))}
@@ -263,6 +294,7 @@ export default class UserProfile extends Component {
       />
     ) : (
       <div className="profile_user">
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"
@@ -300,7 +332,7 @@ export default class UserProfile extends Component {
                     <Tab label="My Courses" />
                   </Tabs>
                 </Paper>
-                {list || this.getMyGroup()}
+                {list}
                 {!isEditCourses && userDetails.canEdit && currTab === 1 && (
                   <button
                     className="editCoursesBtn"

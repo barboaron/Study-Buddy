@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import FloatingLabel from "../Utils/floatingLabel";
 import axios from "axios";
+import { Header } from "../Header";
 import DropDownOptions from "../Utils/DropDownOptions";
 import Questions from "./Questions";
 import "../styles/studyGroupStyles.css";
@@ -161,6 +162,7 @@ export default class StudyGroupCreation extends Component {
 
     return (
       <div className="profile_user">
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"

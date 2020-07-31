@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ChangePassword from "../Utils/ChangePassword";
 import ChangeUserDetails from "../Utils/ChangeUserDetails";
 import ProfileImg from "../Utils/profileImg";
+import { Header } from "../Header";
 import "../styles/userProfileStyle.css";
 
 export default class EditProfile extends Component {
@@ -25,6 +26,7 @@ export default class EditProfile extends Component {
 
     return (
       <div className="profile_user">
+        <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"

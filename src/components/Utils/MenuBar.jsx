@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";
+import NotificationsIcon from "../Icons/NotificationsIcon";
+import Badge from "@material-ui/core/Badge";
 import "../styles/menuStyles.css";
 
 export default class MenuBar extends Component {
@@ -41,7 +43,11 @@ export default class MenuBar extends Component {
 
   render() {
     const { isLoading, isAdmin } = this.state;
-
+    const notificationsWithBadge = (
+      <Badge color="secondary" badgeContent={2}>
+        <NotificationsIcon />
+      </Badge>
+    );
     if (!isLoading) {
       return null;
     }
@@ -73,6 +79,21 @@ export default class MenuBar extends Component {
             </NavDropdown>
           </Nav>
           <Nav>
+            <NavDropdown
+              title={notificationsWithBadge}
+              id="collasible-nav-dropdown"
+              alignRight
+            >
+              <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+              <NavDropdown.Item href="#action/3.2">
+                Another action
+              </NavDropdown.Item>
+              <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item href="#action/3.4">
+                Separated link
+              </NavDropdown.Item>
+            </NavDropdown>
             <Nav.Link href="/UserProfile">My Profile</Nav.Link>
             <Nav.Link href="#">Logout</Nav.Link>
           </Nav>
