@@ -28,11 +28,17 @@ export default class MainPage extends Component {
     res && this.getStudyGroups();
   }
 
-  async getStudyGroups(isNewFilter) {
-    const { currFilter, page, groupsList } = this.state;
+  async getStudyGroups(isNewFilter, shouldClosePopup) {
+    const {
+      currFilter,
+      page,
+      groupsList,
+      showPopup,
+      groupForPopup,
+    } = this.state;
     let token = await localStorage.getItem("jwtToken");
-    let currPage = isNewFilter ? 1 : page;
-
+    let currPage = isNewFilter || shouldClosePopup ? 1 : page;
+    const show_popup = shouldClosePopup ? !showPopup : showPopup;
     const studyGroupsFilters = {
       jwt: token,
       page: currPage,
@@ -47,15 +53,18 @@ export default class MainPage extends Component {
           if (res.data.hasNextPage) {
             currPage++;
           }
-          const studyGroupsList = isNewFilter
-            ? res.data.studyGroups
-            : [...groupsList, ...res.data.studyGroups];
+          const studyGroupsList =
+            isNewFilter || shouldClosePopup
+              ? res.data.studyGroups
+              : [...groupsList, ...res.data.studyGroups];
 
           this.setState({
             groupsList: studyGroupsList,
             hasNextPage: res.data.hasNextPage,
             page: currPage,
             isLoading: true,
+            showPopup: show_popup,
+            groupForPopup: shouldClosePopup ? {} : groupForPopup,
           });
         }
       })
@@ -92,12 +101,19 @@ export default class MainPage extends Component {
     });
   };
 
+  updateGroupsList = () => {
+    const shouldClosePopup = true;
+    const isNewFilter = false;
+    this.getStudyGroups(isNewFilter, shouldClosePopup);
+  };
+
   render() {
     const { groupsList, groupForPopup, isLoading } = this.state;
     const errorMsg = "Sorry, there are no relevant results";
     if (!isLoading) {
       return null;
     }
+
     return (
       <div className="mainPage_wrapper">
         <Header />
@@ -128,6 +144,7 @@ export default class MainPage extends Component {
           </div>
           {this.state.showPopup ? (
             <ViewDetailsPopup
+              updateGroupsList={this.updateGroupsList}
               closePopup={this.togglePopup}
               groupForPopup={groupForPopup}
             />

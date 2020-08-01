@@ -67,7 +67,7 @@ class ViewDetailsPopup extends React.Component {
       answers,
     });
     alert("succeed");
-    this.props.closePopup();
+    this.props.updateGroupsList();
   };
 
   getPopover = (index) => {
@@ -146,6 +146,23 @@ class ViewDetailsPopup extends React.Component {
     );
   };
 
+  getJoinGroupBtn = () => {
+    const { isInGroup, isFull, isPending } = this.props.groupForPopup;
+    const content = isPending ? "Pending" : "Join Group";
+    const button =
+      !isInGroup && !isFull ? (
+        <button
+          className="popupsBtn"
+          onClick={this.joinToGroup}
+          disabled={isPending}
+        >
+          {content}
+        </button>
+      ) : null;
+
+    return button;
+  };
+
   render() {
     const { groupForPopup, closePopup } = this.props;
     const {
@@ -158,8 +175,6 @@ class ViewDetailsPopup extends React.Component {
       maxParticipants,
       description,
       groupName,
-      isInGroup,
-      isFull,
     } = groupForPopup;
 
     const { showQuestions, isLoading } = this.state;
@@ -237,11 +252,7 @@ class ViewDetailsPopup extends React.Component {
           <button className="popupsBtn" onClick={closePopup}>
             X Close Me
           </button>
-          {!isInGroup && !isFull ? (
-            <button className="popupsBtn" onClick={this.joinToGroup}>
-              Join Group
-            </button>
-          ) : null}
+          {this.getJoinGroupBtn()}
         </div>
       </div>
     );
