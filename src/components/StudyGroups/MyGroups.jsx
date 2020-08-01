@@ -4,6 +4,7 @@ import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 import { Header } from "../Header";
 import axios from "axios";
 import EditGroup from "./EditGroup";
+import { Link } from "react-router-dom";
 import "../styles/myGroupsStyle.css";
 
 export default class MyGroups extends Component {
@@ -71,7 +72,12 @@ export default class MyGroups extends Component {
       .map((data) => {
         return (
           <tr>
-            <td>{data.groupName}</td>
+            <td>
+              <Link to={{ pathname: "/GroupPage", state: { group: data } }}>
+                {data.groupName}
+              </Link>
+            </td>
+            {/* <td>{data.groupName}</td> */}
             <td>{data.courseName}</td>
             <td>{data.groupType}</td>
             <td>{data.description}</td>
@@ -124,6 +130,7 @@ export default class MyGroups extends Component {
       jwt: token,
       groupId: data._id,
     };
+    console.log(data._id);
 
     return axios
       .post("/api/studyGroups/deleteGroup", deleteGroupReq)

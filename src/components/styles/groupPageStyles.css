@@ -1,0 +1,18 @@
+.tabsContainer {
+  margin-left: 5%;
+}
+
+.participant {
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.subtitle {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.details {
+  color: #6f6767 !important;
+}

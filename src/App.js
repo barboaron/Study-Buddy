@@ -4,6 +4,7 @@ import MainPage from "./components/Main/MainPage";
 import RegistrationPage from "./components/Registration/RegistrationPage";
 import UserProfile from "./components/UserProfile/UserProfile";
 import StudyGroupCreation from "./components/StudyGroups/StudyGroupCreation";
+import GroupPage from "./components/StudyGroups/GroupPage";
 import MyGroups from "./components/StudyGroups/MyGroups";
 // import { Header } from "./components/Header";
 import Admin from "./components/AdminPanel/Admin";
@@ -20,6 +21,7 @@ function App() {
           <Route exact path="/" component={MainPage}></Route>
           <Route path="/registration" component={RegistrationPage}></Route>
           <Route path="/UserProfile" component={UserProfile}></Route>
+          <Route path="/GroupPage" component={GroupPage}></Route>
           <Route path="/MyGroups" component={MyGroups}></Route>
           <Route
             path="/StudyGroupCreation"
