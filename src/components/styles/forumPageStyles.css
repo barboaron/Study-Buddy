@@ -1,0 +1,13 @@
+.listOfPosts {
+    overflow: scroll;
+    border-style: solid;
+    height: max-content;
+    max-height: 70%;
+  }
+
+  
+  .tableOfPosts {
+    height: max-content;
+    width: 100%;
+    position: relative;
+  }

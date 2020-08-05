@@ -4,12 +4,11 @@ const router = express.Router();
 const Forum = require("../../models/Forum");
 const { isLoggedIn } = require("../../authentication/auth");
 const jwt_decode = require("jwt-decode");
+const { validatePostInput, validateCommentInput, postTypes } = require("../../validation/post");
+const { v4: uuidv4 } = require('uuid');
 
-// get forums
-// create post
-// add comment to post
-// delete post
-// delete comment
+//upload file to post
+
 
 router.post("/", isLoggedIn, (req, res) => {
     const { id } = jwt_decode(req.body.jwt);
@@ -24,12 +23,175 @@ router.post("/", isLoggedIn, (req, res) => {
                 .map((course) => course.id.toString())
                 .includes(forum.courseId.toString());
             });
+            let forumIds = filteredForums.map((forum) => {
+              return { forumName: forum.forumName, forumId: forum._id, forumType: forum.forumType, forumCourse: forum.courseName };
+            });
 
-            res.status(200).json({ forums: filteredForums });
+            res.status(200).json({ forums: forumIds });
           })
           .catch((err) => res.status(400).json(err));
       })
       .catch((err) => res.status(400).json(err));
 });
+
+router.post("/forum", isLoggedIn, (req, res) => {
+  const forumId = req.body.forumId;
+
+  Forum.findOne({ _id: forumId })
+    .then((forum) => {
+      res.status(200).json({ forum });
+    })
+  .catch((err) => res.status(400).json('forum not found'));
+});
+
+router.post("/postTypes", isLoggedIn, (req, res) => {
+    res.status(200).json(postTypes);
+});
+
+router.post("/createPost", isLoggedIn, (req, res) => {
+  const { id, name } = jwt_decode(req.body.jwt);
+  const { forumId, title, content, type } = req.body;
+  
+  const { errors, isValid } = validatePostInput(req.body);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
+  Forum.findOne({ _id: forumId })
+    .then((forum) => {
+      const post = {
+        _id: uuidv4(),
+        creationDate: Date.now(),
+        title,
+        content,
+        type,
+        creatorName: name,
+        creatorId: id,
+        comments: [],
+        //files??
+      };
+      Forum.updateOne({ _id: forumId }, { posts: forum.posts.concat(post) }).then(
+        (forum) => {
+          res.status(200).json(post);
+        }
+      ).catch((err) => res.status(400).json('forum update failed'));
+    })
+  .catch((err) => res.status(400).json('forum not found'));
+});
+
+router.post("/addComment", isLoggedIn, (req, res) => {
+  const { id, name } = jwt_decode(req.body.jwt);
+  const { forumId, postId, comment } = req.body;
+  
+  const { errors, isValid } = validateCommentInput(req.body);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
+  Forum.findOne({ _id: forumId })
+    .then((forum) => {
+      const newComment = {
+        _id: uuidv4(),
+        creationDate: Date.now(),
+        content: comment,
+        creatorName: name,
+        creatorId: id,
+      };
+
+      const posts = addCommentToPost(forum, postId, newComment);
+      
+      Forum.updateOne({ _id: forumId }, { posts }).then(
+        (forum) => {
+          res.status(200).json(newComment);
+        }
+      ).catch((err) => res.status(400).json('forum update failed'));
+    })
+  .catch((err) => res.status(400).json('forum not found'));
+});
+
+router.post("/deleteComment", isLoggedIn, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const { forumId, postId, commentId } = req.body;
+
+  Forum.findOne({ _id: forumId })
+    .then((forum) => {
+      
+      deleteCommentFromPost(id, forum, postId, commentId).then( posts => {
+        Forum.updateOne({ _id: forumId }, { posts }).then(
+          (forum) => {
+            res.status(200).json(commentId);
+          }
+        ).catch(() => res.status(400).json('forum update failed'));
+      }).catch((err) => res.status(401).json(err));
+    })
+  .catch(() => res.status(400).json('forum not found'));
+});
+
+router.post("/deletePost", isLoggedIn, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const { forumId, postId } = req.body;
+
+  Forum.findOne({ _id: forumId })
+    .then((forum) => {
+      
+      deletePostFromForum(id, forum, postId).then( posts => {
+        Forum.updateOne({ _id: forumId }, { posts }).then(
+          (forum) => {
+            res.status(200).json(postId);
+          }
+        ).catch(() => res.status(400).json('forum update failed'));
+      }).catch((err) => res.status(401).json(err));
+    })
+  .catch(() => res.status(400).json('forum not found'));
+});
+
+function addCommentToPost(forum, postId, newComment) {
+  return forum.posts.map(post => {
+    if(post._id === postId) {
+      return {...post, comments: post.comments.concat(newComment)};
+    } else {
+      return post;
+    }
+  });
+}
+
+function deleteCommentFromPost(userId, forum, postId, commentId) {
+  return new Promise( (resolve, reject) => { 
+    const posts = forum.posts.map(post => {
+      if(post._id === postId) {
+        post.comments.forEach(comment => {
+          if(comment._id === commentId) {
+            if(comment.creatorId !== userId) {
+              reject('only comment creator can delete');
+            }
+          }
+        });
+        return {...post, comments: post.comments.filter(comment => comment._id !== commentId)};
+      } else {
+        return post;
+      }
+    });
+    resolve(posts);
+  });
+}
+
+function deletePostFromForum(userId, forum, postId) {
+  return new Promise( (resolve, reject) => { 
+    forum.posts.forEach(post => {
+      if(post._id === postId) {
+        if(post.creatorId !== userId) {
+          reject('only post creator can delete');
+        }
+      }
+    });
+
+    const posts = forum.posts.filter(post => {
+      return post._id !== postId;
+    });
+
+    resolve(posts);
+  });
+}
+
 
 module.exports = router;
