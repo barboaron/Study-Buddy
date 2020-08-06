@@ -13,6 +13,7 @@ import Admin from "./components/AdminPanel/Admin";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "semantic-ui-css/semantic.min.css";
 
 function App() {
   return (

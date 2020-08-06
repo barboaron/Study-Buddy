@@ -53,8 +53,10 @@
   right: 0;
   bottom: 0;
   margin: auto;
+  z-index: 6;
   background-color: rgba(0, 0, 0, 0.5);
 }
+
 .popup_inner {
   padding: 30px;
   position: absolute;
