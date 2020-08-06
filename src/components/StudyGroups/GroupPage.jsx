@@ -4,8 +4,10 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Paper from "@material-ui/core/Paper";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
+import { Feed } from "semantic-ui-react";
 import axios from "axios";
 import { Header } from "../Header";
+import FeedEvent from "./FeedEvent";
 import "../styles/groupPageStyles.css";
 
 export default class GroupPage extends Component {
@@ -172,67 +174,21 @@ export default class GroupPage extends Component {
     }
     const { group } = this.props.location.state;
     const dateAndTime = group.date && new Date(group.date);
-
     return (
-      <div className="profile_user">
+      <div className="groupPageWrapper">
         <Header />
         <link
           href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           rel="stylesheet"
           id="bootstrap-css"
         />
-        <div className="container emp-profile">
+        <div className="container emp-profile groupPage">
+          <div className="profile-head">
+            <h2 className="groupPageTitle">
+              {group.groupName || "Group Page"}
+            </h2>
+          </div>
           <div className="row">
-            <div className="col-md-4">
-              <div className="profile-img">
-                <div className="containerPopup">
-                  <span className="subtitle">
-                    Participants ({group.participants.length}/
-                    {group.maxParticipants}):
-                  </span>
-                  <br />
-                  {group.participants.map((elem, idx) => (
-                    <OverlayTrigger
-                      trigger="hover"
-                      placement="top"
-                      overlay={this.getPopover(idx)}
-                    >
-                      <span className={"participant"}>
-                        {elem.name}
-                        <br />
-                      </span>
-                    </OverlayTrigger>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="profile-head">
-                <h2 className="UserProfileTitle">
-                  {group.groupName || "Group Page"}
-                </h2>
-                <h5 className="details">
-                  <span className="titleDetails"> Course Name: </span>
-                  {group.courseName || " "}
-                  <br /> <br />
-                  <span className="titleDetails"> Group Type: </span>
-                  {group.groupType}
-                  <br /> <br />
-                  {group.description ? (
-                    <>
-                      <span className="titleDetails"> Description:</span>
-                      {group.description}
-                    </>
-                  ) : null}
-                  {group.date ? (
-                    <>
-                      <span className="titleDetails"> Date: </span>
-                      {dateAndTime.toLocaleString()}
-                    </>
-                  ) : null}
-                </h5>
-              </div>
-            </div>
             <div className="tabsContainer">
               <Paper square>
                 <Tabs
@@ -246,15 +202,75 @@ export default class GroupPage extends Component {
                   <Tab label="Schedual Helper" />
                 </Tabs>
               </Paper>
+              <form className={"formPosts"} onSubmit={this.addNewPost}>
+                <textarea
+                  id="postTextArea"
+                  rows="2"
+                  cols="50"
+                  placeholder="Add post..."
+                />
+                <br />
+                <input id="chooseFile" type="file" name="myfile" multiple />
+                <button type="submit" style={{ padding: "8px 33px" }}>
+                  Post
+                </button>
+              </form>
+              <Feed>
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+                <FeedEvent />
+              </Feed>
               {/* {list}  */}
-              {/* {!isEditCourses && userDetails.canEdit && currTab === 1 && (
-                  <button
-                    className="editCoursesBtn"
-                    onClick={this.renderPossibleCourses}
+            </div>
+            <div className="detailsContainer">
+              <h5 className="details">
+                <span className="titleDetails"> Course Name: </span>
+                {group.courseName || " "}
+                <br /> <br />
+                <span className="titleDetails"> Group Type: </span>
+                {group.groupType}
+                <br /> <br />
+                {group.description ? (
+                  <>
+                    <span className="titleDetails"> Description:</span>
+                    {group.description}
+                    <br />
+                    <br />
+                  </>
+                ) : null}
+                {group.date ? (
+                  <>
+                    <span className="titleDetails"> Date: </span>
+                    {dateAndTime.toLocaleString()}
+                    <br />
+                  </>
+                ) : null}
+              </h5>
+              <div className="participantsWrapper">
+                <span className="subtitle">
+                  Participants ({group.participants.length}/
+                  {group.maxParticipants}):
+                </span>
+                <br />
+                {group.participants.map((elem, idx) => (
+                  <OverlayTrigger
+                    trigger="hover"
+                    placement="top"
+                    overlay={this.getPopover(idx)}
                   >
-                    Edit Courses
-                  </button>
-                )} */}
+                    <span className={"participant"}>
+                      {elem.name}
+                      <br />
+                    </span>
+                  </OverlayTrigger>
+                ))}
+              </div>
             </div>
           </div>
         </div>

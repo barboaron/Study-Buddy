@@ -13,3 +13,12 @@
 #collasible-nav-dropdown::after {
   display: none;
 }
+
+.dropdown-menu {
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+.unseen {
+  background: rgb(185, 205, 218) !important;
+}
