@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
           type: groupTypes.join,
           groupId: data.group._id,
           answers: data.answers,
+          questions: data.questions,
         };
         await User.updateOne(
           { _id: receiver._id },
@@ -87,7 +88,7 @@ io.on("connection", (socket) => {
             isCreator: false,
           });
           const isFull = participants.length === studyGroup.maxParticipants;
-          const pendingUsers = isFull ? [] : studyGroup.pendingUsers;
+          const pendingUsers = isFull ? [] : studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
           const seenNotifications = isFull 
             ? removeFullGroupNotification(sender.seenNotifications, studyGroup._id)
             : sender.seenNotifications;
