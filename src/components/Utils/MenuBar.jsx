@@ -3,6 +3,7 @@ import axios from "axios";
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 import NotificationsIcon from "../Icons/NotificationsIcon";
 import Notification from "./Notification";
+import PopupJoinGroup from "./PopupJoinGroup";
 import Badge from "@material-ui/core/Badge";
 import "../styles/menuStyles.css";
 import { socket } from "./../Header";
@@ -62,7 +63,7 @@ export default class MenuBar extends Component {
       approvedUserId: this.state.notificationInPopup.senderId,
     });
     this.togglePopup(null);
-  }
+  };
 
   toggleDropdown = () => {
     const { updateSeenNotifications } = this.props;
@@ -70,9 +71,31 @@ export default class MenuBar extends Component {
     this.isDropdownOpen = !this.isDropdownOpen;
   };
 
-  render() {
-    const { isLoading, isAdmin } = this.state;
+  getDropdownElements = (notifications, className) => {
+    notifications
+      .reverse()
+      .map((elem, index) => (
+        <Notification
+          notification={elem}
+          className={className}
+          handleJoinPopup={this.handleJoinPopup}
+        />
+      ));
+  };
+
+  getNotificationsDropdown = () => {
     const { seenNotifications, unseenNotifications } = this.props;
+    return (
+      <>
+        {this.getDropdownElements(unseenNotifications, "unseen")}
+        {this.getDropdownElements(seenNotifications, "seen")}
+      </>
+    );
+  };
+
+  render() {
+    const { isLoading, isAdmin, notificationInPopup } = this.state;
+    const { unseenNotifications } = this.props;
     const notificationsWithBadge = (
       <Badge color="secondary" badgeContent={unseenNotifications.length}>
         <NotificationsIcon />
@@ -117,42 +140,7 @@ export default class MenuBar extends Component {
                 alignRight
                 onClick={this.toggleDropdown}
               >
-                {unseenNotifications.reverse().map((elem, index) => {
-                  return (
-                    <>
-                      <NavDropdown.Item
-                        className="unseen"
-                        href={
-                          elem.type !== "join-request" ? "#action/3.1" : null
-                        }
-                        onClick={
-                          elem.type === "join-request" && (() => this.handleJoinPopup(elem))
-                        }
-                      >
-                        <Notification notification={elem} />
-                      </NavDropdown.Item>
-                      <NavDropdown.Divider />
-                    </>
-                  );
-                })}
-                {seenNotifications.reverse().map((elem, index) => {
-                  return (
-                    <>
-                      <NavDropdown.Item
-                        className="seen"
-                        href={
-                          elem.type !== "join-request" ? "#action/3.1" : null
-                        }
-                        onClick={
-                          elem.type === "join-request" && (() => this.handleJoinPopup(elem))
-                        }
-                      >
-                        <Notification notification={elem} />
-                      </NavDropdown.Item>
-                      <NavDropdown.Divider />
-                    </>
-                  );
-                })}
+                {this.getNotificationsDropdown()}
               </NavDropdown>
               <Nav.Link href="/UserProfile">My Profile</Nav.Link>
               <Nav.Link href="#">Logout</Nav.Link>
@@ -160,16 +148,11 @@ export default class MenuBar extends Component {
           </Navbar.Collapse>
         </Navbar>
         {this.state.showPopup ? (
-          <div className="popup">
-            <div className="popup_inner">
-              <button className="popupsBtn" onClick={this.togglePopup}>
-                X Close Me
-              </button>
-              <button className="popupsBtn" onClick={this.handleAccept}>
-                Accept
-              </button>
-            </div>
-          </div>
+          <PopupJoinGroup
+            togglePopup={this.togglePopup}
+            handleAccept={this.handleAccept}
+            notificationInPopup={notificationInPopup}
+          />
         ) : null}
       </>
     );

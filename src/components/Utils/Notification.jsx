@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { NavDropdown } from "react-bootstrap";
 
 export default class Notification extends Component {
   getElementByType = () => {
@@ -19,7 +20,22 @@ export default class Notification extends Component {
   };
 
   render() {
+    const { notification, className, handleJoinPopup } = this.props;
     const message = this.getElementByType();
-    return message;
+    return (
+      <>
+        <NavDropdown.Item
+          className={className}
+          href={notification.type !== "join-request" ? "#action/3.1" : null}
+          onClick={
+            notification.type === "join-request" &&
+            (() => handleJoinPopup(notification))
+          }
+        >
+          {message}
+        </NavDropdown.Item>
+        <NavDropdown.Divider />
+      </>
+    );
   }
 }

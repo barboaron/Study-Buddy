@@ -240,11 +240,11 @@ class ViewDetailsPopup extends React.Component {
                 </span>
                 {participants.map((elem, idx) => (
                   <OverlayTrigger
-                    trigger="hover"
+                    trigger={["hover", "focus"]}
                     placement="top"
                     overlay={this.getPopover(idx)}
                   >
-                    <span className={"participantName"}> {elem.name} </span>
+                    <span className={"participantName"}> {elem.name}, </span>
                   </OverlayTrigger>
                 ))}
               </div>
