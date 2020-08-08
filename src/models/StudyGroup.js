@@ -54,6 +54,10 @@ const StudyGroupSchema = new Schema({
     pendingUsers: {
         type: [],
         required: true,
+    },
+    posts: {
+        type: [],
+        required: true,
     }
 });
 
