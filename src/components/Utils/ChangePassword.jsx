@@ -3,7 +3,6 @@ import "../styles/userProfileStyle.css";
 import PasswordIcon from "../Icons/PasswordIcon";
 import FloatingLabel from "./floatingLabel";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 export default class ChangePassword extends Component {
   constructor(props) {
