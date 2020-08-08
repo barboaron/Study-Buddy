@@ -82,7 +82,7 @@ class Header extends React.Component {
     if (!isLoading) {
       return null;
     }
-    debugger;
+
     return (
       <MenuBar
         seenNotifications={seenNotifications}
