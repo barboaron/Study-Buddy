@@ -65,6 +65,7 @@ class ViewDetailsPopup extends React.Component {
       jwt,
       group: this.props.groupForPopup,
       answers,
+      questions
     });
     alert("succeed");
     this.props.updateGroupsList();

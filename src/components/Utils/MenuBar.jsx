@@ -5,6 +5,7 @@ import NotificationsIcon from "../Icons/NotificationsIcon";
 import Notification from "./Notification";
 import Badge from "@material-ui/core/Badge";
 import "../styles/menuStyles.css";
+import { socket } from "./../Header";
 
 export default class MenuBar extends Component {
   constructor(props) {
@@ -42,15 +43,26 @@ export default class MenuBar extends Component {
     }
   }
 
-  handleJoinPopup = () => {
-    this.togglePopup();
+  handleJoinPopup = (elem) => {
+    this.togglePopup(elem);
   };
 
-  togglePopup = () => {
+  togglePopup = (elem) => {
     this.setState({
       showPopup: !this.state.showPopup,
+      notificationInPopup: elem,
     });
   };
+
+  handleAccept = () => {
+    let jwt = localStorage.getItem("jwtToken");
+    socket.emit("join-group-approved", {
+      jwt,
+      groupId: this.state.notificationInPopup.groupId,
+      approvedUserId: this.state.notificationInPopup.senderId,
+    });
+    this.togglePopup(null);
+  }
 
   toggleDropdown = () => {
     const { updateSeenNotifications } = this.props;
@@ -114,7 +126,7 @@ export default class MenuBar extends Component {
                           elem.type !== "join-request" ? "#action/3.1" : null
                         }
                         onClick={
-                          elem.type === "join-request" && this.handleJoinPopup
+                          elem.type === "join-request" && (() => this.handleJoinPopup(elem))
                         }
                       >
                         <Notification notification={elem} />
@@ -132,7 +144,7 @@ export default class MenuBar extends Component {
                           elem.type !== "join-request" ? "#action/3.1" : null
                         }
                         onClick={
-                          elem.type === "join-request" && this.handleJoinPopup
+                          elem.type === "join-request" && (() => this.handleJoinPopup(elem))
                         }
                       >
                         <Notification notification={elem} />
@@ -152,6 +164,9 @@ export default class MenuBar extends Component {
             <div className="popup_inner">
               <button className="popupsBtn" onClick={this.togglePopup}>
                 X Close Me
+              </button>
+              <button className="popupsBtn" onClick={this.handleAccept}>
+                Accept
               </button>
             </div>
           </div>
