@@ -215,7 +215,8 @@ export default class GroupPage extends Component {
                   Post
                 </button>
               </form>
-              <Feed>
+              {/* need to add props to FeedEvent */}
+              {/* <Feed>
                 <FeedEvent />
                 <FeedEvent />
                 <FeedEvent />
@@ -225,7 +226,7 @@ export default class GroupPage extends Component {
                 <FeedEvent />
                 <FeedEvent />
                 <FeedEvent />
-              </Feed>
+              </Feed> */}
               {/* {list}  */}
             </div>
             <div className="detailsContainer">

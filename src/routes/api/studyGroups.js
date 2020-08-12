@@ -131,7 +131,7 @@ router.post("/", isLoggedIn, (req, res) => {
             let isInGroup = false;
             let isPending = false;
             group.participants.forEach((participant) => {
-              if (participant.id === id) {
+              if (participant.id.toString() === id.toString()) {
                 isInGroup = true;
               }
             });
@@ -221,7 +221,7 @@ router.post("/leaveGroup", isLoggedIn, isInGroup, (req, res) => {
     .then((studyGroup) => {
       let isAdmin = false;
       studyGroup.participants.forEach((participant) => {
-        if (participant.id.toString() === id) {
+        if (participant.id === id) {
           isAdmin = participant.isCreator;
         }
       });
@@ -251,24 +251,28 @@ router.post("/addPost", isLoggedIn, isInGroup, (req, res) => {
   if (!content) {
     return res.status(400).json('content is required');
   }
-
-  StudyGroup.findOne({ _id: groupId })
-    .then((studyGroup) => {
-      const post = {
-        _id: uuidv4(),
-        creationDate: Date.now(),
-        content,
-        creatorName: name,
-        creatorId: id,
-        //files??
-      };
-      StudyGroup.updateOne({ _id: groupId }, { posts: studyGroup.posts.concat(post) }).then(
-        () => {
-          res.status(200).json(studyGroup);
-        }
-      ).catch((err) => res.status(400).json('study group update failed'));
+  Profile.findOne({ user_id: id })
+    .then((profile) => {
+      StudyGroup.findOne({ _id: groupId })
+      .then((studyGroup) => {
+        const post = {
+          _id: uuidv4(),
+          creationDate: Date.now(),
+          content,
+          creatorName: name,
+          creatorId: id,
+          creatorImgSrc: profile.imgSrc,
+          //files??
+        };
+        StudyGroup.updateOne({ _id: groupId }, { posts: studyGroup.posts.concat(post) }).then(
+          () => {
+            res.status(200).json(studyGroup);
+          }
+        ).catch((err) => res.status(400).json('study group update failed'));
+      })
+      .catch((err) => res.status(400).json('study group not found'));
     })
-  .catch((err) => res.status(400).json('study group not found'));
+    .catch((err) => res.status(400).json('profile not found'));
 });
 
 router.post("/deletePost", isLoggedIn, isInGroup, (req, res) => {

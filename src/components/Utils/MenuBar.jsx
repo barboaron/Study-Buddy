@@ -59,7 +59,7 @@ export default class MenuBar extends Component {
     let jwt = localStorage.getItem("jwtToken");
     socket.emit("join-group-approved", {
       jwt,
-      groupId: this.state.notificationInPopup.groupId,
+      group: this.state.notificationInPopup.group,
       approvedUserId: this.state.notificationInPopup.senderId,
     });
     this.togglePopup(null);
@@ -72,7 +72,8 @@ export default class MenuBar extends Component {
   };
 
   getDropdownElements = (notifications, className) => {
-    notifications
+    console.log(notifications);
+    return notifications
       .reverse()
       .map((elem, index) => (
         <Notification

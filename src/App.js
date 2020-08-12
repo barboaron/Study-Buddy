@@ -8,6 +8,7 @@ import GroupPage from "./components/StudyGroups/GroupPage";
 import MyGroups from "./components/StudyGroups/MyGroups";
 import Forums from "./components/Forums/Forums";
 import ForumPage from "./components/Forums/ForumPage";
+import PostPage from "./components/Forums/PostPage";
 // import { Header } from "./components/Header";
 import Admin from "./components/AdminPanel/Admin";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/MyGroups" component={MyGroups}></Route>
           <Route path="/Forums" component={Forums}></Route>
           <Route path="/ForumPage" component={ForumPage}></Route>
+          <Route path="/PostPage" component={PostPage}></Route>
           <Route
             path="/StudyGroupCreation"
             component={StudyGroupCreation}

@@ -7,10 +7,10 @@ export default class Notification extends Component {
     let message;
     switch (notification.type) {
       case "join-request":
-        message = `${notification.senderName} asked to join your group`;
+        message = `${notification.senderName} asked to join your group "${notification.group.groupName}"`;
         break;
       case "accepted":
-        message = `${notification.senderName} has accepted your join request to groupName group`;
+        message = `${notification.senderName} has accepted your join request to "${notification.group.groupName}" group`;
         break;
       case "posted":
       default:
@@ -21,6 +21,7 @@ export default class Notification extends Component {
 
   render() {
     const { notification, className, handleJoinPopup } = this.props;
+
     const message = this.getElementByType();
     return (
       <>

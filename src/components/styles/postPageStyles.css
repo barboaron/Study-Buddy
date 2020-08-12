@@ -1,0 +1,83 @@
+.listOfComments {
+    height: max-content;
+    max-height: 70%;
+  }
+
+  .post-page {
+      display: flex;
+      flex-flow: column;
+  }
+
+  .post-title {
+      font-size: 30px;
+  }
+
+  .post-content-container {
+    border: 1px solid black;
+    border-radius: 15px;
+    margin: 20px;
+    display: inline-block;
+    width: 50%;
+    padding: 15px;
+    background-color: lightgray;
+  }
+
+  .post-content {
+    text-align: left;
+  }
+
+  .post-details {
+    display: flex;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .creator-title {
+    margin-right: 3px;
+    font-weight: bold;
+  }
+
+  .post-creator {
+      color: gray;
+  }
+
+  .comments-title {
+      text-align: left;
+      font-weight: bold;
+      font-size: 20px;
+  }
+
+  .add-comment-btn {
+    width: 15%;
+    margin-top: 20px;
+    padding: 8px 33px;
+  }
+
+  #commentTextArea {
+    padding: 10px;
+    line-height: 1.5;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px #999;
+    letter-spacing: 1px;
+    margin-top: 2%;
+    resize: none;
+  }
+  
+  .form-comments {
+    text-align: left;
+  }
+  
+  #labelFile {
+    cursor: pointer;
+  }
+  
+  #upload-photo {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+  }
+
+  #chooseFile {
+    width: 20%;
+  }

@@ -87,7 +87,7 @@ export default class ForumPage extends Component {
         return (
           <tr>
             <td>
-              <Link to={{ pathname: "/PostPage", state: { post } }}>
+              <Link to={{ pathname: "/PostPage", state: { post, forumId: this.state.forum._id } }}>
                 {`${post.type} | ${post.title}`}
               </Link>
             </td>

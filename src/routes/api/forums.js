@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 // const Course = require("../../models/Course");
 const Forum = require("../../models/Forum");
+const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");
 const jwt_decode = require("jwt-decode");
 const { validatePostInput, validateCommentInput, postTypes } = require("../../validation/post");
@@ -87,26 +88,35 @@ router.post("/addComment", isLoggedIn, (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
+  Profile.findOne({ user_id: id})
+    .then((profile) => {
+      Forum.findOne({ _id: forumId })
+      .then((forum) => {
+        const newComment = {
+          _id: uuidv4(),
+          creationDate: Date.now(),
+          content: comment,
+          creatorName: name,
+          creatorId: id,
+          imgSrc: null //profile.imgSrc,
+        };
 
-  Forum.findOne({ _id: forumId })
-    .then((forum) => {
-      const newComment = {
-        _id: uuidv4(),
-        creationDate: Date.now(),
-        content: comment,
-        creatorName: name,
-        creatorId: id,
-      };
-
-      const posts = addCommentToPost(forum, postId, newComment);
-      
-      Forum.updateOne({ _id: forumId }, { posts }).then(
-        (forum) => {
-          res.status(200).json(newComment);
-        }
-      ).catch((err) => res.status(400).json('forum update failed'));
+        const posts = addCommentToPost(forum, postId, newComment);
+        
+        Forum.updateOne({ _id: forumId }, { posts }).then(
+          () => {
+            Forum.findOne({ _id: forumId })
+              .then((forum) => {
+                  const post = forum.posts.find((post) => post._id === postId);
+                  res.status(200).json(post);
+              }
+            ).catch((err) => res.status(400).json('forum not found'));
+          }
+        ).catch((err) => res.status(400).json('forum update failed'));
+      })
+      .catch((err) => res.status(400).json('forum not found'));
     })
-  .catch((err) => res.status(400).json('forum not found'));
+    .catch((err) => res.status(400).json('profile not found'));
 });
 
 router.post("/deleteComment", isLoggedIn, (req, res) => {
@@ -143,6 +153,21 @@ router.post("/deletePost", isLoggedIn, (req, res) => {
       }).catch((err) => res.status(401).json(err));
     })
   .catch(() => res.status(400).json('forum not found'));
+});
+
+router.post("/post", isLoggedIn, (req, res) => {
+  const { forumId, postId } = req.body;
+
+  Forum.findOne({ _id: forumId })
+    .then((forum) => {
+      const post = forum.posts.find((post) => post._id === postId);
+      if(post) {
+        res.status(200).json(post);
+      } else {
+        res.status(400).json('Post not found');
+      }
+    })
+    .catch((err) => res.status(400).json('forum not found'));
 });
 
 function addCommentToPost(forum, postId, newComment) {
