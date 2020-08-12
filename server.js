@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
           senderId: sender._id,
           senderName: sender.firstName + " " + sender.lastName,
           type: groupTypes.join,
-          groupId: data.group._id,
+          group: data.group,
           answers: data.answers,
           questions: data.questions,
         };
@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
           senderId: sender._id,
           senderName: sender.firstName + " " + sender.lastName,
           type: groupTypes.accepted,
-          groupId: data.groupId,
+          group: data.group,
         };
         await User.updateOne(
           { _id: receiver._id },
@@ -78,13 +78,13 @@ io.on("connection", (socket) => {
         if (receiver.socketId) {
           io.to(receiver.socketId).emit("notification", notification);
         }
-        StudyGroup.findOne({ _id: data.groupId }).then(async (studyGroup) => {
+        StudyGroup.findOne({ _id: data.group._id }).then(async (studyGroup) => {
           const participants = studyGroup.participants;
           const newParticipantName =
             receiver.firstName + " " + receiver.lastName;
           participants.push({
             name: newParticipantName,
-            id: receiver._id,
+            id: receiver._id.toString(),
             isCreator: false,
           });
           const isFull = participants.length === studyGroup.maxParticipants;
