@@ -8,6 +8,8 @@ import { Feed } from "semantic-ui-react";
 import axios from "axios";
 import { Header } from "../Header";
 import FeedEvent from "./FeedEvent";
+import ScheduleWrapper from "./ScheduleWrapper";
+
 import "../styles/groupPageStyles.css";
 
 export default class GroupPage extends Component {
@@ -185,21 +187,26 @@ export default class GroupPage extends Component {
     let token = await localStorage.getItem("jwtToken");
     const { _id } = this.props.location.state.group;
     const content = event?.target?.elements?.postTextArea?.value;
-    //add file
-    const postDetails = {
-      jwt: token,
-      groupId: _id,
-      content,
-    };
+    const files = event?.target?.elements[1]?.files;
+    const data = new FormData();
+    data.append("jwt", token);
+    data.append("groupId", _id);
+    data.append("content", content);
+    if (files?.length > 0)
+      Object.values(files).map((file, index) =>
+        data.append("file" + index, file)
+      );
+
     if (content) event.target.elements.postTextArea.value = "";
 
     return axios
-      .post("/api/studyGroups/addPost", postDetails)
+      .post("/api/studyGroups/addPost", data)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
           this.setState({ posts: res.data });
+          // return res.data;
         }
       })
       .catch((err) => {
@@ -210,18 +217,36 @@ export default class GroupPage extends Component {
   getContentByCurrTab = () => {
     const { currTab, posts } = this.state;
     return currTab === 0 ? (
-      <Feed>
-        {posts.map((post) => (
-          <FeedEvent
-            imgSrc={post.imgSrc}
-            userName={post.creatorName}
-            action={"posted"}
-            date={new Date(post.creationDate).toLocaleString()}
-            content={post.content}
+      <>
+        <form className={"formPosts"} onSubmit={this.addNewPost}>
+          <textarea
+            id="postTextArea"
+            name="postTextArea"
+            rows="2"
+            cols="50"
+            placeholder="Add post..."
           />
-        ))}
-      </Feed>
-    ) : null;
+          <br />
+          <input id="chooseFile" type="file" name="myfile" multiple />
+          <button type="submit" style={{ padding: "8px 33px" }}>
+            Post
+          </button>
+        </form>
+        <Feed>
+          {posts.map((post) => (
+            <FeedEvent
+              imgSrc={post.imgSrc}
+              userName={post.creatorName}
+              action={"posted"}
+              date={new Date(post.creationDate).toLocaleString()}
+              content={post.content}
+            />
+          ))}
+        </Feed>
+      </>
+    ) : (
+      <ScheduleWrapper isAdmin />
+    );
   };
 
   render() {
@@ -260,20 +285,6 @@ export default class GroupPage extends Component {
                   <Tab label="Schedual Helper" />
                 </Tabs>
               </Paper>
-              <form className={"formPosts"} onSubmit={this.addNewPost}>
-                <textarea
-                  id="postTextArea"
-                  name="postTextArea"
-                  rows="2"
-                  cols="50"
-                  placeholder="Add post..."
-                />
-                <br />
-                <input id="chooseFile" type="file" name="myfile" multiple />
-                <button type="submit" style={{ padding: "8px 33px" }}>
-                  Post
-                </button>
-              </form>
               {this.getContentByCurrTab()}
             </div>
             <div className="detailsContainer">
