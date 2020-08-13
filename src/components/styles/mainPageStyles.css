@@ -13,7 +13,7 @@
 
 .columns_container {
   height: 75%;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 .mainPageLogo {
   height: auto;

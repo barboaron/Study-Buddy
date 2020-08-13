@@ -22,3 +22,8 @@
 .unseen {
   background: rgb(185, 205, 218) !important;
 }
+
+.questionAndAnswer {
+  font-weight: 500;
+  cursor: pointer;
+}

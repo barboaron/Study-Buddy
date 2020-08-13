@@ -15,10 +15,16 @@ export default class GroupPage extends Component {
     super(props);
     this.state = { currTab: 0 };
     this.getParicipantsDetails = this.getParicipantsDetails.bind(this);
+    this.getAllPosts = this.getAllPosts.bind(this);
+    this.addNewPost = this.addNewPost.bind(this);
   }
 
-  componentDidMount() {
-    !this.breakRender && this.getParicipantsDetails();
+  async componentDidMount() {
+    if (!this.breakRender) {
+      const detailsArray = await this.getParicipantsDetails();
+      const posts = await this.getAllPosts();
+      this.setState({ detailsArray, posts, isLoading: true });
+    }
   }
 
   componentWillMount() {
@@ -30,12 +36,16 @@ export default class GroupPage extends Component {
 
   async getParicipantsDetails() {
     const { participants } = this.props.location.state.group;
-    Promise.all(
+    return Promise.all(
       participants.map(async (user) => await this.getUserDetails(user.id))
     ).then((data) => {
-      this.setState({ detailsArray: data, isLoading: true });
+      return data;
     });
   }
+
+  handleChange = (_, newValue) => {
+    this.setState({ currTab: newValue });
+  };
 
   //   createListFromArray = (array, isGroups) => (
   //     <div className="cousrsesList">
@@ -145,25 +155,73 @@ export default class GroupPage extends Component {
     );
   };
 
-  handleChange = (_, newValue) => {
-    // let isEditCourses,
-    //   list = [];
-    // const { groups } = this.state;
-    // switch (newValue) {
-    //   case 0:
-    //     list =
-    //       groups.length !== 0
-    //         ? this.createListFromArray(groups, true)
-    //         : ["No Groups"];
-    //     break;
-    //   case 1:
-    //     list = this.getMyCourses();
-    //     isEditCourses = false;
-    //     break;
-    //   default:
-    //     break;
-    // }
-    this.setState({ currTab: newValue });
+  async getAllPosts() {
+    let token = await localStorage.getItem("jwtToken");
+    const { _id } = this.props.location.state.group;
+
+    const getAllPosts = {
+      jwt: token,
+      groupId: _id,
+    };
+
+    return axios
+      .post("/api/studyGroups/posts", getAllPosts)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  async addNewPost(event) {
+    event.persist();
+    event.preventDefault();
+
+    let token = await localStorage.getItem("jwtToken");
+    const { _id } = this.props.location.state.group;
+    const content = event?.target?.elements?.postTextArea?.value;
+    //add file
+    const postDetails = {
+      jwt: token,
+      groupId: _id,
+      content,
+    };
+    if (content) event.target.elements.postTextArea.value = "";
+
+    return axios
+      .post("/api/studyGroups/addPost", postDetails)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          this.setState({ posts: res.data });
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
+  getContentByCurrTab = () => {
+    const { currTab, posts } = this.state;
+    return currTab === 0 ? (
+      <Feed>
+        {posts.map((post) => (
+          <FeedEvent
+            imgSrc={post.imgSrc}
+            userName={post.creatorName}
+            action={"posted"}
+            date={new Date(post.creationDate).toLocaleString()}
+            content={post.content}
+          />
+        ))}
+      </Feed>
+    ) : null;
   };
 
   render() {
@@ -205,6 +263,7 @@ export default class GroupPage extends Component {
               <form className={"formPosts"} onSubmit={this.addNewPost}>
                 <textarea
                   id="postTextArea"
+                  name="postTextArea"
                   rows="2"
                   cols="50"
                   placeholder="Add post..."
@@ -215,19 +274,7 @@ export default class GroupPage extends Component {
                   Post
                 </button>
               </form>
-              {/* need to add props to FeedEvent */}
-              {/* <Feed>
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-                <FeedEvent />
-              </Feed> */}
-              {/* {list}  */}
+              {this.getContentByCurrTab()}
             </div>
             <div className="detailsContainer">
               <h5 className="details">
