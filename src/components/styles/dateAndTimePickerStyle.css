@@ -1,0 +1,49 @@
+.inputPicker {
+  display: block;
+  width: 100%;
+  font-size: 16px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.picker_Form {
+  padding: 0px 30px;
+  background: #fefefe;
+  flex-direction: column;
+  padding-bottom: 20px;
+}
+
+.picker_submitBtn {
+  margin-top: 5%;
+}
+.addNewPickerBtn:disabled {
+  background-color: #dbf99f;
+  color: #333;
+}
+
+.addNewPickerBtn {
+  display: inline-block;
+  width: auto;
+  padding: 0 20px;
+  background-color: #777;
+  font-size: 14px;
+}
+
+.picker {
+  display: flex;
+  direction: row;
+  align-items: center;
+}
+
+.deletePickerBtn {
+  margin: 0;
+  margin-left: 10px;
+  width: 40px;
+  border-radius: 5px;
+  padding: 0;
+}
+
+.deletePickerbtn:hover {
+  background-color: #999;
+}
