@@ -86,6 +86,7 @@ io.on("connection", (socket) => {
             name: newParticipantName,
             id: receiver._id.toString(),
             isCreator: false,
+            didAnswerSurvey: false,
           });
           const isFull = participants.length === studyGroup.maxParticipants;
           const pendingUsers = isFull ? [] : studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
