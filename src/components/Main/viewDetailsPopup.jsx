@@ -57,18 +57,16 @@ class ViewDetailsPopup extends React.Component {
       answers = questions.map(
         (question, idx) => document.getElementById(`Q${idx}`).value
       );
-      //pass the answers to the server
+      let jwt = localStorage.getItem("jwtToken");
+      socket.emit("request-join-group", {
+        jwt,
+        group: this.props.groupForPopup,
+        answers,
+        questions,
+      });
+      alert("succeed");
+      this.props.updateGroupsList();
     }
-
-    let jwt = localStorage.getItem("jwtToken");
-    socket.emit("request-join-group", {
-      jwt,
-      group: this.props.groupForPopup,
-      answers,
-      questions
-    });
-    alert("succeed");
-    this.props.updateGroupsList();
   };
 
   getPopover = (index) => {
@@ -203,7 +201,7 @@ class ViewDetailsPopup extends React.Component {
                     id={`Q${idx}`}
                     type="text"
                     name={`Q${idx}`}
-                    required={true}
+                    required
                   />
                 </div>
               ))}

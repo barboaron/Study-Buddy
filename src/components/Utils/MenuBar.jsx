@@ -122,17 +122,6 @@ export default class MenuBar extends Component {
               <Nav.Link href="/MyGroups">My Groups</Nav.Link>
               {isAdmin ? <Nav.Link href="/Admin">Admin</Nav.Link> : null}
               <Nav.Link href="/Forums">Forums</Nav.Link>
-              {/* <NavDropdown title="Forums" id="collasible-nav-dropdown">
-              <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">
-                Another action
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.4">
-                Separated link
-              </NavDropdown.Item>
-            </NavDropdown> */}
             </Nav>
             <Nav>
               <NavDropdown
