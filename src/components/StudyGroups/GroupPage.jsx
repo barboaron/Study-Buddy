@@ -216,6 +216,8 @@ export default class GroupPage extends Component {
 
   getContentByCurrTab = () => {
     const { currTab, posts } = this.state;
+    const { group } = this.props.location.state;
+
     return currTab === 0 ? (
       <>
         <form className={"formPosts"} onSubmit={this.addNewPost}>
@@ -245,7 +247,7 @@ export default class GroupPage extends Component {
         </Feed>
       </>
     ) : (
-      <ScheduleWrapper isAdmin />
+      <ScheduleWrapper isAdmin survey={group.survey} />
     );
   };
 
