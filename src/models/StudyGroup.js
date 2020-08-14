@@ -58,6 +58,10 @@ const StudyGroupSchema = new Schema({
     posts: {
         type: [],
         required: true,
+    },
+    survey: {
+        type: {},
+        required: true,
     }
 });
 

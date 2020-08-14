@@ -41,6 +41,7 @@ router.post("/create", isLoggedIn, (req, res) => {
     creatorId: id,
     pendingUsers: [],
     posts: [],
+    survey: null,
   });
   newStudyGroup
     .save()
@@ -282,6 +283,7 @@ router.post("/deletePost", isLoggedIn, isInGroup, (req, res) => {
   const { id, name } = jwt_decode(req.body.jwt);
   const { postId, groupId } = req.body;
 
+
   StudyGroup.findOne({ _id: groupId })
     .then((studyGroup) => {
       deletePostFromGroup(id, studyGroup, postId)
@@ -308,6 +310,93 @@ router.post("/posts", isLoggedIn, isInGroup, (req, res) => {
     .catch(() => res.status(400).json("study group not found"));
 });
 
+router.post("/createSurvey", isLoggedIn, isInGroup, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const { groupId } = req.body;
+
+  StudyGroup.findOne({_id: groupId}).then(studyGroup => {
+    
+    const requester = studyGroup.participants.find(participant => participant.id === id)
+    if(!requester.isCreator) {
+      res.status(400).json("only group admin can create a survey");
+    } else {
+      const survey = req.body.dates.map(date => {
+        return {
+          date,
+          votes: 0
+        }
+      })
+      StudyGroup.updateOne({_id: groupId}, { survey }).then(() => res.status(200).json(survey));
+    }
+  })
+  .catch(() => res.status(400).json("study group not found"));
+})
+
+router.post("/answerSurvey", isLoggedIn, isInGroup, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const { groupId } = req.body;
+
+  StudyGroup.findOne({_id: groupId}).then(studyGroup => {
+    const requester = studyGroup.participants.find(participant => participant.id === id);
+    if(requester.isCreator) {
+      res.status(400).json("group admin can't answer the survey");
+    } else if(requester.didAnswerSurvey) {
+      res.status(400).json("user already answered the survey");
+    } 
+    else {
+      const updatedSurvey = studyGroup.survey.map(dateAndVotesObj => {
+        if(req.body.dates.includes(dateAndVotesObj.date)){
+          return {
+            date: dateAndVotesObj.date,
+            votes: dateAndVotesObj.votes + 1
+          }
+        }
+        return dateAndVotesObj;
+      });
+      const updatedParticipants = studyGroup.participants.map(participant => {
+        if(participant.isCreator || participant.id !== id) return participant;
+        return {...participant, didAnswerSurvey: true };
+      })
+      StudyGroup.updateOne({_id: groupId}, { survey: updatedSurvey, participants: updatedParticipants }).then(() => {
+        
+        if(didSurveyEnd(updatedParticipants)){ //everyone answered
+          const winningDate = findWinningDate(updatedSurvey);
+          const updatedParticipants = studyGroup.participants.map(participant => {
+            if(participant.isCreator) return participant;
+            return {...participant, didAnswerSurvey: false }
+          })
+          StudyGroup.updateOne({_id: groupId}, { survey: null, date: winningDate, participants: updatedParticipants }).then(() => {
+            res.status(200).json({surveyEnded: true});
+          });
+        }
+        else {
+          res.status(200).json({surveyEnded: false});
+        }
+      });
+    }
+  })
+  .catch(() => res.status(400).json("study group not found"));
+})
+
+function didSurveyEnd(participants) {
+  let didEnd = true;
+  participants.forEach(participant => {
+    if(!participant.isCreator && !partricipant.didAnswerSurvey) {
+      didEnd = false;
+    }
+  })
+  return didEnd;
+}
+
+function findWinningDate(survey) {
+  let winningDate = survey[0];
+  for(let i = 1; i < survey.length; i++){
+    if(survey[i].votes > winningDate.votes){
+      winningDate = survey[i];
+    }
+  }
+  return winningDate.date;
+}
 function deletePostFromGroup(userId, studyGroup, postId) {
   return new Promise((resolve, reject) => {
     studyGroup.posts.forEach((post) => {
