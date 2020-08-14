@@ -345,7 +345,7 @@ router.post("/answerSurvey", isLoggedIn, isInGroup, (req, res) => {
     } 
     else {
       const updatedSurvey = studyGroup.survey.map(dateAndVotesObj => {
-        if(dateAndVotesObj.date === req.body.date){
+        if(req.body.dates.includes(dateAndVotesObj.date)){
           return {
             date: dateAndVotesObj.date,
             votes: dateAndVotesObj.votes + 1
@@ -358,11 +358,8 @@ router.post("/answerSurvey", isLoggedIn, isInGroup, (req, res) => {
         return {...participant, didAnswerSurvey: true };
       })
       StudyGroup.updateOne({_id: groupId}, { survey: updatedSurvey, participants: updatedParticipants }).then(() => {
-        let voteAmount= 0;
-        updatedSurvey.forEach(dateAndVotesObj => {
-          voteAmount += dateAndVotesObj.votes;
-        })
-        if(voteAmount === studyGroup.participants.length - 1){ //everyone answered
+        
+        if(didSurveyEnd(updatedParticipants)){ //everyone answered
           const winningDate = findWinningDate(updatedSurvey);
           const updatedParticipants = studyGroup.participants.map(participant => {
             if(participant.isCreator) return participant;
@@ -380,6 +377,16 @@ router.post("/answerSurvey", isLoggedIn, isInGroup, (req, res) => {
   })
   .catch(() => res.status(400).json("study group not found"));
 })
+
+function didSurveyEnd(participants) {
+  let didEnd = true;
+  participants.forEach(participant => {
+    if(!participant.isCreator && !partricipant.didAnswerSurvey) {
+      didEnd = false;
+    }
+  })
+  return didEnd;
+}
 
 function findWinningDate(survey) {
   let winningDate = survey[0];
