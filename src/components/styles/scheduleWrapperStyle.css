@@ -47,3 +47,20 @@
 .deletePickerbtn:hover {
   background-color: #999;
 }
+
+.msgPollCreated {
+  font-weight: 700 !important;
+  font-size: 24px;
+  color: rgb(80, 73, 73);
+}
+
+.pollList_Item {
+  font-size: large;
+  padding: 5px 15px;
+}
+
+.pollList {
+  text-align: left;
+  height: 300px;
+  margin-top: 10px;
+}

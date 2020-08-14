@@ -206,7 +206,6 @@ export default class GroupPage extends Component {
           console.log("error");
         } else {
           this.setState({ posts: res.data });
-          // return res.data;
         }
       })
       .catch((err) => {
@@ -247,7 +246,7 @@ export default class GroupPage extends Component {
         </Feed>
       </>
     ) : (
-      <ScheduleWrapper isAdmin survey={group.survey} />
+      <ScheduleWrapper group={group} />
     );
   };
 
@@ -321,7 +320,7 @@ export default class GroupPage extends Component {
                 <br />
                 {group.participants.map((elem, idx) => (
                   <OverlayTrigger
-                    trigger="hover"
+                    trigger={["hover", "focus"]}
                     placement="top"
                     overlay={this.getPopover(idx)}
                   >

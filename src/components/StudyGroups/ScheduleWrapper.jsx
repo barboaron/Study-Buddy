@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import axios from "axios";
 import DateAndTimePicker from "../Utils/DateAndTimePicker";
-import "../styles/studyGroupStyles.css";
+import Poll from "../Utils/Poll";
+import "../styles/scheduleWrapperStyle.css";
 
 export default class ScheduleWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showDateAndTimePickers: props.isAdmin && !props.survey,
+      showDateAndTimePickers: props.group.isAdmin && !props.group.survey,
+      pollSucceedMsgToAdmin: props.group.isAdmin && props.group.survey,
     };
     this.createPoll = this.createPoll.bind(this);
   }
@@ -17,7 +19,7 @@ export default class ScheduleWrapper extends Component {
     event.preventDefault();
 
     let token = await localStorage.getItem("jwtToken");
-    const { _id } = this.props.location.state.group;
+    const { _id } = this.props.group;
     const date1 = event?.target?.elements?.Picker1?.value;
     const date2 = event?.target?.elements?.Picker2?.value;
     const date3 = event?.target?.elements?.Picker3?.value;
@@ -44,7 +46,10 @@ export default class ScheduleWrapper extends Component {
           console.log("error");
         } else {
           debugger;
-          this.setState({ showDateAndTimePickers: false });
+          this.setState({
+            showDateAndTimePickers: false,
+            pollSucceedMsgToAdmin: true,
+          });
         }
       })
       .catch((err) => {
@@ -52,16 +57,35 @@ export default class ScheduleWrapper extends Component {
       });
   }
 
-  render() {
-    const { showDateAndTimePickers } = this.state;
+  getComponent = () => {
+    const { showDateAndTimePickers, pollSucceedMsgToAdmin } = this.state;
+    let component;
+    debugger;
+    if (showDateAndTimePickers) {
+      component = (
+        <form className="picker_Form" onSubmit={this.createPoll}>
+          <DateAndTimePicker />
+          <button className="picker_submitBtn" type="submit">
+            Submit
+          </button>
+        </form>
+      );
+    } else if (pollSucceedMsgToAdmin) {
+      component = (
+        <span className="msgPollCreated">
+          Poll created successfully! Wait for results...
+          <br />
+        </span>
+      );
+    } else {
+      component = (
+        <Poll survey={this.props.group.survey} groupId={this.props.group._id} />
+      );
+    }
+    return component;
+  };
 
-    return showDateAndTimePickers ? (
-      <form className="picker_Form" onSubmit={this.createPoll}>
-        <DateAndTimePicker />
-        <button className="picker_submitBtn" type="submit">
-          Submit
-        </button>
-      </form>
-    ) : null;
+  render() {
+    return this.getComponent();
   }
 }
