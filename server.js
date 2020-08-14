@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
           senderId: sender._id,
           senderName: sender.firstName + " " + sender.lastName,
           type: groupTypes.accepted,
-          group: data.group,
+          group: {...data.group, isAdmin: false, didAnswerSurvey: false}
         };
         await User.updateOne(
           { _id: receiver._id },
