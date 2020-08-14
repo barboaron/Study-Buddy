@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/dateAndTimePickerStyle.css";
+import "../styles/scheduleWrapperStyle.css";
 
 export default class DateAndTimePicker extends React.Component {
   constructor() {

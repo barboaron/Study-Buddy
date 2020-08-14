@@ -206,7 +206,6 @@ export default class GroupPage extends Component {
           console.log("error");
         } else {
           this.setState({ posts: res.data });
-          // return res.data;
         }
       })
       .catch((err) => {
@@ -216,6 +215,8 @@ export default class GroupPage extends Component {
 
   getContentByCurrTab = () => {
     const { currTab, posts } = this.state;
+    const { group } = this.props.location.state;
+
     return currTab === 0 ? (
       <>
         <form className={"formPosts"} onSubmit={this.addNewPost}>
@@ -245,7 +246,7 @@ export default class GroupPage extends Component {
         </Feed>
       </>
     ) : (
-      <ScheduleWrapper isAdmin />
+      <ScheduleWrapper group={group} />
     );
   };
 
@@ -319,7 +320,7 @@ export default class GroupPage extends Component {
                 <br />
                 {group.participants.map((elem, idx) => (
                   <OverlayTrigger
-                    trigger="hover"
+                    trigger={["hover", "focus"]}
                     placement="top"
                     overlay={this.getPopover(idx)}
                   >
