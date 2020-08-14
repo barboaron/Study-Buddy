@@ -174,12 +174,14 @@ function getMyGroups(id) {
       });
       const resolvedData = myGroups.map((group) => {
         let isAdmin = false;
+        let didAnswerSurvey;
         group.participants.forEach((participant) => {
           if (participant.id.toString() === id) {
             if (participant.isCreator) isAdmin = true;
+            didAnswerSurvey = participant.didAnswerSurvey;
           }
         });
-        return { ...group._doc, isAdmin };
+        return { ...group._doc, isAdmin, didAnswerSurvey };
       });
       return Promise.resolve(resolvedData);
     })
@@ -326,7 +328,11 @@ router.post("/createSurvey", isLoggedIn, isInGroup, (req, res) => {
           votes: 0
         }
       })
-      StudyGroup.updateOne({_id: groupId}, { survey }).then(() => res.status(200).json(survey));
+      const updatedParticipants = studyGroup.participants.map(participant => {
+        if(participant.isCreator) return participant;
+        return {...participant, didAnswerSurvey: false }
+      })
+      StudyGroup.updateOne({_id: groupId}, { survey, participants: updatedParticipants }).then(() => res.status(200).json(survey));
     }
   })
   .catch(() => res.status(400).json("study group not found"));
