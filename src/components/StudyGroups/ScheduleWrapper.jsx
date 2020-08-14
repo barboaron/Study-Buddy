@@ -31,7 +31,6 @@ export default class ScheduleWrapper extends Component {
     date3 && dates.push(date3);
     date4 && dates.push(date4);
     date5 && dates.push(date5);
-    debugger;
 
     const pollData = {
       jwt: token,
@@ -45,7 +44,6 @@ export default class ScheduleWrapper extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           this.setState({
             showDateAndTimePickers: false,
             pollSucceedMsgToAdmin: true,
@@ -59,8 +57,8 @@ export default class ScheduleWrapper extends Component {
 
   getComponent = () => {
     const { showDateAndTimePickers, pollSucceedMsgToAdmin } = this.state;
+    const { survey, _id, didAnswerSurvey } = this.props.group;
     let component;
-    debugger;
     if (showDateAndTimePickers) {
       component = (
         <form className="picker_Form" onSubmit={this.createPoll}>
@@ -79,7 +77,7 @@ export default class ScheduleWrapper extends Component {
       );
     } else {
       component = (
-        <Poll survey={this.props.group.survey} groupId={this.props.group._id} />
+        <Poll survey={survey} groupId={_id} didAnswerSurvey={didAnswerSurvey} />
       );
     }
     return component;

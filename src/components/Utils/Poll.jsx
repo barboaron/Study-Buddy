@@ -6,7 +6,8 @@ export default class ScheduleWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      pollForParticipants: !!props.survey,
+      pollForParticipants: !!props.survey && !props.didAnswerSurvey,
+      didAnswerSurvey: !props.didAnswerSurvey,
     };
     this.answerPoll = this.answerPoll.bind(this);
   }
@@ -20,14 +21,12 @@ export default class ScheduleWrapper extends Component {
     const dates = Array.from(event?.target?.elements)
       .filter((elem) => elem.checked)
       .map((elem) => elem.value);
-    debugger;
 
     const pollAnswers = {
       jwt: token,
       groupId,
       dates,
     };
-    debugger;
 
     return axios
       .post("/api/studyGroups/answerSurvey", pollAnswers)
@@ -35,8 +34,7 @@ export default class ScheduleWrapper extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
-          this.setState({ pollForParticipants: false });
+          this.setState({ pollForParticipants: false, didAnswerSurvey: true });
         }
       })
       .catch((err) => {
@@ -45,9 +43,8 @@ export default class ScheduleWrapper extends Component {
   }
 
   render() {
-    const { pollForParticipants } = this.state;
+    const { pollForParticipants, didAnswerSurvey } = this.state;
     const { survey } = this.props;
-    debugger;
 
     return pollForParticipants ? (
       <form onSubmit={this.answerPoll}>
@@ -67,6 +64,13 @@ export default class ScheduleWrapper extends Component {
         </div>
         <button type="submit">Answer Poll</button>
       </form>
-    ) : null;
+    ) : (
+      <span className="msgPollCreated">
+        {didAnswerSurvey
+          ? "Thanks for your vote! Wait for results..."
+          : "No poll found for this group"}
+        <br />
+      </span>
+    );
   }
 }
