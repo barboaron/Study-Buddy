@@ -5,10 +5,12 @@ import NotificationsIcon from "../Icons/NotificationsIcon";
 import Notification from "./Notification";
 import PopupJoinGroup from "./PopupJoinGroup";
 import Badge from "@material-ui/core/Badge";
-import "../styles/menuStyles.css";
 import { socket } from "./../Header";
+import { withRouter } from "react-router";
+import "../styles/menuStyles.css";
 
-export default class MenuBar extends Component {
+/* MenuBar component renders the main menu in the header of the application(you can access the menu from anywhere in the application)*/
+class MenuBar extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -75,7 +77,7 @@ export default class MenuBar extends Component {
     console.log(notifications);
     return notifications
       .reverse()
-      .map((elem, index) => (
+      .map((elem) => (
         <Notification
           notification={elem}
           className={className}
@@ -92,6 +94,11 @@ export default class MenuBar extends Component {
         {this.getDropdownElements(seenNotifications, "seen")}
       </>
     );
+  };
+
+  logoutUser = () => {
+    localStorage.removeItem("jwtToken");
+    this.props.history.push("/login");
   };
 
   render() {
@@ -133,7 +140,7 @@ export default class MenuBar extends Component {
                 {this.getNotificationsDropdown()}
               </NavDropdown>
               <Nav.Link href="/UserProfile">My Profile</Nav.Link>
-              <Nav.Link href="#">Logout</Nav.Link>
+              <Nav.Link onClick={this.logoutUser}>Logout</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
@@ -148,3 +155,4 @@ export default class MenuBar extends Component {
     );
   }
 }
+export default withRouter(MenuBar);

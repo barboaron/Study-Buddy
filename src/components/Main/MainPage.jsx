@@ -8,6 +8,9 @@ import { Header } from "../Header";
 import ViewDetailsPopup from "./viewDetailsPopup";
 import "../styles/mainPageStyles.css";
 
+/* MainPage component is the main page of the application which shows the matched study-groups for the user.
+The component enable users to view studyGroup's details, join to a studyGroup, filter studyGroups, etc...*/
+
 export default class MainPage extends Component {
   constructor(props) {
     super(props);

@@ -2,6 +2,11 @@ import React, { Component } from "react";
 import { NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
+/* A notification will appear to the user in the menu for on of the following reasons:
+ * A join request sent to the creator's group.
+ * My join request has been approved by the group's creator.
+ * A user posted a new post in a group I am in.
+ */
 export default class Notification extends Component {
   getElementByType = () => {
     const { notification } = this.props;
@@ -27,7 +32,12 @@ export default class Notification extends Component {
     return notification.type !== "join-request" ? (
       <NavDropdown.Item className={className}>
         <Link
-          to={{ pathname: "/GroupPage", state: { group: notification.group } }}
+          to={{
+            pathname: "/GroupPage",
+            state: {
+              groupId: notification.group._id,
+            },
+          }}
         >
           {message}
         </Link>

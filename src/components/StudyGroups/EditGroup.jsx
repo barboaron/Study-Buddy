@@ -3,7 +3,8 @@ import FloatingLabel from "../Utils/floatingLabel";
 import axios from "axios";
 import "../styles/studyGroupStyles.css";
 
-export default class StudyGroupCreation extends Component {
+/* EditGroup component enables the user to edit his group's details*/
+export default class EditGroup extends Component {
   constructor(props) {
     super(props);
     this.state = {};

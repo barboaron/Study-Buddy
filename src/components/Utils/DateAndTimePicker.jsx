@@ -1,6 +1,8 @@
 import React from "react";
 import "../styles/scheduleWrapperStyle.css";
 
+/* DateAndTimePicker component is a util component for ScheduleWrapper.
+This component appears in the creator's group page in the schedule tab, so the creator can create a poll for the group.*/
 export default class DateAndTimePicker extends React.Component {
   constructor() {
     super();

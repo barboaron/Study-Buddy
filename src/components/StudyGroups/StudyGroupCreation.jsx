@@ -6,6 +6,7 @@ import DropDownOptions from "../Utils/DropDownOptions";
 import Questions from "./Questions";
 import "../styles/studyGroupStyles.css";
 
+/* StudyGroupCreation component enables user to create a new studyGroup.*/
 export default class StudyGroupCreation extends Component {
   constructor(props) {
     super(props);

@@ -1,5 +1,7 @@
 import React from "react";
 
+/* PopupJoinGroup component is a util component for Notification- shows a popup with the details of the 'join request' notificaion 
+and an option to accept/ignore the join request*/
 class PopupJoinGroup extends React.Component {
   render() {
     const { notificationInPopup, handleAccept, togglePopup } = this.props;

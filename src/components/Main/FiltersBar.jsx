@@ -3,8 +3,9 @@ import FloatingLabel from "../Utils/floatingLabel";
 import axios from "axios";
 import DropDownOptions from "../Utils/DropDownOptions";
 import FilterIcon from "../Icons/FilterIcon";
-
 import "../styles/studyGroupStyles.css";
+
+/* Filters component is a util component for MainPage- search and filter study-groups*/
 
 export default class Filters extends Component {
   constructor(props) {

@@ -4,6 +4,8 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import axios from "axios";
 import { socket } from "./../Header";
 
+/* ViewDetailsPopup component is a util component for MainPage- shows a popup with the studyGroup details
+and enables the user to join the studyGroup*/
 class ViewDetailsPopup extends React.Component {
   constructor(props) {
     super(props);

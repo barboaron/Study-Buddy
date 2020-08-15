@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import classNames from "classnames";
 
+/* FloatingLabel component is a util component for rendering an input and label in forms*/
 export default class FloatingLabel extends Component {
   render() {
     const {

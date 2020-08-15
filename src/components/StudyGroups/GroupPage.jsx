@@ -9,9 +9,9 @@ import axios from "axios";
 import { Header } from "../Header";
 import FeedEvent from "./FeedEvent";
 import ScheduleWrapper from "./ScheduleWrapper";
-
 import "../styles/groupPageStyles.css";
 
+/* GroupPage component has the collaboration feature and the schedule helper and all the details of the studyGroup.*/
 export default class GroupPage extends Component {
   constructor(props) {
     super(props);
@@ -19,25 +19,27 @@ export default class GroupPage extends Component {
     this.getParicipantsDetails = this.getParicipantsDetails.bind(this);
     this.getAllPosts = this.getAllPosts.bind(this);
     this.addNewPost = this.addNewPost.bind(this);
+    this.getGroupDetails = this.getGroupDetails.bind(this);
   }
 
   async componentDidMount() {
     if (!this.breakRender) {
-      const detailsArray = await this.getParicipantsDetails();
+      const group = await this.getGroupDetails();
+      const detailsArray = await this.getParicipantsDetails(group);
       const posts = await this.getAllPosts();
-      this.setState({ detailsArray, posts, isLoading: true });
+      this.setState({ detailsArray, posts, group, isLoading: true });
     }
   }
 
   componentWillMount() {
-    if (!this.props?.location?.state?.group) {
+    if (!this.props?.location?.state?.groupId) {
       this.props.history.push("/");
       this.breakRender = true;
     }
   }
 
-  async getParicipantsDetails() {
-    const { participants } = this.props.location.state.group;
+  async getParicipantsDetails(group) {
+    const { participants } = group;
     return Promise.all(
       participants.map(async (user) => await this.getUserDetails(user.id))
     ).then((data) => {
@@ -45,20 +47,31 @@ export default class GroupPage extends Component {
     });
   }
 
+  async getGroupDetails() {
+    let token = await localStorage.getItem("jwtToken");
+    const { groupId } = this.props.location.state;
+    const getGroupData = {
+      jwt: token,
+      groupId,
+    };
+
+    return axios
+      .post("/api/studyGroups/group", getGroupData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.group;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
   handleChange = (_, newValue) => {
     this.setState({ currTab: newValue });
   };
-
-  //   createListFromArray = (array, isGroups) => (
-  //     <div className="cousrsesList">
-  //       {array.map((elem) => (
-  //         <div className="cousrsesList_Item">
-  //           {isGroups ? elem.groupName || elem.courseName : elem.name}
-  //           <br />
-  //         </div>
-  //       ))}
-  //     </div>
-  //   );
 
   createFullName = (firstName, lastName) => {
     return (
@@ -159,11 +172,11 @@ export default class GroupPage extends Component {
 
   async getAllPosts() {
     let token = await localStorage.getItem("jwtToken");
-    const { _id } = this.props.location.state.group;
+    const { groupId } = this.props.location.state;
 
     const getAllPosts = {
       jwt: token,
-      groupId: _id,
+      groupId,
     };
 
     return axios
@@ -185,12 +198,12 @@ export default class GroupPage extends Component {
     event.preventDefault();
 
     let token = await localStorage.getItem("jwtToken");
-    const { _id } = this.props.location.state.group;
+    const { groupId } = this.props.location.state;
     const content = event?.target?.elements?.postTextArea?.value;
     const files = event?.target?.elements[1]?.files;
     const data = new FormData();
     data.append("jwt", token);
-    data.append("groupId", _id);
+    data.append("groupId", groupId);
     data.append("content", content);
     if (files?.length > 0)
       Object.values(files).map((file, index) =>
@@ -214,8 +227,8 @@ export default class GroupPage extends Component {
   }
 
   getContentByCurrTab = () => {
-    const { currTab, posts } = this.state;
-    const { group } = this.props.location.state;
+    const { currTab, posts, group } = this.state;
+    // const { groupId } = this.props.location.state;
 
     return currTab === 0 ? (
       <>
@@ -236,6 +249,8 @@ export default class GroupPage extends Component {
         <Feed>
           {posts.map((post) => (
             <FeedEvent
+              // groupId={groupId}
+              postId={post.id} // check the id
               imgSrc={post.imgSrc}
               userName={post.creatorName}
               action={"posted"}
@@ -251,12 +266,11 @@ export default class GroupPage extends Component {
   };
 
   render() {
-    const { isLoading, currTab } = this.state;
+    const { isLoading, currTab, group } = this.state;
 
     if (!isLoading) {
       return null;
     }
-    const { group } = this.props.location.state;
     const dateAndTime = group.date && new Date(group.date);
     return (
       <div className="groupPageWrapper">

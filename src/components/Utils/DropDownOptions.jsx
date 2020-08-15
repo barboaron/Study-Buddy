@@ -4,6 +4,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
+/* This component is a util component for rendering of dropdown list*/
 export default function DropDownSelect({
   options = [],
   label_name,

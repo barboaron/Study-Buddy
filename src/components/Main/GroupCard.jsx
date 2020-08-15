@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Card from "react-bootstrap/Card";
 
+/* GroupCard component is a util component for MainPage- create a card in the main page with the main information of a study-group*/
 export default class GroupCard extends Component {
   render() {
     const { group, viewDetails } = this.props;
