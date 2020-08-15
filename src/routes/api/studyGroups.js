@@ -155,6 +155,17 @@ router.post("/", isLoggedIn, (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
+router.post("/group", isLoggedIn, (req, res) => {
+  const { id } = jwt_decode(req.body.jwt);
+  const groupId = req.body.groupId;
+  getMyGroups(id)
+    .then((groups) => {
+      const requestedGroup = groups.find(group => group._id.toString() === groupId);
+      res.status(200).json({ group: requestedGroup });
+    })
+    .catch((err) => res.status(400).json(err));
+});
+
 router.post("/myGroups", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
   getMyGroups(id)
