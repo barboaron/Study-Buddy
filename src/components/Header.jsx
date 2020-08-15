@@ -3,6 +3,7 @@ import socketIOClient from "socket.io-client";
 import MenuBar from "./Utils/MenuBar";
 import axios from "axios";
 
+/* Header component is a wrapper component for the MenuBar- manages all the transmission of notifications using web socket*/
 var socket;
 class Header extends React.Component {
   constructor() {

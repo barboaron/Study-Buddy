@@ -3,6 +3,7 @@ import FloatingLabel from "./floatingLabel";
 import axios from "axios";
 import DropDownOptions from "./DropDownOptions";
 
+/* ChangeUserDetails component is a util component for EditProfile- enables the user to change his details*/
 export default class ChangeUserDetails extends Component {
   constructor(props) {
     super(props);

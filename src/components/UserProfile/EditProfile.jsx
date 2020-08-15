@@ -5,6 +5,7 @@ import ProfileImg from "../Utils/profileImg";
 import { Header } from "../Header";
 import "../styles/userProfileStyle.css";
 
+/* EditProfile component is a util component for UserProfile- enables a user to edit his profile details*/
 export default class EditProfile extends Component {
   constructor(props) {
     super(props);

@@ -1,5 +1,6 @@
 import axios from "axios";
 
+/* isUserLoggedIn function is a util function that check if the user logged in, if not- transfers the user to the login page*/
 export async function isUserLoggedIn(
   history,
   loggedIn_path,

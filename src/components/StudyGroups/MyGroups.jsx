@@ -7,6 +7,7 @@ import EditGroup from "./EditGroup";
 import { Link } from "react-router-dom";
 import "../styles/myGroupsStyle.css";
 
+/* MyGroups component shows the user all groups that he is in, and enables the user to perform some operations*/
 export default class MyGroups extends Component {
   constructor(props) {
     super(props);
@@ -76,7 +77,7 @@ export default class MyGroups extends Component {
               <Link
                 to={{
                   pathname: "/GroupPage",
-                  state: { group: data, groupId: data._id },
+                  state: { groupId: data._id },
                 }}
               >
                 {data.groupName}

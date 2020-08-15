@@ -5,10 +5,10 @@ import Tab from "@material-ui/core/Tab";
 import axios from "axios";
 import { isUserLoggedIn } from "../Utils/isUserLoggedIn";
 import { Header } from "../Header";
-
 import EditProfile from "./EditProfile";
 import "../styles/userProfileStyle.css";
 
+/* UserProfile component shows the profile of user (with all his detailss)*/
 export default class UserProfile extends Component {
   constructor(props) {
     super(props);

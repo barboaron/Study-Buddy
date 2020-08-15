@@ -2,7 +2,10 @@ import React, { Component } from "react";
 import axios from "axios";
 import "../styles/studyGroupStyles.css";
 
-export default class ScheduleWrapper extends Component {
+/* Poll component is a util component for ScheduleWrapper.
+This component appears in the participants's group page in the schedule tab after the creator's group created a new poll, 
+so they can vote it.*/
+export default class Poll extends Component {
   constructor(props) {
     super(props);
     this.state = {

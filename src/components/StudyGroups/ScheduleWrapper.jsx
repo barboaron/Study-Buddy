@@ -4,6 +4,10 @@ import DateAndTimePicker from "../Utils/DateAndTimePicker";
 import Poll from "../Utils/Poll";
 import "../styles/scheduleWrapperStyle.css";
 
+/* ScheduleWrapper component is a util component for schedule helper feature 
+that enables the creator's group to create a poll in order to schedule in a comfortable way between all the participants,
+and enables the paricipants to vote this poll.
+When all the participants vote, the date that chosen will be shown in the group's details*/
 export default class ScheduleWrapper extends Component {
   constructor(props) {
     super(props);

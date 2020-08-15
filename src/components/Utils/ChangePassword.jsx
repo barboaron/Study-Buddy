@@ -4,6 +4,7 @@ import PasswordIcon from "../Icons/PasswordIcon";
 import FloatingLabel from "./floatingLabel";
 import axios from "axios";
 
+/* ChangePassword component is a util component for EditProfile- enables the user to change his password*/
 export default class ChangePassword extends Component {
   constructor(props) {
     super(props);

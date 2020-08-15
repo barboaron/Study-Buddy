@@ -1,6 +1,10 @@
 import React from "react";
 import "../styles/questionsStyle.css";
 
+/* Questions component is a util component for createStudyGroup component- a creator of studyGroup can add questions
+that each user that want to join the group have to answer this questions 
+and then the creator will decide if he accept/ignore the join request*/
+
 export default class Questions extends React.Component {
   constructor() {
     super();

@@ -6,9 +6,11 @@ import Notification from "./Notification";
 import PopupJoinGroup from "./PopupJoinGroup";
 import Badge from "@material-ui/core/Badge";
 import { socket } from "./../Header";
+import { withRouter } from "react-router";
 import "../styles/menuStyles.css";
 
-export default class MenuBar extends Component {
+/* MenuBar component renders the main menu in the header of the application(you can access the menu from anywhere in the application)*/
+class MenuBar extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -75,7 +77,7 @@ export default class MenuBar extends Component {
     console.log(notifications);
     return notifications
       .reverse()
-      .map((elem, index) => (
+      .map((elem) => (
         <Notification
           notification={elem}
           className={className}
@@ -95,10 +97,8 @@ export default class MenuBar extends Component {
   };
 
   logoutUser = () => {
-    debugger;
-
     localStorage.removeItem("jwtToken");
-    // this.props.history.push("/login");
+    this.props.history.push("/login");
   };
 
   render() {
@@ -155,3 +155,4 @@ export default class MenuBar extends Component {
     );
   }
 }
+export default withRouter(MenuBar);

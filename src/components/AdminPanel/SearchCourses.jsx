@@ -1,6 +1,7 @@
 /* eslint-disable array-callback-return */
 import React, { Component } from "react";
 
+/* SearchCourses component is a util component for admin- search possible courses*/
 class SearchCourses extends Component {
   constructor(props) {
     super(props);

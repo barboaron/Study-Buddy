@@ -6,6 +6,7 @@ import SearchCourses from "./SearchCourses";
 import { Header } from "../Header";
 import axios from "axios";
 
+/*Admin component -accessible only for admin user, enables admin user to manage courses and degrees in his university*/
 export default class Admin extends Component {
   constructor(props) {
     super(props);
@@ -166,8 +167,7 @@ export default class Admin extends Component {
     if (!isLoading) {
       return null;
     }
-    // const { history } = this.props;
-    // isUserLoggedIn(history, "/");
+
     return (
       <div className="profile_user">
         <Header />
