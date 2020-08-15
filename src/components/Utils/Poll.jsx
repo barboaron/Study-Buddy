@@ -7,7 +7,7 @@ export default class ScheduleWrapper extends Component {
     super(props);
     this.state = {
       pollForParticipants: !!props.survey && !props.didAnswerSurvey,
-      didAnswerSurvey: !props.didAnswerSurvey,
+      didAnswerSurvey: props.didAnswerSurvey,
     };
     this.answerPoll = this.answerPoll.bind(this);
   }

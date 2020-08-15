@@ -17,6 +17,9 @@ export default class FeedEvent extends Component {
             <Feed.User>{userName || "name"}</Feed.User>
             {` ${action}`}
             <Feed.Date>{date}</Feed.Date>
+            <Feed.Meta>
+              <a href="https://www.w3schools.com">Delete</a>
+            </Feed.Meta>
           </Feed.Summary>
           <Feed.Extra text>{content}</Feed.Extra>
           {/* <Feed.Extra images>

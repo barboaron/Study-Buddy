@@ -5,8 +5,8 @@ import NotificationsIcon from "../Icons/NotificationsIcon";
 import Notification from "./Notification";
 import PopupJoinGroup from "./PopupJoinGroup";
 import Badge from "@material-ui/core/Badge";
-import "../styles/menuStyles.css";
 import { socket } from "./../Header";
+import "../styles/menuStyles.css";
 
 export default class MenuBar extends Component {
   constructor(props) {
@@ -94,6 +94,13 @@ export default class MenuBar extends Component {
     );
   };
 
+  logoutUser = () => {
+    debugger;
+
+    localStorage.removeItem("jwtToken");
+    // this.props.history.push("/login");
+  };
+
   render() {
     const { isLoading, isAdmin, notificationInPopup } = this.state;
     const { unseenNotifications } = this.props;
@@ -133,7 +140,7 @@ export default class MenuBar extends Component {
                 {this.getNotificationsDropdown()}
               </NavDropdown>
               <Nav.Link href="/UserProfile">My Profile</Nav.Link>
-              <Nav.Link href="#">Logout</Nav.Link>
+              <Nav.Link onClick={this.logoutUser}>Logout</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Navbar>

@@ -27,7 +27,13 @@ export default class Notification extends Component {
     return notification.type !== "join-request" ? (
       <NavDropdown.Item className={className}>
         <Link
-          to={{ pathname: "/GroupPage", state: { group: notification.group } }}
+          to={{
+            pathname: "/GroupPage",
+            state: {
+              group: notification.group,
+              groupId: notification.group._id,
+            },
+          }}
         >
           {message}
         </Link>

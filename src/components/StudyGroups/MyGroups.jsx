@@ -73,11 +73,15 @@ export default class MyGroups extends Component {
         return (
           <tr>
             <td>
-              <Link to={{ pathname: "/GroupPage", state: { group: data } }}>
+              <Link
+                to={{
+                  pathname: "/GroupPage",
+                  state: { group: data, groupId: data._id },
+                }}
+              >
                 {data.groupName}
               </Link>
             </td>
-            {/* <td>{data.groupName}</td> */}
             <td>{data.courseName}</td>
             <td>{data.groupType}</td>
             <td>{data.description}</td>

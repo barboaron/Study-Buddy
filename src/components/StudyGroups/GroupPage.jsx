@@ -9,7 +9,6 @@ import axios from "axios";
 import { Header } from "../Header";
 import FeedEvent from "./FeedEvent";
 import ScheduleWrapper from "./ScheduleWrapper";
-
 import "../styles/groupPageStyles.css";
 
 export default class GroupPage extends Component {
@@ -216,6 +215,7 @@ export default class GroupPage extends Component {
   getContentByCurrTab = () => {
     const { currTab, posts } = this.state;
     const { group } = this.props.location.state;
+    debugger;
 
     return currTab === 0 ? (
       <>
@@ -236,6 +236,8 @@ export default class GroupPage extends Component {
         <Feed>
           {posts.map((post) => (
             <FeedEvent
+              groupId={group._id}
+              postId={post.id} // check the id
               imgSrc={post.imgSrc}
               userName={post.creatorName}
               action={"posted"}

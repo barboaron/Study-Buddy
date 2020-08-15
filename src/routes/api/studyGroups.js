@@ -41,7 +41,7 @@ router.post("/create", isLoggedIn, (req, res) => {
     creatorId: id,
     pendingUsers: [],
     posts: [],
-    survey: null,
+    survey: false,
   });
   newStudyGroup
     .save()
