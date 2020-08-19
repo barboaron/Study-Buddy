@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
           const pendingUsers = isFull ? [] : studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
           const seenNotifications = isFull 
             ? removeFullGroupNotification(sender.seenNotifications, studyGroup._id.toString())
-            : sender.seenNotifications;
+            : sender.seenNotifications.filter(notification => notification.timeCreated !== data.notificationId);
           const unseenNotifications = isFull 
             ? removeFullGroupNotification(sender.unseenNotifications, studyGroup._id.toString())
             : sender.unseenNotifications;
