@@ -77,7 +77,7 @@ export default class PostPage extends Component {
     const files = event?.target?.elements[1]?.files;
     const data = new FormData();
     
-    data.append("jwt", 'token');
+    data.append("jwt", token);
     data.append("forumId", forumId);
     data.append("postId", postId);
     data.append("comment", comment);
