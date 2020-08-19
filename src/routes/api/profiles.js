@@ -11,11 +11,11 @@ var multer = require("multer");
 const { promisify } = require("util");
 const unlinkAsync = promisify(fs.unlink);
 var btoa = require('btoa');
-var { defaultImgSrc } = require("./../../utils/defaults");
+const defaultImgSrc = '/defaultPicUser.png';
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads");
+    cb(null, "public/uploads");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -146,12 +146,12 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-function createProfileImgSrc(buffer) {
-  let base64Flag = "data:image/*;base64,";
-  let imageStr = arrayBufferToBase64(buffer);
-  const imageSource = base64Flag + imageStr;
-  return imageSource;
-}
+// function createProfileImgSrc(buffer) {
+//   let base64Flag = "data:image/*;base64,";
+//   let imageStr = arrayBufferToBase64(buffer);
+//   const imageSource = base64Flag + imageStr;
+//   return imageSource;
+// }
 
 router.post("/changeProfilePic", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.headers["jwt"]);
@@ -169,14 +169,13 @@ router.post("/changeProfilePic", isLoggedIn, (req, res) => {
       if (!profile) {
         return res.status(400).json("Profile does not exist.");
       } else {
-        let imgObject = {};
-        imgObject.data = fs.readFileSync(req.file.path);
-
-        imgObject.contentType = "image/png";
-        const imageSource = createProfileImgSrc(imgObject.data);
-        await Profile.update({ user_id: id }, {img: imgObject, imgSrc: imageSource});
-        await unlinkAsync(req.file.path);
-        return res.status(200).json(imageSource);
+        if(profile.imgSrc !== defaultImgSrc)
+        {
+          await unlinkAsync(`./public/${profile.imgSrc}`);
+        }
+        const imgSrc = (req.file.path).substr(7);
+        await Profile.update({ user_id: id }, { imgSrc });
+        return res.status(200).json(imgSrc);
       }
     })
     .catch((err) => res.status(400).json(err));

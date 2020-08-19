@@ -31,11 +31,6 @@ const ProfileSchema = new Schema({
         type: Number,
         required: false
     },
-    img: {
-        data: Buffer,
-        contentType: String,
-        required:false
-    },
     imgSrc: {
         type: String,
         required:false

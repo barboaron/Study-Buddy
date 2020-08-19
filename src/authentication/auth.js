@@ -3,18 +3,27 @@ const jwt_decode = require("jwt-decode");
 const User = require("../models/User");
 const StudyGroup = require("../models/StudyGroup");
 const keys = require("../../config/keys");
+const fs = require("fs");
+const { promisify } = require("util");
+const unlinkAsync = promisify(fs.unlink);
 
 function isLoggedIn(req, res, next) {
-  
     if(!req.body.jwt) {
         if(!req.headers['jwt'])
+        {
             res.status(401).json("please sign in");
+        }
     }
     
     const token = req.body.jwt ? (req.body.jwt).substring(7) : (req.headers['jwt']).substring(7);
   
     jwt.verify(token, keys.secretOrKey, function(err, decoded) {
         if (err) {
+            if(req.files) {
+                req.files.forEach(async (file) => {
+                    await unlinkAsync(file.path);
+                })
+            }
             res.status(401).json("please sign in");
         } else {
             next();
@@ -41,9 +50,8 @@ function isAdminUser(req, res, next) {
 
 function isInGroup(req, res, next) {
     const jwt = req.body.jwt ? req.body.jwt : req.headers['jwt'];
-    const groupId = req.body.groupId ? req.body.groupId : req.headers['groupId'];
+    const groupId = req.body.groupId ? req.body.groupId : req.headers['groupid'];
     const { id } = jwt_decode(jwt);
-
     StudyGroup.findOne({ _id: groupId })
         .then((studyGroup) => {
             let isInGroup = false;

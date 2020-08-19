@@ -69,29 +69,33 @@ export default class PostPage extends Component {
   addNewComment = async (event) => {
     event.persist();
     event.preventDefault();
-    const comment = event?.target?.elements?.comment?.value;
+
     let token = await localStorage.getItem("jwtToken");
+    const forumId = this.props.location.state.forumId;
+    const postId = this.props.location.state.post._id;
+    const comment = event?.target?.elements?.comment?.value;
+    const files = event?.target?.elements[1]?.files;
+    const data = new FormData();
+    
+    data.append("jwt", 'token');
+    data.append("forumId", forumId);
+    data.append("postId", postId);
+    data.append("comment", comment);
 
-    const reqBody = {
-      jwt: token,
-      forumId: this.props.location.state.forumId,
-      postId: this.props.location.state.post._id,
-      comment,
-    };
+    if (files?.length > 0)
+      Object.values(files).map((file, index) =>
+        data.append("file", file)
+      );
+    
+    if (comment) event.target.elements.comment.value = "";
 
-    const post = await this.getPost(reqBody);
-    console.log(post);
-    this.setState({ post });
-  };
-
-  getPost = async (reqBody) => {
-    return axios
-      .post("/api/forums/addComment", reqBody)
+    axios
+      .post("/api/forums/addComment", data)
       .then((res) => {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          return res.data;
+          this.setState({ post: res.data });
         }
       })
       .catch((err) => {

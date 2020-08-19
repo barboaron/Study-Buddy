@@ -67,6 +67,17 @@ class MenuBar extends Component {
     this.togglePopup(null);
   };
 
+  
+  handleIgnore = () => {
+    let jwt = localStorage.getItem("jwtToken");
+    socket.emit("join-group-ignored", {
+      jwt,
+      group: this.state.notificationInPopup.group,
+      ignoredUserId: this.state.notificationInPopup.senderId,
+    });
+    this.togglePopup(null);
+  };
+
   toggleDropdown = () => {
     const { updateSeenNotifications } = this.props;
     this.isDropdownOpen && updateSeenNotifications();
@@ -148,6 +159,7 @@ class MenuBar extends Component {
           <PopupJoinGroup
             togglePopup={this.togglePopup}
             handleAccept={this.handleAccept}
+            handleIgnore={this.handleIgnore}
             notificationInPopup={notificationInPopup}
           />
         ) : null}
