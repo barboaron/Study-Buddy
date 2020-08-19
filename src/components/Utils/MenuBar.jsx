@@ -63,6 +63,7 @@ class MenuBar extends Component {
       jwt,
       group: this.state.notificationInPopup.group,
       approvedUserId: this.state.notificationInPopup.senderId,
+      notificationId: this.state.notificationInPopup.timeCreated,
     });
     this.togglePopup(null);
   };
