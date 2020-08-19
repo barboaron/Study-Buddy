@@ -8,6 +8,18 @@ const jwt_decode = require("jwt-decode");
 const { isLoggedIn, isInGroup } = require("../../authentication/auth");
 const isEmpty = require("is-empty");
 const { v4: uuidv4 } = require("uuid");
+const multer = require("multer");
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+var upload = multer({ storage: storage });
 
 const PAGE_SIZE = 9;
 const studyGroupTypes = ["Project", "Homework", "Exam Study"];
@@ -258,38 +270,38 @@ router.post("/leaveGroup", isLoggedIn, isInGroup, (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
-router.post("/addPost", isLoggedIn, isInGroup, (req, res) => {
-  const { id, name } = jwt_decode(req.body.jwt);
-  const { content, groupId } = req.body;
-
-  if (!content) {
-    return res.status(400).json("content is required");
-  }
-  Profile.findOne({ user_id: id })
-    .then((profile) => {
-      StudyGroup.findOne({ _id: groupId })
-        .then((studyGroup) => {
-          const post = {
-            _id: uuidv4(),
-            creationDate: Date.now(),
-            content,
-            creatorName: name,
-            creatorId: id,
-            creatorImgSrc: profile.imgSrc,
-            //files??
-          };
-          StudyGroup.updateOne(
-            { _id: groupId },
-            { posts: studyGroup.posts.concat(post) }
-          )
-            .then(() => {
-              res.status(200).json(studyGroup.posts.concat(post));
-            })
-            .catch((err) => res.status(400).json("study group update failed"));
-        })
-        .catch((err) => res.status(400).json("study group not found"));
-    })
-    .catch((err) => res.status(400).json("profile not found"));
+router.post("/addPost", isLoggedIn, isInGroup, upload.array('file', 5), (req, res) => {
+    const { id, name } = jwt_decode(req.headers['jwt']);  
+    const { content, groupId } = req.body;
+    if (!content) {
+      return res.status(400).json("content is required");
+    }
+    Profile.findOne({ user_id: id })
+      .then((profile) => {
+        StudyGroup.findOne({ _id: groupId })
+          .then((studyGroup) => {
+            const filePaths = req.files.map((file) => file.path.substr(7));
+            const post = {
+              _id: uuidv4(),
+              creationDate: Date.now(),
+              content,
+              creatorName: name,
+              creatorId: id,
+              creatorImgSrc: profile.imgSrc,
+              files: filePaths,
+            };
+            StudyGroup.updateOne(
+              { _id: groupId },
+              { posts: studyGroup.posts.concat(post) }
+            )
+              .then(() => {
+                res.status(200).json(studyGroup.posts.concat(post));
+              })
+              .catch((err) => res.status(400).json("study group update failed"));
+          })
+          .catch((err) => res.status(400).json("study group not found"));
+      })
+      .catch((err) => res.status(400).json("profile not found"));
 });
 
 router.post("/deletePost", isLoggedIn, isInGroup, (req, res) => {

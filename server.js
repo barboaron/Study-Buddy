@@ -16,6 +16,8 @@ const keys = require("./config/keys");
 const multer = require("multer");
 const cors = require("cors");
 const io = require("socket.io")(5500);
+const formidableMiddleware = require('express-formidable');
+
 
 const groupTypes = {
   join: "join-request",
@@ -91,13 +93,30 @@ io.on("connection", (socket) => {
           const isFull = participants.length === studyGroup.maxParticipants;
           const pendingUsers = isFull ? [] : studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
           const seenNotifications = isFull 
-            ? removeFullGroupNotification(sender.seenNotifications, studyGroup._id)
+            ? removeFullGroupNotification(sender.seenNotifications, studyGroup._id.toString())
             : sender.seenNotifications;
           const unseenNotifications = isFull 
-            ? removeFullGroupNotification(sender.unseenNotifications, studyGroup._id)
+            ? removeFullGroupNotification(sender.unseenNotifications, studyGroup._id.toString())
             : sender.unseenNotifications;
           await User.updateOne( { _id: sender._id }, { seenNotifications, unseenNotifications });
           await StudyGroup.updateOne({ _id: studyGroup._id }, { participants, isFull, pendingUsers });
+        });
+      });
+    });
+  });
+  socket.on("join-group-ignored", (data) => {
+    const { id } = jwt_decode(data.jwt);
+    User.findOne({ _id: id }).then((sender) => {
+      User.findOne({ _id: data.ignoredUserId }).then(async (receiver) => {
+        StudyGroup.findOne({ _id: data.group._id }).then(async (studyGroup) => {
+          const pendingUsers = studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
+          const seenNotifications = sender.seenNotifications.filter(notification => {
+            return notification.group._id !== studyGroup._id.toString() 
+              || notification.type !== groupTypes.join
+              || notification.senderId.toString() !== data.ignoredUserId;
+          }); 
+          await User.updateOne( { _id: sender._id }, { seenNotifications });
+          await StudyGroup.updateOne({ _id: studyGroup._id }, { pendingUsers });
         });
       });
     });
@@ -106,7 +125,7 @@ io.on("connection", (socket) => {
 
 function removeFullGroupNotification(notifications, groupId) {
   return notifications.filter( notification => {
-    return notification.groupId !== groupId || notification.type !== groupTypes.join;
+    return notification.group._id !== groupId || notification.type !== groupTypes.join;
   });
 }
 
@@ -137,6 +156,8 @@ app.use("/api/courses", courses);
 app.use("/api/admins", admins);
 app.use("/api/studyGroups", studyGroups);
 app.use("/api/forums", forums);
+app.use(formidableMiddleware());
+
 
 app.use(cors());
 // app.use(multer({ dest: './uploads/',

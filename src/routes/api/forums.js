@@ -8,8 +8,18 @@ const jwt_decode = require("jwt-decode");
 const { validatePostInput, validateCommentInput, postTypes } = require("../../validation/post");
 const { v4: uuidv4 } = require('uuid');
 
-//upload file to post
+const multer = require("multer");
 
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+var upload = multer({ storage: storage });
 
 router.post("/", isLoggedIn, (req, res) => {
     const { id } = jwt_decode(req.body.jwt);
@@ -49,10 +59,9 @@ router.post("/postTypes", isLoggedIn, (req, res) => {
     res.status(200).json(postTypes);
 });
 
-router.post("/createPost", isLoggedIn, (req, res) => {
+router.post("/createPost", upload.array('file', 5), isLoggedIn, (req, res) => {
   const { id, name } = jwt_decode(req.body.jwt);
   const { forumId, title, content, type } = req.body;
-  
   const { errors, isValid } = validatePostInput(req.body);
   if (!isValid) {
     return res.status(400).json(errors);
@@ -60,6 +69,7 @@ router.post("/createPost", isLoggedIn, (req, res) => {
 
   Forum.findOne({ _id: forumId })
     .then((forum) => {
+      const filePaths = req.files ? req.files.map((file) => file.path.substr(7)) : [];
       const post = {
         _id: uuidv4(),
         creationDate: Date.now(),
@@ -69,18 +79,18 @@ router.post("/createPost", isLoggedIn, (req, res) => {
         creatorName: name,
         creatorId: id,
         comments: [],
-        //files??
+        files: filePaths,
       };
       Forum.updateOne({ _id: forumId }, { posts: forum.posts.concat(post) }).then(
-        (forum) => {
-          res.status(200).json(post);
+        () => {
+          res.status(200).json(forum.posts.concat(post));
         }
       ).catch((err) => res.status(400).json('forum update failed'));
     })
   .catch((err) => res.status(400).json('forum not found'));
 });
 
-router.post("/addComment", isLoggedIn, (req, res) => {
+router.post("/addComment", upload.array('file', 5), isLoggedIn, (req, res) => {
   const { id, name } = jwt_decode(req.body.jwt);
   const { forumId, postId, comment } = req.body;
   
@@ -92,13 +102,15 @@ router.post("/addComment", isLoggedIn, (req, res) => {
     .then((profile) => {
       Forum.findOne({ _id: forumId })
       .then((forum) => {
+        const filePaths = req.files.map((file) => file.path.substr(7));
         const newComment = {
           _id: uuidv4(),
           creationDate: Date.now(),
           content: comment,
           creatorName: name,
           creatorId: id,
-          imgSrc: null //profile.imgSrc,
+          imgSrc: profile.imgSrc,
+          files: filePaths,
         };
 
         const posts = addCommentToPost(forum, postId, newComment);

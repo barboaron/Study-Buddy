@@ -4,7 +4,7 @@ import React from "react";
 and an option to accept/ignore the join request*/
 class PopupJoinGroup extends React.Component {
   render() {
-    const { notificationInPopup, handleAccept, togglePopup } = this.props;
+    const { notificationInPopup, handleAccept, togglePopup, handleIgnore } = this.props;
     const { group } = notificationInPopup;
 
     return (
@@ -30,7 +30,7 @@ class PopupJoinGroup extends React.Component {
           <button className="popupsBtn" onClick={togglePopup}>
             X Close Me
           </button>
-          <button className="popupsBtn" onClick={() => {}}>
+          <button className="popupsBtn" onClick={handleIgnore}>
             Ignore
           </button>
           <button className="popupsBtn" onClick={handleAccept}>
