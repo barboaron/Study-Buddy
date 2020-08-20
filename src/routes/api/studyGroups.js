@@ -280,7 +280,13 @@ router.post("/addPost", upload.array('file', 5),  isLoggedIn, isInGroup, (req, r
       .then((profile) => {
         StudyGroup.findOne({ _id: groupId })
           .then((studyGroup) => {
-            const filePaths = req.files.map((file) => file.path.substr(7));
+            const filePaths = req.files.map((file) =>  {
+              const isImage = isImageFile(file.path);
+              return {
+                path: file.path.substr(7),
+                isImage, 
+              }
+            });
             const post = {
               _id: uuidv4(),
               creationDate: Date.now(),
@@ -304,6 +310,9 @@ router.post("/addPost", upload.array('file', 5),  isLoggedIn, isInGroup, (req, r
       .catch((err) => res.status(400).json("profile not found"));
 });
 
+function isImgFile(path) {
+  return path.endsWith("jpg") || path.endsWith("png");
+}
 router.post("/deletePost", isLoggedIn, isInGroup, (req, res) => {
   const { id, name } = jwt_decode(req.body.jwt);
   const { postId, groupId } = req.body;

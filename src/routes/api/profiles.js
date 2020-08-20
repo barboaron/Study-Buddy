@@ -173,7 +173,7 @@ router.post("/changeProfilePic", isLoggedIn, (req, res) => {
         {
           await unlinkAsync(`./public/${profile.imgSrc}`);
         }
-        const imgSrc = (req.file.path).substr(7);
+        const imgSrc = "uploads/" + (req.file.path).substr(15);
         await Profile.update({ user_id: id }, { imgSrc });
         return res.status(200).json(imgSrc);
       }
