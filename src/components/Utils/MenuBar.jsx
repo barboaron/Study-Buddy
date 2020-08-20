@@ -68,7 +68,6 @@ class MenuBar extends Component {
     this.togglePopup(null);
   };
 
-  
   handleIgnore = () => {
     let jwt = localStorage.getItem("jwtToken");
     socket.emit("join-group-ignored", {
@@ -100,11 +99,22 @@ class MenuBar extends Component {
 
   getNotificationsDropdown = () => {
     const { seenNotifications, unseenNotifications } = this.props;
+    const notificationsWithBadge = (
+      <Badge color="secondary" badgeContent={unseenNotifications.length}>
+        <NotificationsIcon />
+      </Badge>
+    );
+
     return (
-      <>
+      <NavDropdown
+        title={notificationsWithBadge}
+        id="collasible-nav-dropdown"
+        alignRight
+        onClick={this.toggleDropdown}
+      >
         {this.getDropdownElements(unseenNotifications, "unseen")}
         {this.getDropdownElements(seenNotifications, "seen")}
-      </>
+      </NavDropdown>
     );
   };
 
@@ -115,12 +125,7 @@ class MenuBar extends Component {
 
   render() {
     const { isLoading, isAdmin, notificationInPopup } = this.state;
-    const { unseenNotifications } = this.props;
-    const notificationsWithBadge = (
-      <Badge color="secondary" badgeContent={unseenNotifications.length}>
-        <NotificationsIcon />
-      </Badge>
-    );
+
     if (!isLoading) {
       return null;
     }
@@ -143,14 +148,7 @@ class MenuBar extends Component {
               <Nav.Link href="/Forums">Forums</Nav.Link>
             </Nav>
             <Nav>
-              <NavDropdown
-                title={notificationsWithBadge}
-                id="collasible-nav-dropdown"
-                alignRight
-                onClick={this.toggleDropdown}
-              >
-                {this.getNotificationsDropdown()}
-              </NavDropdown>
+              {this.getNotificationsDropdown()}
               <Nav.Link href="/UserProfile">My Profile</Nav.Link>
               <Nav.Link onClick={this.logoutUser}>Logout</Nav.Link>
             </Nav>

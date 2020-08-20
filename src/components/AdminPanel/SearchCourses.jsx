@@ -17,20 +17,16 @@ class SearchCourses extends Component {
 
   getCoursesList = () =>
     this.props.coursesList
-      .filter((data) => {
-        if (this.state.search == null) return data;
-        else if (
+      .filter(
+        (data) =>
+          this.state.search == null ||
           data.degreeName
             .toLowerCase()
             .includes(this.state.search.toLowerCase()) ||
           data.courseName
             .toLowerCase()
             .includes(this.state.search.toLowerCase())
-        ) {
-          return data;
-        }
-        return;
-      })
+      )
       .map((data) => {
         return (
           <tr>

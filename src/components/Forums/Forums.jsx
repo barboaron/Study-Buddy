@@ -29,32 +29,32 @@ export default class Forums extends Component {
     this.setState({ search: keyword });
   };
 
-    getMyForums = async () => {
-        let token = await localStorage.getItem("jwtToken");
+  getMyForums = async () => {
+    let token = await localStorage.getItem("jwtToken");
 
-        const reqBody = {
-        jwt: token,
-        };
+    const reqBody = {
+      jwt: token,
+    };
 
-        return axios
-        .post("/api/forums/", reqBody)
-        .then((res) => {
-            if (res.status !== 200) {
-            console.log("error");
-            } else {
-            return res.data.forums;
-            }
-        })
-        .catch((err) => {
-            console.log("error");
-        });
-    }
+    return axios
+      .post("/api/forums/", reqBody)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.forums;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  };
 
   getForumsList = () =>
     this.state.forumsList
-      .filter((data) => {
-        if (this.state.search == null) return data;
-        else if (
+      .filter(
+        (data) =>
+          this.state.search == null ||
           data.forumName
             .toLowerCase()
             .includes(this.state.search.toLowerCase()) ||
@@ -64,11 +64,7 @@ export default class Forums extends Component {
           data.forumCourse
             .toLowerCase()
             .includes(this.state.search.toLowerCase())
-        ) {
-          return data;
-        }
-        return;
-      })
+      )
       .map((data) => {
         return (
           <tr>
@@ -92,7 +88,7 @@ export default class Forums extends Component {
       height: "3px",
       marginBottom: "20px",
     };
-    const { isLoading,  } = this.state;
+    const { isLoading } = this.state;
     if (!isLoading) {
       return null;
     }
@@ -108,32 +104,32 @@ export default class Forums extends Component {
           id="bootstrap-css"
         />
         <div className="container emp-profile mainPage_container">
-            <>
-              <div className="profile-head">
-                <h2>My Forums</h2>
-              </div>
-              <input
-                className="input"
-                type="text"
-                placeholder="Search..."
-                style={elementStyle}
-                onChange={(e) => this.searchSpace(e)}
-              />
-              <div className="listOfForums">
-                <table className="tableOfForums">
-                  <thead>
-                    <tr>
-                      <th className="headerColumn">Forum Name</th>
-                      <th className="headerColumn">Forum Type</th>
-                      <th className="headerColumn">Course Name</th>
-                      <th className="headerColumn"></th>
-                      <th className="headerColumn"></th>
-                    </tr>
-                  </thead>
-                  <tbody> {items}</tbody>
-                </table>
-              </div>
-            </>
+          <>
+            <div className="profile-head">
+              <h2>My Forums</h2>
+            </div>
+            <input
+              className="input"
+              type="text"
+              placeholder="Search..."
+              style={elementStyle}
+              onChange={(e) => this.searchSpace(e)}
+            />
+            <div className="listOfForums">
+              <table className="tableOfForums">
+                <thead>
+                  <tr>
+                    <th className="headerColumn">Forum Name</th>
+                    <th className="headerColumn">Forum Type</th>
+                    <th className="headerColumn">Course Name</th>
+                    <th className="headerColumn"></th>
+                    <th className="headerColumn"></th>
+                  </tr>
+                </thead>
+                <tbody> {items}</tbody>
+              </table>
+            </div>
+          </>
         </div>
       </div>
     );
