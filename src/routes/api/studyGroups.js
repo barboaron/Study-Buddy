@@ -323,7 +323,7 @@ router.post("/deletePost", isLoggedIn, isInGroup, (req, res) => {
         .then((posts) => {
           StudyGroup.updateOne({ _id: groupId }, { posts })
             .then(() => {
-              res.status(200).json(postId);
+              res.status(200).json(posts);
             })
             .catch(() => res.status(400).json("study group update failed"));
         })
@@ -470,7 +470,6 @@ function deletePostFromGroup(userId, studyGroup, postId) {
     const posts = studyGroup.posts.filter((post) => {
       return post._id !== postId;
     });
-
     resolve(posts);
   });
 }
