@@ -45,6 +45,7 @@ router.post("/register", (req, res) => {
         university_name: req.body.universityName,
         user_id: newUser._id,
         courses: [],
+        imgSrc: "/defaultPicUser.png",
       });
       newProfile
         .save()
