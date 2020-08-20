@@ -219,19 +219,25 @@ export default class GroupPage extends Component {
   async addNewPost(event) {
     event.persist();
     event.preventDefault();
+    const files = event?.target?.elements[1]?.files;
+    if (files?.length > 10) {
+      alert("You are only allowed to upload a maximum of 10 files");
+      event.target.elements[1].value = "";
+      return;
+    }
 
     let token = await localStorage.getItem("jwtToken");
     const { groupId } = this.props.location.state;
     const content = event?.target?.elements?.postTextArea?.value;
-    const files = event?.target?.elements[1]?.files;
     const data = new FormData();
     data.append("jwt", token);
     data.append("groupId", groupId);
     data.append("content", content);
-    if (files?.length > 0)
-      Object.values(files).map((file, index) => data.append("file", file));
 
+    if (files?.length > 0)
+      Object.values(files).map((file) => data.append("file", file));
     if (content) event.target.elements.postTextArea.value = "";
+    if (files) event.target.elements[1].value = "";
 
     return axios
       .post("/api/studyGroups/addPost", data)
@@ -263,7 +269,6 @@ export default class GroupPage extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          debugger;
           this.setState({ posts: res.data });
         }
       })
@@ -287,13 +292,17 @@ export default class GroupPage extends Component {
           />
           <br />
           <input id="chooseFile" type="file" name="myfile" multiple />
-          <button type="submit" style={{ padding: "8px 33px" }}>
+          <button
+            type="submit"
+            style={{ padding: "8px 33px", marginLeft: "23%" }}
+          >
             Post
           </button>
         </form>
         <Feed>
           {posts.map((post) => (
             <FeedEvent
+              files={post.files}
               canDelete={myId === post.creatorId}
               postId={post._id}
               imgSrc={post.creatorImgSrc}

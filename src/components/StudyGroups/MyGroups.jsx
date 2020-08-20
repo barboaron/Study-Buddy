@@ -55,9 +55,9 @@ export default class MyGroups extends Component {
 
   getGroupsList = () =>
     this.state.myGroupsList
-      .filter((data) => {
-        if (this.state.search == null) return data;
-        else if (
+      .filter(
+        (data) =>
+          this.state.search == null ||
           data.groupName
             .toLowerCase()
             .includes(this.state.search.toLowerCase()) ||
@@ -65,11 +65,7 @@ export default class MyGroups extends Component {
             .toLowerCase()
             .includes(this.state.search.toLowerCase()) ||
           data.groupType.toLowerCase().includes(this.state.search.toLowerCase())
-        ) {
-          return data;
-        }
-        return;
-      })
+      )
       .map((data) => {
         return (
           <tr>

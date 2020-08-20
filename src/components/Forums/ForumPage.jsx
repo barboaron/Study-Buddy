@@ -1,31 +1,25 @@
 import React, { Component } from "react";
-// import Popover from "react-bootstrap/Popover";
-// import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-// import Paper from "@material-ui/core/Paper";
-// import Tabs from "@material-ui/core/Tabs";
-// import Tab from "@material-ui/core/Tab";
 import axios from "axios";
 import { Header } from "../Header";
 import "../styles/forumPageStyles.css";
 import { Link } from "react-router-dom";
 import DropDownOptions from "../Utils/DropDownOptions";
 
-
 export default class ForumPage extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
-        currTab: 0,
-        forum: {},
-        search: null,
+    this.state = {
+      currTab: 0,
+      forum: {},
+      search: null,
     };
   }
 
   async componentDidMount() {
-    if(!this.breakRender) {
-        const forum = await this.getForumDetails();
-        const postTypes = await this.getPostTypes();
-        this.setState({ forum, posts: forum.posts, postTypes, isLoading: true });
+    if (!this.breakRender) {
+      const forum = await this.getForumDetails();
+      const postTypes = await this.getPostTypes();
+      this.setState({ forum, posts: forum.posts, postTypes, isLoading: true });
     }
   }
 
@@ -41,70 +35,67 @@ export default class ForumPage extends Component {
     }
   }
 
-   getForumDetails = async () => {
-       let token = await localStorage.getItem("jwtToken");
+  getForumDetails = async () => {
+    let token = await localStorage.getItem("jwtToken");
 
-       const reqBody = {
-        jwt: token,
-        forumId: this.props.location.state.forum.forumId,
-       };
+    const reqBody = {
+      jwt: token,
+      forumId: this.props.location.state.forum.forumId,
+    };
 
-       return axios
-       .post("/api/forums/forum", reqBody)
-       .then((res) => {
-           if (res.status !== 200) {
-            console.log("error");
-           } else {
-            return res.data.forum;
-           }
-       })
-       .catch((err) => {
-           console.log("error");
-       });
-  }
+    return axios
+      .post("/api/forums/forum", reqBody)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.forum;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  };
 
   getPostTypes = async () => {
     let token = await localStorage.getItem("jwtToken");
 
     const reqBody = {
-     jwt: token,
+      jwt: token,
     };
 
     return axios
-    .post("/api/forums/postTypes", reqBody)
-    .then((res) => {
+      .post("/api/forums/postTypes", reqBody)
+      .then((res) => {
         if (res.status !== 200) {
-         console.log("error");
+          console.log("error");
         } else {
-         return res.data;
+          return res.data;
         }
-    })
-    .catch((err) => {
+      })
+      .catch((err) => {
         console.log("error");
-    });
-}
+      });
+  };
 
   getPostsList = () => {
     const posts = this.state.posts
-      .filter((post) => {
-        if (this.state.search == null) return post;
-        else if (
-          post.title
-            .toLowerCase()
-            .includes(this.state.search.toLowerCase()) ||
-          post.content
-            .toLowerCase()
-            .includes(this.state.search.toLowerCase())
-        ) {
-          return post;
-        }
-        return;
-      })
+      .filter(
+        (post) =>
+          this.state.search == null ||
+          post.title.toLowerCase().includes(this.state.search.toLowerCase()) ||
+          post.content.toLowerCase().includes(this.state.search.toLowerCase())
+      )
       .map((post) => {
         return (
           <tr>
             <td>
-              <Link to={{ pathname: "/PostPage", state: { post, forumId: this.state.forum._id } }}>
+              <Link
+                to={{
+                  pathname: "/PostPage",
+                  state: { post, forumId: this.state.forum._id },
+                }}
+              >
                 {`${post.type} | ${post.title}`}
               </Link>
             </td>
@@ -114,50 +105,47 @@ export default class ForumPage extends Component {
           </tr>
         );
       });
-      return posts;
-    }
+    return posts;
+  };
 
-    addNewPost = async (event) => {
-      event.persist();
-      event.preventDefault();
+  addNewPost = async (event) => {
+    event.persist();
+    event.preventDefault();
 
-      let token = await localStorage.getItem("jwtToken");
-      const forumId = this.state.forum._id;
-      const title = event?.target?.elements?.title?.value;
-      const content = event?.target?.elements?.contentTextArea?.value;
-      const type = event?.target?.elements?.postType?.value;
-      const files = event?.target?.elements[3]?.files;
-      const data = new FormData();
-      
-      data.append("jwt", token);
-      data.append("forumId", forumId);
-      data.append("title", title);
-      data.append("content", content);
-      data.append("type", type);
+    let token = await localStorage.getItem("jwtToken");
+    const forumId = this.state.forum._id;
+    const title = event?.target?.elements?.title?.value;
+    const content = event?.target?.elements?.contentTextArea?.value;
+    const type = event?.target?.elements?.postType?.value;
+    const files = event?.target?.elements[3]?.files;
+    const data = new FormData();
 
-      if (files?.length > 0)
-        Object.values(files).map((file, index) =>
-          data.append("file", file)
-        );
-      
-      if (title) event.target.elements.title.value = "";
-      if (content) event.target.elements.contentTextArea.value = "";
-      if (type) event.target.elements.postType.value = ""; //doesn't work!
-  
-      return axios
-        .post("/api/forums/createPost", data)
-        .then((res) => {
-          if (res.status !== 200) {
-            console.log("error");
-          } else {
-            this.setState({ posts: res.data });
-          }
-        })
-        .catch((err) => {
+    data.append("jwt", token);
+    data.append("forumId", forumId);
+    data.append("title", title);
+    data.append("content", content);
+    data.append("type", type);
+
+    if (files?.length > 0)
+      Object.values(files).map((file, index) => data.append("file", file));
+
+    if (title) event.target.elements.title.value = "";
+    if (content) event.target.elements.contentTextArea.value = "";
+    if (type) event.target.elements.postType.value = ""; //doesn't work!
+
+    return axios
+      .post("/api/forums/createPost", data)
+      .then((res) => {
+        if (res.status !== 200) {
           console.log("error");
-        });
-    }
-
+        } else {
+          this.setState({ posts: res.data });
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  };
 
   handleChange = (_, newValue) => {
     this.setState({ currTab: newValue });
@@ -165,20 +153,20 @@ export default class ForumPage extends Component {
 
   render() {
     const elementStyle = {
-        border: "solid",
-        borderRadius: "10px",
-        left: "10px",
-        height: "3px",
-        marginBottom: "20px",
+      border: "solid",
+      borderRadius: "10px",
+      left: "10px",
+      height: "3px",
+      marginBottom: "20px",
     };
-    const { isLoading, currTab, forum, postTypes } = this.state;
+    const { isLoading, forum, postTypes } = this.state;
 
     if (!isLoading) {
-        return null;
+      return null;
     }
 
-    const items = forum ? this.getPostsList() : 'Loading...';
-    console.log('items:', items);
+    const items = forum ? this.getPostsList() : "Loading...";
+    console.log("items:", items);
 
     return (
       <div className="profile_user">
@@ -221,24 +209,19 @@ export default class ForumPage extends Component {
             </div>
           </div>
           <form className={"form-comments"} onSubmit={this.addNewPost}>
-                  <DropDownOptions
-                    options={postTypes}
-                    label_name="Type Of Post:"
-                    name="postType"
-                  />
-                  <input type="text" name="title" placeholder="Add Post Title"/>
-                  <textarea
-                    name="content"
-                    id="contentTextArea"
-                    rows="2"
-                    cols="50"
-                  />
-                  <br />
-                  <input id="chooseFile" type="file" name="myfile" multiple />
-                  <button className="add-comment-btn" type="submit">
-                    Publish
-                  </button>
-              </form>
+            <DropDownOptions
+              options={postTypes}
+              label_name="Type Of Post:"
+              name="postType"
+            />
+            <input type="text" name="title" placeholder="Add Post Title" />
+            <textarea name="content" id="contentTextArea" rows="2" cols="50" />
+            <br />
+            <input id="chooseFile" type="file" name="myfile" multiple />
+            <button className="add-comment-btn" type="submit">
+              Publish
+            </button>
+          </form>
         </div>
       </div>
     );

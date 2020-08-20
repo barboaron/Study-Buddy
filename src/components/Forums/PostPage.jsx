@@ -76,17 +76,15 @@ export default class PostPage extends Component {
     const comment = event?.target?.elements?.comment?.value;
     const files = event?.target?.elements[1]?.files;
     const data = new FormData();
-    
+
     data.append("jwt", token);
     data.append("forumId", forumId);
     data.append("postId", postId);
     data.append("comment", comment);
 
     if (files?.length > 0)
-      Object.values(files).map((file, index) =>
-        data.append("file", file)
-      );
-    
+      Object.values(files).map((file, index) => data.append("file", file));
+
     if (comment) event.target.elements.comment.value = "";
 
     axios
@@ -108,14 +106,14 @@ export default class PostPage extends Component {
   };
 
   render() {
-    const elementStyle = {
-      border: "solid",
-      borderRadius: "10px",
-      left: "10px",
-      height: "3px",
-      marginBottom: "20px",
-    };
-    const { isLoading, currPage, post } = this.state;
+    // const elementStyle = {
+    //   border: "solid",
+    //   borderRadius: "10px",
+    //   left: "10px",
+    //   height: "3px",
+    //   marginBottom: "20px",
+    // };
+    const { isLoading, post } = this.state;
 
     if (!isLoading) {
       return null;
