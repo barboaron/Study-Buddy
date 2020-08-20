@@ -11,7 +11,6 @@ import FeedEvent from "./FeedEvent";
 import ScheduleWrapper from "./ScheduleWrapper";
 import "../styles/groupPageStyles.css";
 
-
 /* GroupPage component has the collaboration feature and the schedule helper and all the details of the studyGroup.*/
 export default class GroupPage extends Component {
   constructor(props) {
@@ -207,9 +206,7 @@ export default class GroupPage extends Component {
     data.append("groupId", groupId);
     data.append("content", content);
     if (files?.length > 0)
-      Object.values(files).map((file, index) =>
-        data.append("file", file)
-      );
+      Object.values(files).map((file, index) => data.append("file", file));
 
     if (content) event.target.elements.postTextArea.value = "";
 
