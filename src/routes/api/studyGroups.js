@@ -270,8 +270,8 @@ router.post("/leaveGroup", isLoggedIn, isInGroup, (req, res) => {
     .catch((err) => res.status(400).json(err));
 });
 
-router.post("/addPost", isLoggedIn, isInGroup, upload.array('file', 5), (req, res) => {
-    const { id, name } = jwt_decode(req.headers['jwt']);  
+router.post("/addPost", upload.array('file', 5),  isLoggedIn, isInGroup, (req, res) => {
+    const { id, name } = jwt_decode(req.body.jwt);  
     const { content, groupId } = req.body;
     if (!content) {
       return res.status(400).json("content is required");
