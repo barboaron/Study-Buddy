@@ -20,6 +20,8 @@ export default class GroupPage extends Component {
     this.getAllPosts = this.getAllPosts.bind(this);
     this.addNewPost = this.addNewPost.bind(this);
     this.getGroupDetails = this.getGroupDetails.bind(this);
+    this.deletePost = this.deletePost.bind(this);
+    this.getUserID = this.getUserID.bind(this);
   }
 
   async componentDidMount() {
@@ -27,7 +29,8 @@ export default class GroupPage extends Component {
       const group = await this.getGroupDetails();
       const detailsArray = await this.getParicipantsDetails(group);
       const posts = await this.getAllPosts();
-      this.setState({ detailsArray, posts, group, isLoading: true });
+      const myId = await this.getUserID();
+      this.setState({ detailsArray, posts, group, myId, isLoading: true });
     }
   }
 
@@ -36,6 +39,26 @@ export default class GroupPage extends Component {
       this.props.history.push("/");
       this.breakRender = true;
     }
+  }
+
+  async getUserID() {
+    let token = await localStorage.getItem("jwtToken");
+    const reqData = {
+      jwt: token,
+    };
+
+    return axios
+      .post("/api/users/getUserId", reqData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.id;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
   }
 
   async getParicipantsDetails(group) {
@@ -224,9 +247,33 @@ export default class GroupPage extends Component {
       });
   }
 
+  async deletePost(postId) {
+    let token = await localStorage.getItem("jwtToken");
+    const { _id } = this.state.group;
+
+    const postDetails = {
+      jwt: token,
+      groupId: _id,
+      postId,
+    };
+
+    return axios
+      .post("/api/studyGroups/deletePost", postDetails)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          debugger;
+          this.setState({ posts: res.data });
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
   getContentByCurrTab = () => {
-    const { currTab, posts, group } = this.state;
-    // const { groupId } = this.props.location.state;
+    const { currTab, posts, group, myId } = this.state;
 
     return currTab === 0 ? (
       <>
@@ -247,13 +294,14 @@ export default class GroupPage extends Component {
         <Feed>
           {posts.map((post) => (
             <FeedEvent
-              // groupId={groupId}
-              postId={post.id} // check the id
-              imgSrc={post.imgSrc}
+              canDelete={myId === post.creatorId}
+              postId={post._id}
+              imgSrc={post.creatorImgSrc}
               userName={post.creatorName}
               action={"posted"}
               date={new Date(post.creationDate).toLocaleString()}
               content={post.content}
+              deletePost={this.deletePost}
             />
           ))}
         </Feed>

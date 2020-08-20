@@ -1,10 +1,21 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from "react";
 import { Feed } from "semantic-ui-react";
 
 /* FeedEvent component is a util component for group's page- shows a post in the collaboration tab in the GroupPage*/
 export default class FeedEvent extends Component {
   render() {
-    const { imgSrc, userName, action, date, content } = this.props;
+    const {
+      imgSrc,
+      userName,
+      action,
+      date,
+      content,
+      deletePost,
+      postId,
+      canDelete,
+    } = this.props;
+
     return (
       <Feed.Event>
         <Feed.Label
@@ -19,7 +30,9 @@ export default class FeedEvent extends Component {
             {` ${action}`}
             <Feed.Date>{date}</Feed.Date>
             <Feed.Meta>
-              <a>Delete</a>
+              {canDelete ? (
+                <a onClick={() => deletePost(postId)}>Delete</a>
+              ) : null}
             </Feed.Meta>
           </Feed.Summary>
           <Feed.Extra text>{content}</Feed.Extra>
