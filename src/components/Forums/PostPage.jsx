@@ -17,9 +17,32 @@ export default class PostPage extends Component {
   async componentDidMount() {
     if (!this.breakRender) {
       const post = await this.getPostDetails();
-      this.setState({ post, isLoading: true });
+      const comments = await this.getComments();
+      const myId = await this.getUserID();
+      this.setState({ post, comments, myId, isLoading: true });
     }
   }
+
+  getUserID = async () => {
+    let token = await localStorage.getItem("jwtToken");
+    const reqData = {
+      jwt: token,
+    };
+  
+    return axios
+      .post("/api/users/getUserId", reqData)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data.id;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
 
   componentWillMount() {
     if (!this.props?.location?.state?.post) {
@@ -51,20 +74,72 @@ export default class PostPage extends Component {
       });
   };
 
+  getComments = async () => {
+    let token = await localStorage.getItem("jwtToken");
+
+    const reqBody = {
+      jwt: token,
+      forumId: this.props.location.state.forumId,
+      postId: this.props.location.state.post._id,
+    };
+
+    return axios
+      .post("/api/forums/comments", reqBody)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          return res.data;
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  };
+
   getCommentsList = () => {
-    const comments = this.state.post.comments.map((comment) => {
+    const comments = this.state.comments.map((comment) => {
       return (
         <FeedEvent
-          imgSrc={comment.imgSrc}
+          imgSrc={comment.creatorImgSrc}
           userName={comment.creatorName}
           action={"answered"}
           date={new Date(comment.creationDate).toLocaleString()}
           content={comment.content}
+          canDelete={this.state.myId.toString() === comment.creatorId.toString()}
+          deletePost={this.deleteComment}
+          postId={comment._id}
+          files={comment.files}
         />
       );
     });
     return comments;
   };
+
+  deleteComment = async (commentId) => {
+    let token = await localStorage.getItem("jwtToken");
+
+    const commentDetails = {
+      jwt: token,
+      forumId: this.props.location.state.forumId,
+      postId: this.props.location.state.post._id,
+      commentId,
+    };
+
+    return axios
+      .post("/api/forums/deleteComment", commentDetails)
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log("error");
+        } else {
+          this.setState({ comments: res.data });
+        }
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  }
+
 
   addNewComment = async (event) => {
     event.persist();
@@ -93,7 +168,7 @@ export default class PostPage extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          this.setState({ post: res.data });
+          this.setState({ comments: res.data });
         }
       })
       .catch((err) => {
