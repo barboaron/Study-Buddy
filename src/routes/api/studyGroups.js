@@ -468,7 +468,7 @@ router.post("/answerSurvey", isLoggedIn, isInGroup, (req, res) => {
         });
       }
     })
-    .catch(() => res.status(400).json("study group not found"));
+    .catch((err) => res.status(400).json(err));
 });
 
 function didSurveyEnd(participants) {

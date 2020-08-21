@@ -144,24 +144,23 @@ export default class PostPage extends Component {
                 </div>
               </div>
             </div>
-            <div className="listOfComments">
-              <div className="comments-title">Comments:</div>
-              <Feed>{items}</Feed>
+            <div className="commentsWrapper">
+              <form className={"formComments"} onSubmit={this.addNewComment}>
+                <textarea
+                  name="comment"
+                  id="commentTextArea"
+                  rows="2"
+                  cols="55"
+                  placeholder="Add comment..."
+                />
+                <br />
+                <input id="chooseFile" type="file" name="myfile" multiple />
+                <button type="submit" className="add-comment-btn">
+                  Add Comment
+                </button>
+              </form>
+              <Feed className="feedWrapper">{items}</Feed>
             </div>
-            <form className={"form-comments"} onSubmit={this.addNewComment}>
-              <textarea
-                name="comment"
-                id="commentTextArea"
-                rows="2"
-                cols="50"
-                placeholder="Add comment..."
-              />
-              <br />
-              <input id="chooseFile" type="file" name="myfile" multiple />
-              <button className="add-comment-btn" type="submit">
-                Add Comment
-              </button>
-            </form>
           </div>
         </div>
       </div>

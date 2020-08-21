@@ -9,10 +9,16 @@ export default class Poll extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      pollForParticipants: !!props.survey && !props.didAnswerSurvey,
+      pollForParticipants: props.survey.length > 0 && !props.didAnswerSurvey,
       didAnswerSurvey: props.didAnswerSurvey,
     };
     this.answerPoll = this.answerPoll.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { survey, didAnswerSurvey } = nextProps;
+    const pollForParticipants = survey.length > 0 && !didAnswerSurvey;
+    this.setState({ didAnswerSurvey, pollForParticipants });
   }
 
   async answerPoll(event) {
@@ -37,7 +43,7 @@ export default class Poll extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          this.setState({ pollForParticipants: false, didAnswerSurvey: true });
+          this.props.updateDidAnswer(res.data.surveyEnded);
         }
       })
       .catch((err) => {

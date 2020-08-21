@@ -8,14 +8,10 @@
   margin-bottom: 10px;
   margin-left: 40px;
 }
-/* 
-.descriptionLabel {
-  display: block;
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-} */
+
 .studyGroupCreation_Btn {
-  margin-top: 60%;
+  bottom: 15%;
+  position: fixed;
 }
 
 .Checkbox {
@@ -28,6 +24,4 @@
 }
 
 .addQuestions {
-  /* text-align: left !important;
-  padding-left: 13%; */
 }

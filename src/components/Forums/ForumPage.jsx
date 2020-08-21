@@ -177,13 +177,45 @@ export default class ForumPage extends Component {
           id="bootstrap-css"
         />
         <div className="container emp-profile">
-          <div className="row">
-            <div className="col-md-6">
-              <div className="forum-head">
-                <h2 className="forumTitle">
-                  {forum.forumName || "Forum Page"}
-                </h2>
+          <div className="profile-head">
+            <h2 className="adminPanelTitle">
+              {forum.forumName || "Forum Page"}
+            </h2>
+            <form className="form-comments" onSubmit={this.addNewPost}>
+              <div style={{ width: "min-content" }}>
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Add Post Title"
+                  className="addPostTitle"
+                />
+                <textarea
+                  name="content"
+                  id="contentTextArea"
+                  placeholder="Post something..."
+                  rows="3"
+                  cols="50"
+                />
               </div>
+              <div className="dropdownAndFiles">
+                <DropDownOptions
+                  options={postTypes}
+                  label_name="Type Of Post:"
+                  name="postType"
+                  form_style={{ width: "auto", top: "-20px" }}
+                />
+                <input
+                  className="chooseFileInput"
+                  type="file"
+                  name="myfile"
+                  multiple
+                />
+              </div>
+              <button className="add-comment-btn" type="submit">
+                Publish
+              </button>
+            </form>
+            <div className="searchWrapper">
               <input
                 className="input"
                 type="text"
@@ -208,20 +240,6 @@ export default class ForumPage extends Component {
               </div>
             </div>
           </div>
-          <form className={"form-comments"} onSubmit={this.addNewPost}>
-            <DropDownOptions
-              options={postTypes}
-              label_name="Type Of Post:"
-              name="postType"
-            />
-            <input type="text" name="title" placeholder="Add Post Title" />
-            <textarea name="content" id="contentTextArea" rows="2" cols="50" />
-            <br />
-            <input id="chooseFile" type="file" name="myfile" multiple />
-            <button className="add-comment-btn" type="submit">
-              Publish
-            </button>
-          </form>
         </div>
       </div>
     );

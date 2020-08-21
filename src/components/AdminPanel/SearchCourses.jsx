@@ -52,7 +52,7 @@ class SearchCourses extends Component {
     const items = this.getCoursesList();
 
     return (
-      <div>
+      <div className="searchWrapper">
         <input
           className="input"
           type="text"

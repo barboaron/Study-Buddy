@@ -50,6 +50,9 @@
 .UserProfileTitle {
   text-align: left;
 }
+.profile-head {
+  max-height: 670px;
+}
 
 .profile-head h5 {
   color: #0062cc;
@@ -126,7 +129,7 @@
 
 .cousrsesList {
   text-align: left;
-  overflow: scroll;
-  height: 300px;
+  overflow-y: scroll;
+  height: 230px;
   margin-top: 10px;
 }
