@@ -7,8 +7,10 @@ const { isLoggedIn } = require("../../authentication/auth");
 const jwt_decode = require("jwt-decode");
 const { validatePostInput, validateCommentInput, postTypes } = require("../../validation/post");
 const { v4: uuidv4 } = require('uuid');
-
 const multer = require("multer");
+var fs = require("fs");
+const { promisify } = require("util");
+const unlinkAsync = promisify(fs.unlink);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -102,14 +104,21 @@ router.post("/addComment", upload.array('file', 5), isLoggedIn, (req, res) => {
     .then((profile) => {
       Forum.findOne({ _id: forumId })
       .then((forum) => {
-        const filePaths = req.files.map((file) => file.path.substr(7));
+        const filePaths = req.files.map((file) => {
+          const isImage = isImageFile(file.path);
+          return {
+            path: file.path.substr(7),
+            isImage,
+          };
+        });
         const newComment = {
           _id: uuidv4(),
           creationDate: Date.now(),
           content: comment,
           creatorName: name,
           creatorId: id,
-          imgSrc: profile.imgSrc,
+          // imgSrc: profile.imgSrc,
+          creatorProfileId: profile._id.toString(),
           files: filePaths,
         };
 
@@ -118,9 +127,10 @@ router.post("/addComment", upload.array('file', 5), isLoggedIn, (req, res) => {
         Forum.updateOne({ _id: forumId }, { posts }).then(
           () => {
             Forum.findOne({ _id: forumId })
-              .then((forum) => {
+              .then(async (forum) => {
                   const post = forum.posts.find((post) => post._id === postId);
-                  res.status(200).json(post);
+                  const updatedComments = await updateCommentsWithProfileImages(post.comments);
+                  res.status(200).json(updatedComments);
               }
             ).catch((err) => res.status(400).json('forum not found'));
           }
@@ -131,17 +141,39 @@ router.post("/addComment", upload.array('file', 5), isLoggedIn, (req, res) => {
     .catch((err) => res.status(400).json('profile not found'));
 });
 
+function isImageFile(path) {
+  return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
+}
+
+function updateCommentsWithProfileImages(comments) {
+  const promises = comments.map(async comment => {
+    return await createCommentWithImg(comment);
+  })
+  return Promise.all(promises).catch(err => console.log(err));
+  
+}
+
+function createCommentWithImg(comment) {
+  return new Promise((resolve, reject) => {
+    Profile.findOne({_id: comment.creatorProfileId}).then(profile => {
+      resolve({...comment, creatorImgSrc: profile.imgSrc});
+    })
+    .catch(err => reject({err}))
+  })
+}
+
 router.post("/deleteComment", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
   const { forumId, postId, commentId } = req.body;
 
   Forum.findOne({ _id: forumId })
     .then((forum) => {
-      
       deleteCommentFromPost(id, forum, postId, commentId).then( posts => {
         Forum.updateOne({ _id: forumId }, { posts }).then(
-          (forum) => {
-            res.status(200).json(commentId);
+          async () => {
+            const post = posts.find(currPost => currPost._id === postId);
+            const updatedComments = await updateCommentsWithProfileImages(post.comments);
+            res.status(200).json(updatedComments);
           }
         ).catch(() => res.status(400).json('forum update failed'));
       }).catch((err) => res.status(401).json(err));
@@ -174,7 +206,24 @@ router.post("/post", isLoggedIn, (req, res) => {
     .then((forum) => {
       const post = forum.posts.find((post) => post._id === postId);
       if(post) {
+        delete post.comments;
         res.status(200).json(post);
+      } else {
+        res.status(400).json('Post not found');
+      }
+    })
+    .catch((err) => res.status(400).json('forum not found'));
+});
+
+router.post("/comments", isLoggedIn, (req, res) => {
+  const { forumId, postId } = req.body;
+
+  Forum.findOne({ _id: forumId })
+    .then(async (forum) => {
+      const post = forum.posts.find((post) => post._id === postId);
+      if(post) {
+        const updatedComments = await updateCommentsWithProfileImages(post.comments);
+        res.status(200).json(updatedComments);
       } else {
         res.status(400).json('Post not found');
       }
@@ -200,6 +249,11 @@ function deleteCommentFromPost(userId, forum, postId, commentId) {
           if(comment._id === commentId) {
             if(comment.creatorId !== userId) {
               reject('only comment creator can delete');
+            }
+            else {
+              comment.files.forEach(async fileObj => {
+                await unlinkAsync(`./public/${fileObj.path}`);
+              });
             }
           }
         });
