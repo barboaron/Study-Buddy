@@ -9,6 +9,9 @@ const { isLoggedIn, isInGroup } = require("../../authentication/auth");
 const isEmpty = require("is-empty");
 const { v4: uuidv4 } = require("uuid");
 const multer = require("multer");
+var fs = require("fs");
+const { promisify } = require("util");
+const unlinkAsync = promisify(fs.unlink);
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -53,7 +56,7 @@ router.post("/create", isLoggedIn, (req, res) => {
     creatorId: id,
     pendingUsers: [],
     posts: [],
-    survey: false,
+    survey: [],
   });
   newStudyGroup
     .save()
@@ -300,15 +303,16 @@ router.post(
               content,
               creatorName: name,
               creatorId: id,
-              creatorImgSrc: profile.imgSrc,
+              creatorProfileId: profile._id.toString(),
               files: filePaths,
             };
             StudyGroup.updateOne(
               { _id: groupId },
               { posts: studyGroup.posts.concat(post) }
             )
-              .then(() => {
-                res.status(200).json(studyGroup.posts.concat(post));
+              .then(async () => {
+                const updatedPosts = await updatePostsWithProfileImages(studyGroup.posts.concat(post));
+                res.status(200).json(updatedPosts);
               })
               .catch((err) =>
                 res.status(400).json("study group update failed")
@@ -319,6 +323,23 @@ router.post(
       .catch((err) => res.status(400).json("profile not found"));
   }
 );
+
+function updatePostsWithProfileImages(posts) {
+  const promises = posts.map(async post => {
+    return await createPostWithImg(post);
+  })
+  return Promise.all(promises).catch(err => console.log(err));
+  
+}
+
+function createPostWithImg(post) {
+  return new Promise((resolve, reject) => {
+    Profile.findOne({_id: post.creatorProfileId}).then(profile => {
+      resolve({...post, creatorImgSrc: profile.imgSrc});
+    })
+    .catch(err => reject({err}))
+  })
+}
 
 function isImageFile(path) {
   return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
@@ -332,8 +353,9 @@ router.post("/deletePost", isLoggedIn, isInGroup, (req, res) => {
       deletePostFromGroup(id, studyGroup, postId)
         .then((posts) => {
           StudyGroup.updateOne({ _id: groupId }, { posts })
-            .then(() => {
-              res.status(200).json(posts);
+            .then(async () => {
+              const updatedPosts = await updatePostsWithProfileImages(posts);
+              res.status(200).json(updatedPosts);
             })
             .catch(() => res.status(400).json("study group update failed"));
         })
@@ -347,8 +369,9 @@ router.post("/posts", isLoggedIn, isInGroup, (req, res) => {
   const { groupId } = req.body;
 
   StudyGroup.findOne({ _id: groupId })
-    .then((studyGroup) => {
-      res.status(200).json(studyGroup.posts);
+    .then(async (studyGroup) => {
+      const updatedPosts = await updatePostsWithProfileImages(studyGroup.posts);
+      res.status(200).json(updatedPosts);
     })
     .catch(() => res.status(400).json("study group not found"));
 });
@@ -432,7 +455,7 @@ router.post("/answerSurvey", isLoggedIn, isInGroup, (req, res) => {
             StudyGroup.updateOne(
               { _id: groupId },
               {
-                survey: null,
+                survey: [],
                 date: winningDate,
                 participants: updatedParticipants,
               }
@@ -473,6 +496,11 @@ function deletePostFromGroup(userId, studyGroup, postId) {
       if (post._id === postId) {
         if (post.creatorId !== userId) {
           reject("only post creator can delete");
+        }
+        else {
+          post.files.forEach(async fileObj => {
+            await unlinkAsync(`./public/${fileObj.path}`);
+          })
         }
       }
     });
