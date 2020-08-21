@@ -277,9 +277,23 @@ export default class GroupPage extends Component {
       });
   }
 
+  updateGroupWithSurvey = (survey) => {
+    const { group } = this.state;
+    group.survey = survey;
+    this.setState({ group });
+  };
+
+  updateDidAnswer = (surveyEnded) => {
+    const { group } = this.state;
+    group.didAnswerSurvey = true;
+    if (surveyEnded) {
+      group.survey = [];
+    }
+    this.setState({ group });
+  };
+
   getContentByCurrTab = () => {
     const { currTab, posts, group, myId } = this.state;
-
     return currTab === 0 ? (
       <>
         <form className={"formPosts"} onSubmit={this.addNewPost}>
@@ -316,7 +330,11 @@ export default class GroupPage extends Component {
         </Feed>
       </>
     ) : (
-      <ScheduleWrapper group={group} />
+      <ScheduleWrapper
+        group={group}
+        updateGroupWithSurvey={this.updateGroupWithSurvey}
+        updateDidAnswer={this.updateDidAnswer}
+      />
     );
   };
 

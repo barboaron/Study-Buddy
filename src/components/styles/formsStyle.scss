@@ -95,12 +95,17 @@ label {
     }
   }
 }
+.container {
+  max-height: 720px;
+  height: 720px;
+}
 
 .studyGroupCreation_Form {
   padding: 0px 30px;
   background: #fefefe;
   flex-direction: column;
   padding-bottom: 20px;
+  height: 500px;
 }
 
 .col1 {

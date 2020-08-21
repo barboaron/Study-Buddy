@@ -1,5 +1,5 @@
 .listOfGroups {
-  overflow: scroll;
+  overflow-y: scroll;
   border-style: solid;
   height: max-content;
   max-height: 70%;

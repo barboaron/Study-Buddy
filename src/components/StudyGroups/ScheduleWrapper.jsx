@@ -12,10 +12,19 @@ export default class ScheduleWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showDateAndTimePickers: props.group.isAdmin && !props.group.survey,
-      pollSucceedMsgToAdmin: props.group.isAdmin && props.group.survey,
+      showDateAndTimePickers:
+        props.group.isAdmin && props.group.survey.length === 0,
+      pollSucceedMsgToAdmin:
+        props.group.isAdmin && props.group.survey.length > 0,
     };
     this.createPoll = this.createPoll.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { survey, isAdmin } = nextProps.group;
+    const showDateAndTimePickers = isAdmin && survey.length === 0;
+    const pollSucceedMsgToAdmin = isAdmin && survey.length > 0;
+    this.setState({ showDateAndTimePickers, pollSucceedMsgToAdmin });
   }
 
   async createPoll(event) {
@@ -48,10 +57,7 @@ export default class ScheduleWrapper extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          this.setState({
-            showDateAndTimePickers: false,
-            pollSucceedMsgToAdmin: true,
-          });
+          this.props.updateGroupWithSurvey(res.data);
         }
       })
       .catch((err) => {
@@ -81,7 +87,12 @@ export default class ScheduleWrapper extends Component {
       );
     } else {
       component = (
-        <Poll survey={survey} groupId={_id} didAnswerSurvey={didAnswerSurvey} />
+        <Poll
+          survey={survey}
+          groupId={_id}
+          didAnswerSurvey={didAnswerSurvey}
+          updateDidAnswer={this.props.updateDidAnswer}
+        />
       );
     }
     return component;
