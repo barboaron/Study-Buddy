@@ -51,9 +51,8 @@ class ViewDetailsPopup extends React.Component {
   joinToGroup = () => {
     const { showQuestions } = this.state;
     const { questions } = this.props.groupForPopup;
-
     let answers = [];
-    if (!showQuestions) {
+    if (!showQuestions && questions?.length > 0) {
       this.setState({ showQuestions: true });
     } else {
       answers = questions.map(
@@ -188,7 +187,7 @@ class ViewDetailsPopup extends React.Component {
       <div className="popup">
         <div className="popup_inner">
           <h1>{groupName || "Study Group"}</h1>
-          {showQuestions && questions.length > 0 ? (
+          {showQuestions && questions?.length > 0 ? (
             <div className="popup_questions_wrapper">
               Please answer the following questions to complete your joining the
               group:
