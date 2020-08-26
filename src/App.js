@@ -9,7 +9,6 @@ import MyGroups from "./components/StudyGroups/MyGroups";
 import Forums from "./components/Forums/Forums";
 import ForumPage from "./components/Forums/ForumPage";
 import PostPage from "./components/Forums/PostPage";
-// import { Header } from "./components/Header";
 import Admin from "./components/AdminPanel/Admin";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";

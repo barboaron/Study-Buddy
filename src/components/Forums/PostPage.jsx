@@ -192,13 +192,6 @@ export default class PostPage extends Component {
   };
 
   render() {
-    // const elementStyle = {
-    //   border: "solid",
-    //   borderRadius: "10px",
-    //   left: "10px",
-    //   height: "3px",
-    //   marginBottom: "20px",
-    // };
     const { isLoading, post } = this.state;
 
     if (!isLoading) {

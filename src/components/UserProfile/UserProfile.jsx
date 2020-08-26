@@ -102,7 +102,6 @@ export default class UserProfile extends Component {
   };
 
   async getUserID() {
-    // will move to parent
     let token = await localStorage.getItem("jwtToken");
     const reqData = {
       jwt: token,

@@ -63,7 +63,6 @@ export default class Admin extends Component {
   }
 
   async addNewCoursesByFile(event) {
-    //need to check
     event.persist();
     event.preventDefault();
 

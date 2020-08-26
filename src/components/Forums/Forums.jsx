@@ -73,7 +73,6 @@ export default class Forums extends Component {
                 {data.forumName}
               </Link>
             </td>
-            {/* <td>{data.groupName}</td> */}
             <td>{data.forumType}</td>
             <td>{data.forumCourse}</td>
           </tr>
