@@ -44,21 +44,23 @@ router.post("/readFromCsv", isLoggedIn, isAdminUser, (req, res) => {
         return res.status(400).json("file format must be CSV");
       }
       const jsonObj = csvjson.toObject(fileContent);
-      jsonObj.forEach((courseObj) => {
-        addCourse(universityName, courseObj.degreeName, courseObj.courseName);
+      let promiseArr = jsonObj.map((courseObj) => {
+        return addCourse(universityName, courseObj.degreeName, courseObj.courseName);
       });
       await unlinkAsync(req.file.path);
-      Course.find({ universityName }).then((coursesArray) => {
-        const returnArray = coursesArray.map((course) => {
-          return {
-            id: course._id,
-            courseName: course.courseName,
-            degreeName: course.degreeName,
-            universityName: course.universityName,
-          };
+      Promise.all(promiseArr).then( resArr => {
+        Course.find({ universityName }).then((coursesArray) => {
+          const returnArray = coursesArray.map((course) => {
+            return {
+              id: course._id,
+              courseName: course.courseName,
+              degreeName: course.degreeName,
+              universityName: course.universityName,
+            };
+          });
+          return res.status(200).json(returnArray);
         });
-        return res.status(200).json(returnArray);
-      });
+      })
     });
   });
 });

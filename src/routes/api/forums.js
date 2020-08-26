@@ -71,7 +71,15 @@ router.post("/createPost", upload.array('file', 5), isLoggedIn, (req, res) => {
 
   Forum.findOne({ _id: forumId })
     .then((forum) => {
-      const filePaths = req.files ? req.files.map((file) => file.path.substr(7)) : [];
+      const filePaths = req.files ? 
+      req.files.map((file) => {
+        const isImage = isImageFile(file.path);
+        return {
+          path: file.path.substr(7),
+          isImage,
+        };
+      })
+      : [];
       const post = {
         _id: uuidv4(),
         creationDate: Date.now(),
