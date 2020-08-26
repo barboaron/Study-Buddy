@@ -10,6 +10,7 @@ import { Header } from "../Header";
 import FeedEvent from "./FeedEvent";
 import ScheduleWrapper from "./ScheduleWrapper";
 import "../styles/groupPageStyles.css";
+import { socket } from "./../Header";
 
 /* GroupPage component has the collaboration feature and the schedule helper and all the details of the studyGroup.*/
 export default class GroupPage extends Component {
@@ -246,11 +247,20 @@ export default class GroupPage extends Component {
           console.log("error");
         } else {
           this.setState({ posts: res.data });
+          this.sendNotification();
         }
       })
       .catch((err) => {
         console.log("error");
       });
+  }
+
+  sendNotification = () => {
+    let jwt = localStorage.getItem("jwtToken");
+    socket.emit("collaboration-msg", {
+      jwt,
+      group: this.state.group,
+    });
   }
 
   async deletePost(postId) {

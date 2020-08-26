@@ -4,6 +4,7 @@ import { Header } from "../Header";
 import "../styles/postPageStyles.css";
 import FeedEvent from "./../StudyGroups/FeedEvent";
 import { Feed } from "semantic-ui-react";
+import { socket } from "./../Header";
 
 export default class PostPage extends Component {
   constructor(props) {
@@ -169,11 +170,21 @@ export default class PostPage extends Component {
           console.log("error");
         } else {
           this.setState({ comments: res.data });
+          this.sendNotification();
         }
       })
       .catch((err) => {
         console.log("error");
       });
+  };
+
+  sendNotification = () => {
+    let jwt = localStorage.getItem("jwtToken");
+    socket.emit("post-comment", {
+      jwt,
+      post: this.props.location.state.post,
+      forumId: this.props.location.state.forumId,
+    });
   };
 
   handleChange = (_, newValue) => {

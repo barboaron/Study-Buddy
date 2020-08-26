@@ -11,23 +11,14 @@ const forums = require("./src/routes/api/forums");
 const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
-const StudyGroup = require("./src/models/StudyGroup");
 const keys = require("./config/keys");
 const multer = require("multer");
 const cors = require("cors");
 const io = require("socket.io")(5500);
-const formidableMiddleware = require('express-formidable');
-
-
-const groupTypes = {
-  join: "join-request",
-  accepted: "accepted",
-};
+module.exports = { io };
+const { handlePostComment, handleCollaborationMsg, handleJoinGroupIgnored, handleJoinGroupApproved, handleRequestJoinGroup } = require("./socket");
 
 io.on("connection", (socket) => {
-  // socket.on('disconnect', async () => {
-  //   await User.updateOne({socketId: socket.id}, {socketId:null});
-  // });
   socket.on("new-user", async (data) => {
     if (data.jwt) {
       const { id } = jwt_decode(data.jwt);
@@ -35,99 +26,21 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("request-join-group", (data) => {
-    const { id } = jwt_decode(data.jwt);
-    User.findOne({ _id: id }).then((sender) => {
-      User.findOne({ _id: data.group.creatorId }).then(async (receiver) => {
-        let notification = {
-          timeCreated: Date.now(),
-          senderId: sender._id,
-          senderName: sender.firstName + " " + sender.lastName,
-          type: groupTypes.join,
-          group: data.group,
-          answers: data.answers,
-          questions: data.questions,
-        };
-        await User.updateOne(
-          { _id: receiver._id },
-          { unseenNotifications: receiver.unseenNotifications.concat(notification) }
-        );
-        await StudyGroup.updateOne(
-          { _id: data.group._id },
-          { pendingUsers: data.group.pendingUsers.concat(id)}
-        );
-
-        if (receiver.socketId) {
-          io.to(receiver.socketId).emit("notification", notification);
-        }
-      });
-    });
+      handleRequestJoinGroup(data);
   });
   socket.on("join-group-approved", (data) => {
-    const { id } = jwt_decode(data.jwt);
-    User.findOne({ _id: id }).then((sender) => {
-      User.findOne({ _id: data.approvedUserId }).then(async (receiver) => {
-        let notification = {
-          timeCreated: Date.now(),
-          senderId: sender._id,
-          senderName: sender.firstName + " " + sender.lastName,
-          type: groupTypes.accepted,
-          group: {...data.group, isAdmin: false, didAnswerSurvey: false}
-        };
-        await User.updateOne(
-          { _id: receiver._id },
-          { unseenNotifications: receiver.unseenNotifications.concat(notification) }
-        );
-        if (receiver.socketId) {
-          io.to(receiver.socketId).emit("notification", notification);
-        }
-        StudyGroup.findOne({ _id: data.group._id }).then(async (studyGroup) => {
-          const participants = studyGroup.participants;
-          const newParticipantName =
-            receiver.firstName + " " + receiver.lastName;
-          participants.push({
-            name: newParticipantName,
-            id: receiver._id.toString(),
-            isCreator: false,
-            didAnswerSurvey: false,
-          });
-          const isFull = participants.length === studyGroup.maxParticipants;
-          const pendingUsers = isFull ? [] : studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
-          const seenNotifications = isFull 
-            ? removeFullGroupNotification(sender.seenNotifications, studyGroup._id.toString())
-            : sender.seenNotifications.filter(notification => notification.timeCreated !== data.notificationId);
-          const unseenNotifications = isFull 
-            ? removeFullGroupNotification(sender.unseenNotifications, studyGroup._id.toString())
-            : sender.unseenNotifications;
-          await User.updateOne( { _id: sender._id }, { seenNotifications, unseenNotifications });
-          await StudyGroup.updateOne({ _id: studyGroup._id }, { participants, isFull, pendingUsers });
-        });
-      });
-    });
+      handleJoinGroupApproved(data);
   });
   socket.on("join-group-ignored", (data) => {
-    const { id } = jwt_decode(data.jwt);
-    User.findOne({ _id: id }).then((sender) => {
-      User.findOne({ _id: data.ignoredUserId }).then(async (receiver) => {
-        StudyGroup.findOne({ _id: data.group._id }).then(async (studyGroup) => {
-          const pendingUsers = studyGroup.pendingUsers.filter(userId => userId !== receiver._id.toString());
-          const seenNotifications = sender.seenNotifications.filter(notification => {
-            return notification.group._id !== studyGroup._id.toString() 
-              || notification.type !== groupTypes.join
-              || notification.senderId.toString() !== data.ignoredUserId;
-          }); 
-          await User.updateOne( { _id: sender._id }, { seenNotifications });
-          await StudyGroup.updateOne({ _id: studyGroup._id }, { pendingUsers });
-        });
-      });
-    });
+      handleJoinGroupIgnored(data);
+  });
+  socket.on("collaboration-msg", (data) => {
+      handleCollaborationMsg(data);
+  });
+  socket.on("post-comment", (data) => {
+    handlePostComment(data);
   });
 });
-
-function removeFullGroupNotification(notifications, groupId) {
-  return notifications.filter( notification => {
-    return notification.group._id !== groupId || notification.type !== groupTypes.join;
-  });
-}
 
 const app = express();
 // Bodyparser middleware
@@ -145,6 +58,8 @@ mongoose
   .then(() => console.log("MongoDB successfully connected"))
   .catch((err) => console.log(err));
 
+
+
 // Passport middleware
 app.use(passport.initialize());
 // Passport config
@@ -156,15 +71,8 @@ app.use("/api/courses", courses);
 app.use("/api/admins", admins);
 app.use("/api/studyGroups", studyGroups);
 app.use("/api/forums", forums);
-app.use(formidableMiddleware());
-
 
 app.use(cors());
-// app.use(multer({ dest: './uploads/',
-//   rename: function (fieldname, filename) {
-//     return filename;
-//   },
-//  }).single("photo"));
 
 app.get("/confirmation/:token", async (req, res) => {
   try {
@@ -177,5 +85,8 @@ app.get("/confirmation/:token", async (req, res) => {
   return res.redirect("http://localhost:3000");
 });
 
+
 const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
+
+

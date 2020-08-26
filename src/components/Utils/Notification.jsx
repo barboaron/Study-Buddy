@@ -18,9 +18,13 @@ export default class Notification extends Component {
       case "accepted":
         message = `${notification.senderName} has accepted your join request to ${notification.group.groupName} group`;
         break;
-      case "posted":
-      default:
+      case "collaboration-msg":
         message = `${notification.senderName} posted in ${notification.group.groupName} collaboration`;
+        break;
+      case "post-comment":
+        message = `${notification.senderName} commented on ${notification.post.title} post`;
+        break;
+      default:
     }
     return message;
   };
@@ -29,27 +33,47 @@ export default class Notification extends Component {
     const { notification, className, handleJoinPopup } = this.props;
 
     const message = this.getElementByType();
-    return notification.type !== "join-request" ? (
-      <NavDropdown.Item className={className}>
-        <Link
-          to={{
-            pathname: "/GroupPage",
-            state: {
-              groupId: notification.group._id,
-            },
-          }}
+    if(notification.type === "join-request") {
+      return (
+        <NavDropdown.Item
+          className={className}
+          onClick={() => handleJoinPopup(notification)}
         >
           {message}
-        </Link>
-      </NavDropdown.Item>
-    ) : (
-      <NavDropdown.Item
-        className={className}
-        onClick={() => handleJoinPopup(notification)}
-      >
-        {message}
-      </NavDropdown.Item>
-    );
+        </NavDropdown.Item>
+      );
+    } else if(notification.type === "post-comment") {
+      return (
+        <NavDropdown.Item className={className}>
+          <Link
+            to={{
+              pathname: "/PostPage",
+              state: {
+                post: notification.post, 
+                forumId: notification.forumId,
+              },
+            }}
+          >
+            {message}
+          </Link>
+        </NavDropdown.Item>
+      )
+    } else {
+      return (
+        <NavDropdown.Item className={className}>
+          <Link
+            to={{
+              pathname: "/GroupPage",
+              state: {
+                groupId: notification.group._id,
+              },
+            }}
+          >
+            {message}
+          </Link>
+        </NavDropdown.Item>
+      )
+    }
   };
 
   render() {
