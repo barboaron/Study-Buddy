@@ -4,7 +4,6 @@ import "../styles/userProfileStyle.css";
 
 export default class ProfileImg extends Component {
   changeProfilePic = async (event) => {
-    //need to check
     event.persist();
     event.preventDefault();
 

@@ -41,7 +41,6 @@
 
 .listOfCourses {
   overflow-y: scroll;
-  /* height: 340px; */
   border-style: solid;
 }
 .searchWrapper {

@@ -6,7 +6,6 @@ const FilterIcon = (props) => (
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 408.179 408.179"
-    // enableBackground="new 0 0 408.179 408.179"
     enableBackground="new 0 0 24 24"
     height="25"
     width="25"

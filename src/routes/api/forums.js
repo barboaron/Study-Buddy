@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-// const Course = require("../../models/Course");
 const Forum = require("../../models/Forum");
 const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");

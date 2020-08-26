@@ -35,7 +35,6 @@ export default class ChangePassword extends Component {
         if (res.status !== 200) {
           console.log("error");
         } else {
-          //sucesss
           this.setState({ showSucceedMsg: true });
         }
       })
