@@ -1,3 +1,5 @@
+/* This route contains actions related to forums such as get forums, create post, create comment etc */
+
 const express = require("express");
 const router = express.Router();
 const Forum = require("../../models/Forum");
@@ -5,20 +7,9 @@ const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");
 const jwt_decode = require("jwt-decode");
 const { validatePostInput, validateCommentInput, postTypes } = require("../../validation/post");
-const { v4: uuidv4 } = require('uuid');
 const multer = require("multer");
-var fs = require("fs");
-const { promisify } = require("util");
-const unlinkAsync = promisify(fs.unlink);
-
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+const { storage } = require("./../../utils/multer-util");
+const  { filterForumsByUserCourses, createFilePaths, createPost, createNewComment, isImageFile, updateCommentsWithProfileImages, createCommentWithImg, addCommentToPost, deleteCommentFromPost, deletePostFromForum } = require('./../../utils/forums-util');
 
 var upload = multer({ storage: storage });
 
@@ -30,11 +21,7 @@ router.post("/", isLoggedIn, (req, res) => {
         const courses = profile.courses;
         Forum.find({})
           .then((forums) => {
-            let filteredForums = forums.filter((forum) => {
-              return courses
-                .map((course) => course.id.toString())
-                .includes(forum.courseId.toString());
-            });
+            let filteredForums = filterForumsByUserCourses(courses, forums);
             let forumIds = filteredForums.map((forum) => {
               return { forumName: forum.forumName, forumId: forum._id, forumType: forum.forumType, forumCourse: forum.courseName };
             });
@@ -67,29 +54,10 @@ router.post("/createPost", upload.array('file', 5), isLoggedIn, (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
-
   Forum.findOne({ _id: forumId })
     .then((forum) => {
-      const filePaths = req.files ? 
-      req.files.map((file) => {
-        const isImage = isImageFile(file.path);
-        return {
-          path: file.path.substr(7),
-          isImage,
-        };
-      })
-      : [];
-      const post = {
-        _id: uuidv4(),
-        creationDate: Date.now(),
-        title,
-        content,
-        type,
-        creatorName: name,
-        creatorId: id,
-        comments: [],
-        files: filePaths,
-      };
+      const filePaths = createFilePaths(req.files);
+      const post = createPost(title, content, type, name, id, filePaths); 
       Forum.updateOne({ _id: forumId }, { posts: forum.posts.concat(post) }).then(
         () => {
           res.status(200).json(forum.posts.concat(post));
@@ -111,24 +79,8 @@ router.post("/addComment", upload.array('file', 5), isLoggedIn, (req, res) => {
     .then((profile) => {
       Forum.findOne({ _id: forumId })
       .then((forum) => {
-        const filePaths = req.files.map((file) => {
-          const isImage = isImageFile(file.path);
-          return {
-            path: file.path.substr(7),
-            isImage,
-          };
-        });
-        const newComment = {
-          _id: uuidv4(),
-          creationDate: Date.now(),
-          content: comment,
-          creatorName: name,
-          creatorId: id,
-          // imgSrc: profile.imgSrc,
-          creatorProfileId: profile._id.toString(),
-          files: filePaths,
-        };
-
+        const filePaths = createFilePaths(req.files);
+        const newComment = createNewComment(comment, name, id, profile._id.toString(), filePaths); 
         const posts = addCommentToPost(forum, postId, newComment);
         
         Forum.updateOne({ _id: forumId }, { posts }).then(
@@ -147,27 +99,6 @@ router.post("/addComment", upload.array('file', 5), isLoggedIn, (req, res) => {
     })
     .catch((err) => res.status(400).json('profile not found'));
 });
-
-function isImageFile(path) {
-  return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
-}
-
-function updateCommentsWithProfileImages(comments) {
-  const promises = comments.map(async comment => {
-    return await createCommentWithImg(comment);
-  })
-  return Promise.all(promises).catch(err => console.log(err));
-  
-}
-
-function createCommentWithImg(comment) {
-  return new Promise((resolve, reject) => {
-    Profile.findOne({_id: comment.creatorProfileId}).then(profile => {
-      resolve({...comment, creatorImgSrc: profile.imgSrc});
-    })
-    .catch(err => reject({err}))
-  })
-}
 
 router.post("/deleteComment", isLoggedIn, (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
@@ -237,59 +168,5 @@ router.post("/comments", isLoggedIn, (req, res) => {
     })
     .catch((err) => res.status(400).json('forum not found'));
 });
-
-function addCommentToPost(forum, postId, newComment) {
-  return forum.posts.map(post => {
-    if(post._id === postId) {
-      return {...post, comments: post.comments.concat(newComment)};
-    } else {
-      return post;
-    }
-  });
-}
-
-function deleteCommentFromPost(userId, forum, postId, commentId) {
-  return new Promise( (resolve, reject) => { 
-    const posts = forum.posts.map(post => {
-      if(post._id === postId) {
-        post.comments.forEach(comment => {
-          if(comment._id === commentId) {
-            if(comment.creatorId !== userId) {
-              reject('only comment creator can delete');
-            }
-            else {
-              comment.files.forEach(async fileObj => {
-                await unlinkAsync(`./public/${fileObj.path}`);
-              });
-            }
-          }
-        });
-        return {...post, comments: post.comments.filter(comment => comment._id !== commentId)};
-      } else {
-        return post;
-      }
-    });
-    resolve(posts);
-  });
-}
-
-function deletePostFromForum(userId, forum, postId) {
-  return new Promise( (resolve, reject) => { 
-    forum.posts.forEach(post => {
-      if(post._id === postId) {
-        if(post.creatorId !== userId) {
-          reject('only post creator can delete');
-        }
-      }
-    });
-
-    const posts = forum.posts.filter(post => {
-      return post._id !== postId;
-    });
-
-    resolve(posts);
-  });
-}
-
 
 module.exports = router;

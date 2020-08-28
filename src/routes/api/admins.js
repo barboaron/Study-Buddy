@@ -1,3 +1,5 @@
+/*This route contains actions for admin user only such as add course, delete course, add courses from CSV  */
+
 const express = require("express");
 const router = express.Router();
 const Course = require("../../models/Course");
@@ -9,21 +11,10 @@ const readFile = require("fs").readFile;
 const multer = require("multer");
 const { promisify } = require("util");
 const unlinkAsync = promisify(fs.unlink);
-const User = require("../../models/User");
 const Profile = require("../../models/Profile");
-const Forum = require("../../models/Forum");
-
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-var upload = multer({ storage: storage }).single("file");
-
+const { storage } = require("./../../utils/multer-util");
+const upload = multer({ storage: storage }).single("file");
+const { getUniversityOfUser, getMappedCourses, deleteCourseFromProfiles, createForumAndSaveToDB, addCourse } = require('./../../utils/admins-util');
 const csvTypes = ["text/csv", "application/vnd.ms-excel"];
 
 router.post("/readFromCsv", isLoggedIn, isAdminUser, (req, res) => {
@@ -50,14 +41,7 @@ router.post("/readFromCsv", isLoggedIn, isAdminUser, (req, res) => {
       await unlinkAsync(req.file.path);
       Promise.all(promiseArr).then( resArr => {
         Course.find({ universityName }).then((coursesArray) => {
-          const returnArray = coursesArray.map((course) => {
-            return {
-              id: course._id,
-              courseName: course.courseName,
-              degreeName: course.degreeName,
-              universityName: course.universityName,
-            };
-          });
+          const returnArray = getMappedCourses(coursesArray);
           return res.status(200).json(returnArray);
         });
       })
@@ -76,54 +60,16 @@ router.post("/addCourse", isLoggedIn, isAdminUser, async (req, res) => {
       return res.status(400).json("course already exist");
     }
 
-    const newForum = new Forum({
-      forumName: `${courseName} Forum`,
-      forumType: 'course',
-      universityName,
-      courseName,
-      courseId: course._id,
-      posts: [],
-    });
-
-    newForum
-        .save()
-        .then((forum) => {})
-        .catch((err) => console.log(err));
+    createForumAndSaveToDB(courseName, universityName, course._id);
 
     Course.find({ universityName })
       .then((coursesArray) => {
-        const returnArray = coursesArray.map((course) => {
-          return {
-            id: course._id,
-            courseName: course.courseName,
-            degreeName: course.degreeName,
-            universityName: course.universityName,
-          };
-        });
+        const returnArray = getMappedCourses(coursesArray);
         return res.status(200).json(returnArray);
       })
       .catch((err) => console.log(err));
   });
 });
-
-function addCourse(universityName, degreeName, courseName) {
-  let res = Course.findOne({ universityName, degreeName, courseName }).then(
-    (course) => {
-      if (course) {
-        return Promise.resolve(null);
-      }
-
-      const newCourse = new Course({
-        courseName,
-        degreeName,
-        universityName,
-      });
-
-      return newCourse.save();
-    }
-  );
-  return res;
-}
 
 router.post("/deleteCourse", isLoggedIn, isAdminUser, (req, res) => {
   const jwt = req.body.jwt;
@@ -148,14 +94,7 @@ router.post("/deleteCourse", isLoggedIn, isAdminUser, (req, res) => {
               deleteCourseFromProfiles(course);
               Course.find({ universityName: userUniversity })
                 .then((coursesArray) => {
-                  const returnArray = coursesArray.map((course) => {
-                    return {
-                      id: course._id,
-                      courseName: course.courseName,
-                      degreeName: course.degreeName,
-                      universityName: course.universityName,
-                    };
-                  });
+                  const returnArray = getMappedCourses(coursesArray);
                   return res.status(200).json(returnArray);
                 })
                 .catch((err) => res.status(400).json(err));
@@ -166,18 +105,6 @@ router.post("/deleteCourse", isLoggedIn, isAdminUser, (req, res) => {
     })
     .catch((err) => res.status(400).json(err));
 });
-
-function deleteCourseFromProfiles(course) {
-  console.log(course);
-  Profile.find({university_name: course.universityName, degree_name: course.degreeName}).then(profiles => {
-    profiles.forEach(async profile => {
-      const updatedCourses = profile.courses.filter(theCourse => theCourse.id != course._id.toString() );
-      if(updatedCourses.length != profile.courses.length){
-        await Profile.update({_id:profile._id}, {courses:updatedCourses});
-      }
-    })
-  })
-}
 
 router.post("/courses", isLoggedIn, isAdminUser, async (req, res) => {
   const { id } = jwt_decode(req.body.jwt);
@@ -200,14 +127,5 @@ router.post("/courses", isLoggedIn, isAdminUser, async (req, res) => {
     })
     .catch((err) => res.status(400).json(err));
 });
-
-function getUniversityOfUser(jwt) {
-  const { id } = jwt_decode(jwt);
-
-  let res = User.findOne({ _id: id }).then((user) => {
-    return user.universityName;
-  });
-  return res;
-}
 
 module.exports = router;

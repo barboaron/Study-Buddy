@@ -12,15 +12,7 @@ const multer = require("multer");
 var fs = require("fs");
 const { promisify } = require("util");
 const unlinkAsync = promisify(fs.unlink);
-
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+const { storage } = require("./../../utils/multer-util");
 
 var upload = multer({ storage: storage });
 

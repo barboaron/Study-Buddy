@@ -1,3 +1,5 @@
+/* This route return the relevant courses of a specific user*/
+
 const express = require("express");
 const router = express.Router();
 const Course = require("../../models/Course");
@@ -13,12 +15,7 @@ router.post("/", isLoggedIn, (req, res) => {
         const universityName = profile.university_name;
         const degreeName = profile.degree_name;
         
-        Course.find({}).then (coursesArray => {
-            const courses = coursesArray.filter( course => {
-                return course.universityName === universityName 
-                    && course.degreeName === degreeName;
-            });
-            
+        Course.find({ universityName, degreeName}).then (courses => {            
             const coursesObjects = courses.map ( course => {
                 return {
                     id: course._id,
@@ -32,6 +29,5 @@ router.post("/", isLoggedIn, (req, res) => {
     })
     .catch(err => res.status(400).json(err));
 });
-
 
 module.exports = router;
