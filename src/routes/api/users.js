@@ -1,25 +1,21 @@
+/* This route contains actions related to users such as registration,
+ login, change password and email confirmation */
+
 const express = require("express");
 const router = express.Router();
-const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const jwt_decode = require("jwt-decode");
 const jwt = require("jsonwebtoken");
 const keys = require("../../../config/keys");
-const Validator = require("validator");
-const isEmpty = require("is-empty");
-// Load input validation
 const validateRegisterInput = require("../../validation/register");
 const validateLoginInput = require("../../validation/login");
-// Load User model
 const User = require("../../models/User");
-const Profile = require("../../models/Profile");
 const { isLoggedIn } = require("../../authentication/auth");
 const Course = require("../../models/Course");
+const { getAllUniversities, validateNewPassword, sendMail, createNewUserObj, createNewProfile } = require('./../../utils/users-util');
 
 router.post("/register", (req, res) => {
-  // Form validation
   const { errors, isValid } = validateRegisterInput(req.body);
-  // Check validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
@@ -27,26 +23,9 @@ router.post("/register", (req, res) => {
     if (user) {
       return res.status(400).json({ email: "Email already exists" });
     } else {
-      const newUser = new User({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        universityName: req.body.universityName,
-        email: req.body.email.toLowerCase(),
-        password: req.body.password,
-        confirmed: false,
-        isAdmin: false,
-        seenNotifications: [],
-        unseenNotifications: [],
-      });
-      const newProfile = new Profile({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        isFullDetails: false,
-        university_name: req.body.universityName,
-        user_id: newUser._id,
-        courses: [],
-        imgSrc: "/defaultPicUser.png",
-      });
+      const newUser = createNewUserObj(req.body);
+      const newProfile = createNewProfile(req.body, newUser._id);
+
       newProfile
         .save()
         .then((profile) => {})
@@ -79,17 +58,13 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  // Form validation
   const { errors, isValid } = validateLoginInput(req.body);
-  // Check validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
   const email = req.body.email.toLowerCase();
   const password = req.body.password;
-  // Find user by email
   User.findOne({ email }).then((user) => {
-    // Check if user exists
     if (!user) {
       return res
         .status(401)
@@ -97,21 +72,17 @@ router.post("/login", (req, res) => {
     } else if (!user.confirmed) {
       return res.status(401).json({ emailnotfound: "Email not confirmed" });
     }
-    // Check password
     bcrypt.compare(password, user.password).then((isMatch) => {
       if (isMatch) {
-        // User matched
-        // Create JWT Payload
         const payload = {
           id: user.id,
           name: user.firstName + " " + user.lastName,
         };
-        // Sign token
         jwt.sign(
           payload,
           keys.secretOrKey,
           {
-            expiresIn: 21600, //6 hours in seconds
+            expiresIn: 60*60, 
           },
           (err, token) => {
             res.json({
@@ -129,62 +100,17 @@ router.post("/login", (req, res) => {
   });
 });
 
-function sendMail(user) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "studybuddynoreply@gmail.com",
-      pass: "studyBuddy2020",
-    },
-  });
-  const payload = {
-    id: user.id,
-    name: user.firstName,
-  };
-  // Sign token
-  jwt.sign(
-    payload,
-    keys.secretOrKey,
-    {
-      expiresIn: 86400, // 1 day in seconds
-    },
-    (err, token) => {
-      var decoded = jwt_decode(token);
-      const mailOptions = {
-        from: "studybuddynoreply@gmail.com",
-        to: user.email,
-        subject: "Confirm your email - StudyBuddy",
-        html: `Click the link to confirm your registration: http://localhost:5000/confirmation/${token}`,
-      };
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log("Email sent: " + info.response);
-        }
-      });
-    }
-  );
-}
-
 router.post("/changePassword", isLoggedIn, (req, res) => {
   const jwt = req.body.jwt;
   const { id } = jwt_decode(jwt);
-  const currentPassword = req.body.currentPassword;
-  const newPassword = req.body.newPassword;
-  const confirmPassword = req.body.confirmPassword;
+  const { currentPassword, newPassword, confirmPassword } = req.body;
 
   User.findOne({ _id: id }).then((user) => {
     bcrypt.compare(currentPassword, user.password).then((isMatch) => {
       if (isMatch) {
-        const validatePasswordString = validateNewPassword(
-          currentPassword,
-          newPassword,
-          confirmPassword
-        );
+        const validatePasswordString = validateNewPassword(currentPassword, newPassword, confirmPassword);
 
         if (validatePasswordString === "success") {
-          // Hash password before saving in database
           bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newPassword, salt, async (err, hash) => {
               if (err) throw err;
@@ -207,26 +133,6 @@ router.post("/changePassword", isLoggedIn, (req, res) => {
     });
   });
 });
-
-function validateNewPassword(currentPassword, newPassword, confirmPassword) {
-  if (Validator.isEmpty(newPassword)) {
-    return "New Password field is required";
-  }
-  if (Validator.isEmpty(confirmPassword)) {
-    return "Confirm Password field is required";
-  }
-  if (!Validator.isLength(newPassword, { min: 8, max: 30 })) {
-    return "New password must be at least 8 characters";
-  }
-  if (!Validator.equals(newPassword, confirmPassword)) {
-    return "Confirm password must match to new password";
-  }
-  if (Validator.equals(currentPassword, newPassword)) {
-    return "New password can't be the same as old password";
-  }
-
-  return "success";
-}
 
 router.post("/getUserId", isLoggedIn, (req, res) => {
   const jwt = req.body.jwt;
@@ -252,24 +158,12 @@ router.post("/isLoggedIn", (req, res) => {
 });
 
 router.post("/isAdmin", (req, res) => {
-  
   const { id } = jwt_decode(req.body.jwt);
 
   User.findOne( {_id:id} ).then( user => {
     return res.status(200).json( {isAdmin: user.isAdmin});
   }).catch(err => res.status(400).json(err));
 });
-
-// router.get("/usersAndIds", isLoggedIn,  (req, res) => {
-
-//   User.find({}).then( (usersArray) => {
-//       const universitiesNames = usersArray.map((userObj) => {
-//           return userObj.;
-//       })
-//       return res.status(200).json(universitiesNames);
-//   })
-//   .catch(err => res.status(400).json(err));
-// });
 
 router.get("/allUniversities", (req, res) => {
   Course.find({})
@@ -280,14 +174,6 @@ router.get("/allUniversities", (req, res) => {
     })
     .catch((err) => res.status(400).json(err));
 });
-
-function getAllUniversities(courseObjects) {
-  const universityNames = courseObjects.map((courseObject) => {
-    return courseObject.universityName;
-  });
-  const universitiesSet = new Set(universityNames);
-  return Array.from(universitiesSet);
-}
 
 router.post("/notifications", isLoggedIn, (req, res) => {
   const jwt = req.body.jwt;

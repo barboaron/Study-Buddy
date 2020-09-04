@@ -380,7 +380,7 @@ export default class GroupPage extends Component {
                   textColor="primary"
                 >
                   <Tab label="Colaboration" />
-                  <Tab label="Schedual Helper" />
+                  <Tab label="Schedule Helper" />
                 </Tabs>
               </Paper>
               {this.getContentByCurrTab()}

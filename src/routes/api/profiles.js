@@ -1,3 +1,5 @@
+/* This route contains actions related to user profile such as edit courses, update profile and get data of profile */
+
 const express = require("express");
 const router = express.Router();
 const User = require("../../models/User");
@@ -36,7 +38,6 @@ router.post("/editCourses", isLoggedIn, (req, res) => {
   .catch(err => res.status(400).json(err));
 });
 
-//UPDATE PROFILE (in the body, must send user_id, and all fields to be updated)
 router.post("/updateProfile", isLoggedIn, (req, res) => {
   const jwt = req.body.jwt;
   const { id } = jwt_decode(jwt);
