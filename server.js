@@ -8,11 +8,8 @@ const courses = require("./src/routes/api/courses");
 const admins = require("./src/routes/api/admins");
 const studyGroups = require("./src/routes/api/studyGroups");
 const forums = require("./src/routes/api/forums");
-const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
 const User = require("./src/models/User");
-const keys = require("./config/keys");
-const multer = require("multer");
 const cors = require("cors");
 const io = require("socket.io")(5500);
 module.exports = { io };
@@ -86,7 +83,7 @@ app.get("/confirmation/:token", async (req, res) => {
 });
 
 
-const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
+const port = process.env.PORT || 5000; 
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
 
 

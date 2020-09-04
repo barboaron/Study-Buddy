@@ -9,7 +9,7 @@ const jwt_decode = require("jwt-decode");
 const { validatePostInput, validateCommentInput, postTypes } = require("../../validation/post");
 const multer = require("multer");
 const { storage } = require("./../../utils/multer-util");
-const  { filterForumsByUserCourses, createFilePaths, createPost, createNewComment, isImageFile, updateCommentsWithProfileImages, createCommentWithImg, addCommentToPost, deleteCommentFromPost, deletePostFromForum } = require('./../../utils/forums-util');
+const  { filterForumsByUserCourses, createFilePaths, createPost, createNewComment, updateCommentsWithProfileImages, addCommentToPost, deleteCommentFromPost, deletePostFromForum } = require('./../../utils/forums-util');
 
 var upload = multer({ storage: storage });
 

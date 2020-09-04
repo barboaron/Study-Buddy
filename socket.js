@@ -1,3 +1,5 @@
+/* This file contains actions related to handle notifications */
+
 const StudyGroup = require("./src/models/StudyGroup");
 const User = require("./src/models/User");
 const jwt = require("jsonwebtoken");
