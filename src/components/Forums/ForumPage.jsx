@@ -166,7 +166,6 @@ export default class ForumPage extends Component {
     }
 
     const items = forum ? this.getPostsList() : "Loading...";
-    console.log("items:", items);
 
     return (
       <div className="profile_user">

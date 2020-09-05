@@ -27,6 +27,7 @@
   width: 60px;
   min-width: 10px;
   margin-top: -18px;
+  outline: none;
 }
 
 .adminPanelTitle {
@@ -41,8 +42,10 @@
 
 .listOfCourses {
   overflow-y: scroll;
+  max-height: 330px;
   border-style: solid;
 }
+
 .searchWrapper {
   max-height: 370px;
 }

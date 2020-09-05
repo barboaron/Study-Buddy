@@ -131,7 +131,6 @@ export default class MyGroups extends Component {
       jwt: token,
       groupId: data._id,
     };
-    console.log(data._id);
 
     return axios
       .post("/api/studyGroups/deleteGroup", deleteGroupReq)

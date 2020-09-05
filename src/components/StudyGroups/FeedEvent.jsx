@@ -42,7 +42,7 @@ export default class FeedEvent extends Component {
             {files.map((file) => {
               const path = file.isImage
                 ? file.path
-                : "uploads/1597914073240-fileImg.jpeg";
+                : "/fileprev.png";
               return (
                 <a href={file.path} target="_blank" rel="noopener noreferrer">
                   <img src={path} style={{ height: "75px", width: "70px" }} />

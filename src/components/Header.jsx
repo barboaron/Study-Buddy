@@ -17,7 +17,6 @@ class Header extends React.Component {
 
   componentDidMount() {
     let jwt = localStorage.getItem("jwtToken");
-    console.log(jwt);
     socket = socketIOClient(this.state.endpoint);
     socket.emit("new-user", { jwt });
     socket.on("notification", (notification) => {

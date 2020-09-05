@@ -85,7 +85,6 @@ class MenuBar extends Component {
   };
 
   getDropdownElements = (notifications, className) => {
-    console.log(notifications);
     return notifications
       .reverse()
       .map((elem) => (
