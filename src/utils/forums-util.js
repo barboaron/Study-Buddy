@@ -39,6 +39,7 @@ return {
 }
 
 function createNewComment(comment, name, id, creatorProfileId, filePaths) {
+  comment = comment ? comment : ""
     return {
         _id: uuidv4(),
         creationDate: Date.now(),

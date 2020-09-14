@@ -122,7 +122,7 @@ function createUpdatedSurvey(survey, dates) {
   }
 
   function initSurveyParticipants(participants) {
-    participants.map((participant) => {
+    return participants.map((participant) => {
       if (participant.isCreator) return participant;
         return { ...participant, didAnswerSurvey: false };
     }
@@ -139,6 +139,7 @@ function createUpdatedSurvey(survey, dates) {
   }
 
   function createNewPostObj(content, creatorName, creatorId, creatorProfileId, files) {
+    content = content ? content : ""
     return {
       _id: uuidv4(),
       creationDate: Date.now(),
